@@ -1,0 +1,88 @@
+/* ====== 🔮 الثيم البنفسجي (Purple Royal) - الإصدار 5.0.0 ====== */
+/* ====== يحتوي على جميع المتغيرات اللونية للوضعين النهاري والليلي ====== */
+
+:root,
+[data-theme="light"] {
+  --primary: #9c27b0;
+  --primary-dark: #7b1fa2;
+  --primary-light: #ce93d8;
+  --primary-rgb: 156, 39, 176;
+  
+  --secondary: #ab47bc;
+  --secondary-light: #e1bee7;
+  --secondary-rgb: 171, 71, 188;
+  
+  --accent: #e040fb;
+  --accent-dark: #d500f9;
+  --accent-rgb: 224, 64, 251;
+  
+  --background-light: #f9f0ff;
+  --surface-light: #ffffff;
+  --surface-hover-light: rgba(156, 39, 176, 0.08);
+  
+  --text-primary-light: #2a1e3a;
+  --text-secondary-light: #5a4a6a;
+  --text-tertiary-light: #786889;
+  
+  --border-color-light: rgba(156, 39, 176, 0.2);
+  --border-color-dark: rgba(156, 39, 176, 0.3);
+  
+  --hover-light: rgba(156, 39, 176, 0.1);
+  --active-light: rgba(156, 39, 176, 0.2);
+  
+  --shadow-sm: 0 2px 8px rgba(156, 39, 176, 0.1);
+  --shadow-md: 0 4px 16px rgba(156, 39, 176, 0.15);
+  --shadow-lg: 0 8px 24px rgba(156, 39, 176, 0.2);
+  --shadow-xl: 0 12px 32px rgba(156, 39, 176, 0.25);
+  
+  --xp-start: #FFD700;
+  --xp-end: #FFA000;
+  --level-badge-bg: var(--primary);
+  --level-badge-text: #ffffff;
+  --challenge-bg: rgba(156, 39, 176, 0.1);
+  --challenge-border: rgba(156, 39, 176, 0.3);
+
+  --on-primary: #ffffff;
+}
+
+[data-theme="dark"] {
+  --primary: #ce93d8;
+  --primary-dark: #ab47bc;
+  --primary-light: #e1bee7;
+  --primary-rgb: 206, 147, 216;
+  
+  --secondary: #ba68c8;
+  --secondary-light: #ce93d8;
+  --secondary-rgb: 186, 104, 200;
+  
+  --accent: #ea80fc;
+  --accent-dark: #e040fb;
+  --accent-rgb: 234, 128, 252;
+  
+  --background-light: #1a0a2a;
+  --surface-light: #2a1a3a;
+  --surface-hover-light: rgba(206, 147, 216, 0.12);
+  
+  --text-primary-light: #f3e5f5;
+  --text-secondary-light: #d1c4e9;
+  --text-tertiary-light: #b39ddb;
+  
+  --border-color-light: rgba(206, 147, 216, 0.3);
+  --border-color-dark: rgba(255, 255, 255, 0.1);
+  
+  --hover-light: rgba(206, 147, 216, 0.15);
+  --active-light: rgba(206, 147, 216, 0.25);
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.8);
+  
+  --xp-start: #FFD700;
+  --xp-end: #FF8F00;
+  --challenge-bg: rgba(206, 147, 216, 0.15);
+  --challenge-border: rgba(206, 147, 216, 0.4);
+
+  --on-primary: #14100a;
+  --level-badge-text: var(--on-primary);
+}

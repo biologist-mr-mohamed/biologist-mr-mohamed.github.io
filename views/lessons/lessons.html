@@ -1,0 +1,141 @@
+<!-- صفحة قائمة الدروس - v5.0.0 -->
+<div class="page-content lessons-page" data-page="lessons">
+  <!-- ==== 1. التنقل التفصيلي (Breadcrumb) ==== -->
+  <nav class="breadcrumb-nav" aria-label="مسار التنقل">
+    <ol class="breadcrumb-list">
+      <li class="breadcrumb-item"><a href="#" class="breadcrumb-link" data-nav-target="home" aria-label="الرئيسية"><i class="fas fa-home"></i></a></li>
+      <li class="breadcrumb-item active" aria-current="page">الدروس</li>
+    </ol>
+  </nav>
+
+  <!-- ==== 2. هيدر الصفحة ==== -->
+  <header class="lessons-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1 class="page-title">
+          <i class="fas fa-book-open title-icon" aria-hidden="true"></i>
+          <span>الدروس التعليمية</span>
+        </h1>
+        <p class="page-subtitle" id="lessons-subtitle">اختر درسك المناسب من القائمة التالية</p>
+      </div>
+      <div class="header-actions">
+        <!-- ==== 3. شريط البحث ==== -->
+        <div class="search-wrapper">
+          <i class="fas fa-search search-icon" aria-hidden="true"></i>
+          <input type="search" id="lessons-search-input" class="search-input" placeholder="ابحث عن درس..." aria-label="بحث عن درس" autocomplete="off" enterkeyhint="search">
+          <button type="button" class="clear-search-btn" id="clear-search-btn" aria-label="مسح البحث" data-ui-initial="hidden">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <!-- ==== 4. أزرار المعلم ==== -->
+        <button type="button" class="btn btn-primary teacher-only" data-action="add-lesson" data-ui-initial="hidden">
+          <i class="fas fa-plus"></i> إضافة درس
+        </button>
+        <button type="button" class="btn btn-outline teacher-only" data-action="add-unit" data-ui-initial="hidden">
+          <i class="fas fa-layer-group"></i> إضافة وحدة
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==== 5. حالة التحميل ==== -->
+  <div class="loading-state" aria-live="polite" data-ui-initial="hidden">
+    <div class="loading-spinner">
+      <div class="bio-loader bio-loader--auto bio-loader--lg" role="status" aria-label="جاري تحميل الدروس"></div>
+    </div>
+    <p class="loading-text">جاري تحميل الدروس...</p>
+  </div>
+
+  <!-- ==== 6. التصنيفات السريعة ==== -->
+  <section class="quick-categories" aria-labelledby="categories-title">
+    <h2 id="categories-title" class="section-title">تصنيفات سريعة</h2>
+    <div class="categories-container">
+      <button type="button" class="category-btn active" data-category="all" aria-pressed="true">
+        <i class="fas fa-th-large" aria-hidden="true"></i> الكل
+      </button>
+      <button type="button" class="category-btn" data-category="first" aria-pressed="false">
+        <i class="fas fa-graduation-cap" aria-hidden="true"></i> الترم الأول
+      </button>
+      <button type="button" class="category-btn" data-category="second" aria-pressed="false">
+        <i class="fas fa-graduation-cap" aria-hidden="true"></i> الترم الثاني
+      </button>
+      <button type="button" class="category-btn" data-category="favorites" aria-pressed="false">
+        <i class="fas fa-star" aria-hidden="true"></i> المفضلة
+      </button>
+      <button type="button" class="category-btn" data-category="completed" aria-pressed="false">
+        <i class="fas fa-check-circle" aria-hidden="true"></i> المكتملة
+      </button>
+    </div>
+  </section>
+
+  <!-- ==== 7. ملخص الإحصائيات (للطالب فقط) ==== -->
+  <section class="stats-summary" aria-labelledby="stats-title" data-ui-initial="hidden">
+    <h2 id="stats-title" class="section-title">ملخص أدائك في الدروس</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-book" aria-hidden="true"></i></div>
+        <div class="stat-content">
+          <div class="stat-value" data-stat="total-lessons">0</div>
+          <div class="stat-label">إجمالي الدروس</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-check-circle" aria-hidden="true"></i></div>
+        <div class="stat-content">
+          <div class="stat-value" data-stat="completed-lessons">0</div>
+          <div class="stat-label">دروس مكتملة</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-percentage" aria-hidden="true"></i></div>
+        <div class="stat-content">
+          <div class="stat-value" data-stat="completion-rate">0%</div>
+          <div class="stat-label">معدل الإنجاز</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-star" aria-hidden="true"></i></div>
+        <div class="stat-content">
+          <div class="stat-value" data-stat="favorite-lessons">0</div>
+          <div class="stat-label">دروس مفضلة</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 8. قسم الوحدات والأبواب (Carousel) ==== -->
+  <section class="units-section" aria-labelledby="units-title">
+    <h2 id="units-title" class="section-title">
+      <i class="fas fa-layer-group" id="units-title-icon" aria-hidden="true"></i>
+      <span id="units-title-text">الوحدات والأبواب</span>
+      <span class="section-count" id="section-count" hidden></span>
+    </h2>
+    <div class="units-carousel" id="units-container">
+      <!-- ==== 9. حالة تحميل الوحدات ==== -->
+      <div class="units-loading">
+        <div class="bio-loader bio-loader--auto bio-loader--sm" role="status" aria-label="جاري التحميل"></div>
+        <span>جاري تحميل الوحدات...</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 10. شبكة الدروس ==== -->
+  <div class="lessons-grid" id="lessons-grid">
+    <!-- تُملأ ديناميكيًا -->
+  </div>
+
+  <!-- ==== 11. حالة عدم وجود دروس ==== -->
+  <div class="empty-state" id="lessons-empty-state" data-ui-initial="hidden">
+    <i class="fas fa-book-open empty-icon" aria-hidden="true"></i>
+    <h3>لا توجد دروس متاحة</h3>
+    <p id="empty-state-message">لا توجد دروس متاحة حالياً.</p>
+    <button type="button" class="btn btn-outline" id="clear-filters-btn" data-ui-initial="hidden">مسح الفلاتر</button>
+  </div>
+
+  <!-- ==== 12. زر تحميل المزيد (Pagination) ==== -->
+  <div class="load-more-container" data-ui-initial="hidden">
+    <button type="button" class="btn btn-secondary load-more-btn" id="load-more-lessons">
+      <i class="fas fa-arrow-down"></i> تحميل المزيد
+    </button>
+  </div>
+</div>

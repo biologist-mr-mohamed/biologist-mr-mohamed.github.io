@@ -1,0 +1,94 @@
+/*
+ * css/themes/theme-pink.css — الثيم الوردي (Pink Blossom)
+ * الإصدار: v5.0.0 | Biologist Platform
+ * ============================================================================
+ * المسؤولية: متغيرات الألوان والظلال للوضعين النهاري والليلي
+ * البنية:    primary → secondary → accent → الخلفيات → النصوص → الحدود → التفاعل → الظلال → XP والتحديات
+ * ============================================================================
+ */
+
+:root,
+[data-theme="light"] {
+  --primary: #e91e63;
+  --primary-dark: #c2185b;
+  --primary-light: #f06292;
+  --primary-rgb: 233, 30, 99;
+
+  --secondary: #f48fb1;
+  --secondary-light: #f8bbd0;
+  --secondary-rgb: 244, 143, 177;
+
+  --accent: #ff80ab;
+  --accent-dark: #ff4081;
+  --accent-rgb: 255, 128, 171;
+
+  --background-light: #fff5f8;
+  --surface-light: #ffffff;
+  --surface-hover-light: rgba(233, 30, 99, 0.08);
+
+  --text-primary-light: #3c1e2a;
+  --text-secondary-light: #6b4a5a;
+  --text-tertiary-light: #976375;
+
+  --border-color-light: rgba(233, 30, 99, 0.2);
+  --border-color-dark: rgba(233, 30, 99, 0.3);
+
+  --hover-light: rgba(233, 30, 99, 0.1);
+  --active-light: rgba(233, 30, 99, 0.2);
+
+  --shadow-sm: 0 2px 8px rgba(233, 30, 99, 0.1);
+  --shadow-md: 0 4px 16px rgba(233, 30, 99, 0.15);
+  --shadow-lg: 0 8px 24px rgba(233, 30, 99, 0.2);
+  --shadow-xl: 0 12px 32px rgba(233, 30, 99, 0.25);
+
+  --xp-start: #ffd700;
+  --xp-end: #ffa000;
+  --level-badge-bg: var(--primary);
+  --level-badge-text: #ffffff;
+  --challenge-bg: rgba(233, 30, 99, 0.1);
+  --challenge-border: rgba(233, 30, 99, 0.3);
+
+  --on-primary: #14100a;
+}
+
+[data-theme="dark"] {
+  --primary: #f06292;
+  --primary-dark: #e91e63;
+  --primary-light: #f48fb1;
+  --primary-rgb: 240, 98, 146;
+
+  --secondary: #f8bbd0;
+  --secondary-light: #fce4ec;
+  --secondary-rgb: 248, 187, 208;
+
+  --accent: #ff80ab;
+  --accent-dark: #ff4081;
+  --accent-rgb: 255, 128, 171;
+
+  --background-light: #1e0a14;
+  --surface-light: #2d1a24;
+  --surface-hover-light: rgba(233, 30, 99, 0.12);
+
+  --text-primary-light: #fce4ec;
+  --text-secondary-light: #d4a5b5;
+  --text-tertiary-light: #a87a8a;
+
+  --border-color-light: rgba(233, 30, 99, 0.3);
+  --border-color-dark: rgba(255, 255, 255, 0.1);
+
+  --hover-light: rgba(240, 98, 146, 0.15);
+  --active-light: rgba(240, 98, 146, 0.25);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.8);
+
+  --xp-start: #ffd700;
+  --xp-end: #ff8f00;
+  --challenge-bg: rgba(240, 98, 146, 0.15);
+  --challenge-border: rgba(240, 98, 146, 0.4);
+
+  --on-primary: #14100a;
+  --level-badge-text: var(--on-primary);
+}

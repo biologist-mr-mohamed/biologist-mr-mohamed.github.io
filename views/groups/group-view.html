@@ -1,0 +1,199 @@
+<!-- ==== صفحة عرض المجموعة ==== -->
+<div class="page-content group-view-page" data-page="group-view">
+  <h1 class="visually-hidden">عرض المجموعة - منصة بيولوجست</h1>
+
+  <!-- ==== التنقل التفصيلي ==== -->
+  <nav class="breadcrumb-nav" aria-label="مسار التنقل">
+    <ol class="breadcrumb-list">
+      <li class="breadcrumb-item"><a href="/" class="breadcrumb-link" data-nav-target="home" aria-label="الرئيسية"><i class="fas fa-home" aria-hidden="true"></i></a></li>
+      <li class="breadcrumb-item"><a href="/groups" class="breadcrumb-link" data-nav-target="groups">المجموعات</a></li>
+      <li class="breadcrumb-item active" aria-current="page" id="group-breadcrumb">جاري التحميل...</li>
+    </ol>
+  </nav>
+
+  <!-- ==== حالة التحميل ==== -->
+  <div class="grp-view-skeleton" id="group-skeleton" aria-busy="true" aria-label="جاري تحميل المجموعة">
+    <div class="grp-skeleton grp-skeleton--hero"></div>
+    <div class="grp-skeleton grp-skeleton--tabs"></div>
+    <div class="grp-skeleton grp-skeleton--panel"></div>
+  </div>
+
+  <!-- ==== حالة الخطأ ==== -->
+  <div class="groups-empty groups-error" id="group-error" role="alert" hidden>
+    <div class="empty-icon" aria-hidden="true"><i class="fas fa-exclamation-triangle"></i></div>
+    <h3 id="group-error-title">تعذر تحميل المجموعة</h3>
+    <p id="group-error-message"></p>
+    <div class="grp-error-actions">
+      <button type="button" class="btn btn-outline" id="group-retry-btn" hidden>
+        <i class="fas fa-redo" aria-hidden="true"></i><span>إعادة المحاولة</span>
+      </button>
+      <button type="button" class="btn btn-primary" id="group-back-btn">
+        <i class="fas fa-arrow-right" aria-hidden="true"></i><span>العودة للمجموعات</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==== محتوى المجموعة ==== -->
+  <div class="group-container" id="group-container" hidden>
+    <!-- ==== رأس المجموعة ==== -->
+    <header class="group-header">
+      <div class="group-info">
+        <h2 class="group-name" id="group-name"></h2>
+        <p class="group-description" id="group-description" hidden></p>
+        <div class="group-meta">
+          <span class="group-meta-item"><i class="fas fa-user-cog" aria-hidden="true"></i> <span id="group-creator"></span></span>
+          <span class="group-meta-item"><i class="fas fa-users" aria-hidden="true"></i> <span id="members-count">0</span> عضو</span>
+          <span class="group-meta-item"><i class="fas fa-book" aria-hidden="true"></i> <span id="lessons-count">0</span> درس</span>
+          <span class="group-meta-item"><i class="fas fa-graduation-cap" aria-hidden="true"></i> <span id="exams-count">0</span> امتحان</span>
+        </div>
+      </div>
+      <div class="group-actions">
+        <button type="button" class="btn btn-outline" id="edit-group-btn" hidden><i class="fas fa-pen" aria-hidden="true"></i><span>تعديل</span></button>
+        <button type="button" class="btn btn-outline" id="add-members-btn" hidden><i class="fas fa-user-plus" aria-hidden="true"></i><span>إضافة أعضاء</span></button>
+        <button type="button" class="btn btn-danger" id="leave-group-btn" hidden><i class="fas fa-sign-out-alt" aria-hidden="true"></i><span>مغادرة المجموعة</span></button>
+        <button type="button" class="btn btn-danger" id="delete-group-btn" hidden><i class="fas fa-trash-alt" aria-hidden="true"></i><span>حذف المجموعة</span></button>
+      </div>
+    </header>
+
+    <!-- ==== تبويبات المجموعة ==== -->
+    <div class="group-tabs" role="tablist" aria-label="أقسام المجموعة">
+      <button type="button" class="tab-btn active" role="tab" id="tab-chat" aria-controls="panel-chat" aria-selected="true" data-tab="chat">
+        <span>المحادثة</span><span class="tab-dot" id="chat-unread" hidden aria-label="رسائل جديدة"></span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tab-lessons" aria-controls="panel-lessons" aria-selected="false" tabindex="-1" data-tab="lessons">
+        <span>الدروس</span><span class="tab-count" id="tab-lessons-count"></span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tab-exams" aria-controls="panel-exams" aria-selected="false" tabindex="-1" data-tab="exams">
+        <span>الامتحانات</span><span class="tab-count" id="tab-exams-count"></span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tab-members" aria-controls="panel-members" aria-selected="false" tabindex="-1" data-tab="members">
+        <span>الأعضاء</span><span class="tab-count" id="tab-members-count"></span>
+      </button>
+    </div>
+
+    <!-- ==== تبويب المحادثة ==== -->
+    <section class="tab-content" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat" data-tab-content="chat">
+      <div class="chat-container">
+        <div class="chat-scroll" id="chat-scroll">
+          <div class="chat-older" id="chat-older" hidden>
+            <button type="button" class="btn btn-outline btn-sm" id="chat-older-btn"><i class="fas fa-history" aria-hidden="true"></i><span>تحميل رسائل أقدم</span></button>
+          </div>
+          <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-label="رسائل المجموعة"></div>
+          <div class="chat-state" id="chat-state" hidden></div>
+        </div>
+        <button type="button" class="chat-new-pill" id="chat-new-pill" hidden><i class="fas fa-arrow-down" aria-hidden="true"></i><span>رسائل جديدة</span></button>
+        <div class="chat-notice" id="chat-notice" role="status" hidden></div>
+        <form class="chat-input-container" id="chat-form" novalidate>
+          <label for="chat-input" class="visually-hidden">اكتب رسالتك</label>
+          <textarea id="chat-input" class="chat-input" placeholder="اكتب رسالتك..." rows="1" maxlength="1000"></textarea>
+          <button type="submit" id="send-message-btn" class="btn btn-primary send-btn" aria-label="إرسال الرسالة">
+            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+          </button>
+          <span class="chat-counter" id="chat-counter" hidden></span>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==== تبويب الدروس ==== -->
+    <section class="tab-content" id="panel-lessons" role="tabpanel" aria-labelledby="tab-lessons" data-tab-content="lessons" hidden>
+      <div class="section-header">
+        <h3>دروس المجموعة</h3>
+        <button type="button" class="btn btn-sm btn-primary" id="add-lesson-btn" hidden><i class="fas fa-plus" aria-hidden="true"></i><span>إضافة دروس</span></button>
+      </div>
+      <div class="lessons-grid" id="group-lessons-grid"></div>
+    </section>
+
+    <!-- ==== تبويب الامتحانات ==== -->
+    <section class="tab-content" id="panel-exams" role="tabpanel" aria-labelledby="tab-exams" data-tab-content="exams" hidden>
+      <div class="section-header">
+        <h3>امتحانات المجموعة</h3>
+        <button type="button" class="btn btn-sm btn-primary" id="add-exam-btn" hidden><i class="fas fa-plus" aria-hidden="true"></i><span>إضافة امتحانات</span></button>
+      </div>
+      <div class="exams-grid" id="group-exams-grid"></div>
+    </section>
+
+    <!-- ==== تبويب الأعضاء ==== -->
+    <section class="tab-content" id="panel-members" role="tabpanel" aria-labelledby="tab-members" data-tab-content="members" hidden>
+      <div class="section-header">
+        <h3>أعضاء المجموعة</h3>
+        <label class="grp-search" for="members-filter" id="members-filter-wrap" hidden>
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <input type="search" id="members-filter" class="grp-search-input" placeholder="ابحث في الأعضاء..." autocomplete="off">
+        </label>
+      </div>
+      <div class="members-list" id="members-list"></div>
+    </section>
+  </div>
+
+  <!-- ==== نافذة تعديل المجموعة ==== -->
+  <div class="grp-modal" id="edit-group-modal" role="dialog" aria-modal="true" aria-labelledby="edit-group-title" hidden>
+    <div class="grp-modal__content">
+      <div class="grp-modal__header">
+        <h3 id="edit-group-title">تعديل المجموعة</h3>
+        <button type="button" class="grp-modal__close" data-modal-close aria-label="إغلاق"><i class="fas fa-times" aria-hidden="true"></i></button>
+      </div>
+      <form id="edit-group-form" class="grp-modal__form" novalidate>
+        <div class="grp-modal__body">
+          <div class="form-group">
+            <label for="edit-name-input">اسم المجموعة <span class="required" aria-hidden="true">*</span></label>
+            <input type="text" id="edit-name-input" class="form-control" maxlength="60" autocomplete="off" required data-autofocus>
+            <div class="grp-field-meta"><span class="grp-field-error" id="edit-name-error" role="alert" hidden></span><span class="grp-counter" id="edit-name-counter">0/60</span></div>
+          </div>
+          <div class="form-group">
+            <label for="edit-description-input">وصف المجموعة</label>
+            <textarea id="edit-description-input" class="form-control" rows="2" maxlength="200"></textarea>
+            <div class="grp-field-meta"><span class="grp-counter" id="edit-description-counter">0/200</span></div>
+          </div>
+        </div>
+        <div class="grp-modal__footer">
+          <button type="button" class="btn btn-secondary" data-modal-close>إلغاء</button>
+          <button type="submit" class="btn btn-primary" id="edit-save-btn"><span class="grp-btn-label">حفظ التعديلات</span></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==== نافذة إضافة أعضاء ==== -->
+  <div class="grp-modal" id="add-members-modal" role="dialog" aria-modal="true" aria-labelledby="add-members-title" hidden>
+    <div class="grp-modal__content">
+      <div class="grp-modal__header">
+        <h3 id="add-members-title">إضافة أعضاء جدد</h3>
+        <button type="button" class="grp-modal__close" data-modal-close aria-label="إغلاق"><i class="fas fa-times" aria-hidden="true"></i></button>
+      </div>
+      <div class="grp-modal__body">
+        <div class="form-group">
+          <label for="add-member-search">بحث عن مستخدم</label>
+          <input type="search" id="add-member-search" class="form-control" placeholder="الاسم أو رقم الهاتف أو اسم المستخدم" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="add-member-suggestions" aria-autocomplete="list" data-autofocus>
+          <div id="add-member-suggestions" class="suggestions-list" role="listbox" aria-label="نتائج البحث" hidden></div>
+          <div class="grp-members-meta"><span id="add-members-label"></span></div>
+        </div>
+        <div id="new-members-list" class="selected-members"></div>
+      </div>
+      <div class="grp-modal__footer">
+        <button type="button" class="btn btn-secondary" data-modal-close>إلغاء</button>
+        <button type="button" class="btn btn-primary" id="confirm-add-members"><span class="grp-btn-label">إضافة</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==== نافذة إضافة دروس / امتحانات ==== -->
+  <div class="grp-modal" id="add-content-modal" role="dialog" aria-modal="true" aria-labelledby="add-content-title" hidden>
+    <div class="grp-modal__content">
+      <div class="grp-modal__header">
+        <h3 id="add-content-title">إضافة محتوى</h3>
+        <button type="button" class="grp-modal__close" data-modal-close aria-label="إغلاق"><i class="fas fa-times" aria-hidden="true"></i></button>
+      </div>
+      <div class="grp-modal__body">
+        <label class="grp-search grp-search--block" for="content-search">
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <input type="search" id="content-search" class="grp-search-input" placeholder="ابحث بالعنوان..." autocomplete="off" data-autofocus>
+        </label>
+        <div class="grp-content-list" id="content-list" role="group" aria-label="المحتوى المتاح"></div>
+      </div>
+      <div class="grp-modal__footer">
+        <button type="button" class="btn btn-secondary" data-modal-close>إلغاء</button>
+        <button type="button" class="btn btn-primary" id="confirm-add-content" disabled><span class="grp-btn-label">إضافة</span></button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,80 @@
+{
+  "id": "/",
+  "name": "منصة بيولوجست",
+  "short_name": "بيولوجست",
+  "description": "منصة تعليمية تفاعلية لتدريس العلوم والأحياء للمرحلتين الإعدادية والثانوية، مع نظام استمرارية وميداليات ومجموعات دراسية.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "ar",
+  "dir": "rtl",
+  "theme_color": "#2196f3",
+  "background_color": "#f0f8ff",
+  "categories": [
+    "education",
+    "science"
+  ],
+  "icons": [
+    {
+      "src": "/assets/images/biologist1.png",
+      "sizes": "1649x1649",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "الدروس",
+      "short_name": "الدروس",
+      "description": "تصفح الدروس الخاصة بمرحلتك وصفك",
+      "url": "/lessons",
+      "icons": [
+        {
+          "src": "/assets/images/biologist1.png",
+          "sizes": "1649x1649",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "الامتحانات",
+      "short_name": "الامتحانات",
+      "description": "أدِّ الامتحانات واحصل على الميداليات",
+      "url": "/exams",
+      "icons": [
+        {
+          "src": "/assets/images/biologist1.png",
+          "sizes": "1649x1649",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "المجموعات",
+      "short_name": "المجموعات",
+      "description": "مجموعاتك الدراسية ومحادثاتها",
+      "url": "/groups",
+      "icons": [
+        {
+          "src": "/assets/images/biologist1.png",
+          "sizes": "1649x1649",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "الملف الشخصي",
+      "short_name": "ملفي",
+      "description": "تقدمك واستمراريتك وميدالياتك",
+      "url": "/profile",
+      "icons": [
+        {
+          "src": "/assets/images/biologist1.png",
+          "sizes": "1649x1649",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+<!-- ====== views/dashboard/dashboard.html v8.0.0 ====== -->
+<div class="page-content db-root" data-page="dashboard" id="db-root">
+  <h1 class="db-sr-only">لوحة التحكم - منصة بيولوجست</h1>
+
+  <!-- ====== حالة الصفحة (خطأ تهيئة) ====== -->
+  <div class="db-state" id="db-state" role="status" aria-live="polite" hidden>
+    <div class="db-spinner" aria-hidden="true"></div>
+    <p class="db-state__text" id="db-state-text">جاري تحميل لوحة التحكم...</p>
+    <button type="button" class="db-btn db-btn--primary" data-db-action="retry" id="db-state-retry" hidden>
+      <i class="fas fa-rotate-right" aria-hidden="true"></i><span>إعادة المحاولة</span>
+    </button>
+  </div>
+
+  <div class="db-content" id="db-content">
+
+    <!-- ====== شريط انقطاع الاتصال ====== -->
+    <p class="db-offline" id="db-offline" role="status" hidden>
+      <i class="fas fa-wifi-slash" aria-hidden="true"></i>
+      <span>لا يوجد اتصال بالإنترنت — البيانات المعروضة قد لا تكون محدّثة.</span>
+    </p>
+
+    <!-- ====== رأس الصفحة ====== -->
+    <header class="db-header">
+      <div class="db-header__title">
+        <h2 class="db-title">
+          <i class="fas fa-gauge-high" aria-hidden="true"></i>
+          <span>لوحة التحكم</span>
+        </h2>
+        <p class="db-subtitle">
+          مرحباً بك، <strong id="db-user-name"></strong>
+          <span class="db-badge db-badge--primary" id="db-role-badge"></span>
+        </p>
+      </div>
+      <div class="db-actions">
+        <button type="button" class="db-btn db-btn--ghost" data-db-action="open-semester" data-role="teacher" hidden>
+          <i class="fas fa-calendar-alt" aria-hidden="true"></i><span>الفصل الدراسي</span>
+        </button>
+        <button type="button" class="db-btn db-btn--primary" data-db-action="add-moderator" data-role="teacher" hidden>
+          <i class="fas fa-user-plus" aria-hidden="true"></i><span>إضافة مشرف</span>
+        </button>
+        <button type="button" class="db-btn db-btn--secondary" data-db-action="refresh" id="db-refresh-btn" aria-label="تحديث بيانات لوحة التحكم">
+          <i class="fas fa-sync-alt" aria-hidden="true"></i><span>تحديث</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ====== بطاقات الإحصائيات ====== -->
+    <section class="db-kpis" aria-labelledby="db-kpis-title">
+      <h2 class="db-sr-only" id="db-kpis-title">إحصائيات سريعة</h2>
+      <article class="db-kpi" data-tone="primary">
+        <span class="db-kpi__icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+        <div class="db-kpi__body"><strong class="db-kpi__value" data-kpi="students">—</strong><span class="db-kpi__label">إجمالي الطلاب</span></div>
+      </article>
+      <article class="db-kpi" data-tone="accent">
+        <span class="db-kpi__icon"><i class="fas fa-chalkboard-user" aria-hidden="true"></i></span>
+        <div class="db-kpi__body"><strong class="db-kpi__value" data-kpi="teachers">—</strong><span class="db-kpi__label">المعلمون</span></div>
+      </article>
+      <article class="db-kpi" data-tone="success">
+        <span class="db-kpi__icon"><i class="fas fa-user-shield" aria-hidden="true"></i></span>
+        <div class="db-kpi__body"><strong class="db-kpi__value" data-kpi="moderators">—</strong><span class="db-kpi__label">المشرفون</span></div>
+      </article>
+      <article class="db-kpi" data-tone="primary">
+        <span class="db-kpi__icon"><i class="fas fa-book-open" aria-hidden="true"></i></span>
+        <div class="db-kpi__body"><strong class="db-kpi__value" data-kpi="lessons">—</strong><span class="db-kpi__label">الدروس</span></div>
+      </article>
+      <article class="db-kpi" data-tone="warning">
+        <span class="db-kpi__icon"><i class="fas fa-graduation-cap" aria-hidden="true"></i></span>
+        <div class="db-kpi__body"><strong class="db-kpi__value" data-kpi="exams">—</strong><span class="db-kpi__label">الامتحانات</span></div>
+      </article>
+      <article class="db-kpi" data-tone="success">
+        <span class="db-kpi__icon"><i class="fas fa-clipboard-check" aria-hidden="true"></i></span>
+        <div class="db-kpi__body"><strong class="db-kpi__value" data-kpi="exam_results">—</strong><span class="db-kpi__label">نتائج الامتحانات</span></div>
+      </article>
+      <article class="db-kpi" data-tone="accent">
+        <span class="db-kpi__icon"><i class="fas fa-comments" aria-hidden="true"></i></span>
+        <div class="db-kpi__body"><strong class="db-kpi__value" data-kpi="comments">—</strong><span class="db-kpi__label">التعليقات</span></div>
+      </article>
+      <article class="db-kpi" data-tone="danger" data-role="teacher" hidden>
+        <span class="db-kpi__icon"><i class="fas fa-circle-exclamation" aria-hidden="true"></i></span>
+        <div class="db-kpi__body"><strong class="db-kpi__value" data-kpi="pending">—</strong><span class="db-kpi__label">شكاوى قيد المعالجة</span></div>
+      </article>
+    </section>
+
+    <!-- ====== التبويبات ====== -->
+    <section class="db-tabs">
+      <div class="db-tablist" role="tablist" aria-label="أقسام لوحة التحكم">
+        <button type="button" class="db-tab" role="tab" id="db-tab-overview" data-tab="overview" aria-controls="db-panel-overview" aria-selected="true" tabindex="0">
+          <i class="fas fa-chart-pie" aria-hidden="true"></i><span>نظرة عامة</span>
+        </button>
+        <button type="button" class="db-tab" role="tab" id="db-tab-students" data-tab="students" aria-controls="db-panel-students" aria-selected="false" tabindex="-1">
+          <i class="fas fa-users" aria-hidden="true"></i><span>الطلاب</span>
+        </button>
+        <button type="button" class="db-tab" role="tab" id="db-tab-comments" data-tab="comments" aria-controls="db-panel-comments" aria-selected="false" tabindex="-1">
+          <i class="fas fa-comments" aria-hidden="true"></i><span>التعليقات</span>
+        </button>
+        <button type="button" class="db-tab" role="tab" id="db-tab-moderators" data-tab="moderators" data-role="teacher" aria-controls="db-panel-moderators" aria-selected="false" tabindex="-1" hidden>
+          <i class="fas fa-user-shield" aria-hidden="true"></i><span>المشرفون</span>
+        </button>
+        <button type="button" class="db-tab" role="tab" id="db-tab-trash" data-tab="trash" data-role="teacher" aria-controls="db-panel-trash" aria-selected="false" tabindex="-1" hidden>
+          <i class="fas fa-trash-alt" aria-hidden="true"></i><span>المهملات</span>
+        </button>
+        <button type="button" class="db-tab" role="tab" id="db-tab-complaints" data-tab="complaints" data-role="teacher" aria-controls="db-panel-complaints" aria-selected="false" tabindex="-1" hidden>
+          <i class="fas fa-exclamation-circle" aria-hidden="true"></i><span>الشكاوى</span>
+          <span class="db-tab__badge" id="db-complaints-badge" hidden></span>
+        </button>
+      </div>
+
+      <div class="db-panels">
+
+        <!-- ====== نظرة عامة ====== -->
+        <div class="db-panel" role="tabpanel" id="db-panel-overview" aria-labelledby="db-tab-overview" tabindex="0">
+          <div class="db-grid">
+            <article class="db-card">
+              <h3 class="db-card__title"><i class="fas fa-chart-pie" aria-hidden="true"></i><span>توزيع الطلاب حسب المرحلة</span></h3>
+              <div class="db-chart">
+                <canvas id="db-chart-stage" role="img" aria-label="رسم بياني لتوزيع الطلاب حسب المرحلة الدراسية"></canvas>
+                <p class="db-empty" data-empty-for="db-chart-stage" hidden>لا توجد بيانات كافية بعد</p>
+              </div>
+            </article>
+            <article class="db-card">
+              <h3 class="db-card__title"><i class="fas fa-chart-column" aria-hidden="true"></i><span>توزيع الطلاب حسب الصف</span></h3>
+              <div class="db-chart">
+                <canvas id="db-chart-grade" role="img" aria-label="رسم بياني لتوزيع الطلاب حسب الصف الدراسي"></canvas>
+                <p class="db-empty" data-empty-for="db-chart-grade" hidden>لا توجد بيانات كافية بعد</p>
+              </div>
+            </article>
+            <article class="db-card">
+              <h3 class="db-card__title"><i class="fas fa-chart-line" aria-hidden="true"></i><span>النشاط خلال آخر 7 أيام</span></h3>
+              <div class="db-chart">
+                <canvas id="db-chart-weekly" role="img" aria-label="رسم بياني لعدد محاولات الامتحانات والتعليقات خلال آخر سبعة أيام"></canvas>
+                <p class="db-empty" data-empty-for="db-chart-weekly" hidden>لا يوجد نشاط مسجّل بعد</p>
+              </div>
+            </article>
+            <article class="db-card">
+              <h3 class="db-card__title"><i class="fas fa-bullseye" aria-hidden="true"></i><span>أداء الطلاب في أكثر الامتحانات تكرارًا</span></h3>
+              <div class="db-chart">
+                <canvas id="db-chart-exams" role="img" aria-label="رسم بياني لمتوسط نسبة الإجابات الصحيحة في أكثر الامتحانات تكرارًا"></canvas>
+                <p class="db-empty" data-empty-for="db-chart-exams" hidden>لا توجد نتائج امتحانات بعد</p>
+              </div>
+            </article>
+
+            <article class="db-card">
+              <h3 class="db-card__title"><i class="fas fa-trophy" aria-hidden="true"></i><span>أوائل الطلاب</span></h3>
+              <ol class="db-list" id="db-top-list"><li class="db-skeleton">جاري التحميل...</li></ol>
+            </article>
+            <article class="db-card">
+              <h3 class="db-card__title"><i class="fas fa-comment-dots" aria-hidden="true"></i><span>أحدث التعليقات</span></h3>
+              <ul class="db-list" id="db-recent-comments"><li class="db-skeleton">جاري التحميل...</li></ul>
+            </article>
+            <article class="db-card" data-role="teacher" hidden>
+              <h3 class="db-card__title"><i class="fas fa-inbox" aria-hidden="true"></i><span>شكاوى تنتظر الرد</span></h3>
+              <ul class="db-list" id="db-pending-complaints"><li class="db-skeleton">جاري التحميل...</li></ul>
+            </article>
+          </div>
+        </div>
+
+        <!-- ====== الطلاب ====== -->
+        <div class="db-panel" role="tabpanel" id="db-panel-students" aria-labelledby="db-tab-students" tabindex="0" hidden>
+          <div class="db-toolbar">
+            <div class="db-field db-field--grow">
+              <label class="db-sr-only" for="db-student-search">بحث عن طالب</label>
+              <input type="search" id="db-student-search" class="db-input" placeholder="بحث بالاسم أو رقم الهاتف أو المعرّف..." autocomplete="off">
+            </div>
+            <div class="db-field">
+              <label class="db-sr-only" for="db-student-stage">المرحلة</label>
+              <select id="db-student-stage" class="db-input">
+                <option value="">كل المراحل</option>
+                <option value="إعدادي">الإعدادية</option>
+                <option value="ثانوي">الثانوية</option>
+              </select>
+            </div>
+            <div class="db-field">
+              <label class="db-sr-only" for="db-student-grade">الصف</label>
+              <select id="db-student-grade" class="db-input">
+                <option value="">كل الصفوف</option>
+                <option value="1">الصف الأول</option>
+                <option value="2">الصف الثاني</option>
+                <option value="3">الصف الثالث</option>
+              </select>
+            </div>
+            <button type="button" class="db-btn db-btn--ghost db-btn--sm" data-db-action="students-reset">مسح الفلاتر</button>
+          </div>
+          <p class="db-count" id="db-students-count" aria-live="polite"></p>
+          <div class="db-table-wrap">
+            <table class="db-table" id="db-students-table">
+              <thead>
+                <tr>
+                  <th scope="col">الطالب</th>
+                  <th scope="col">المرحلة</th>
+                  <th scope="col">الصف</th>
+                  <th scope="col">النقاط</th>
+                  <th scope="col">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="db-students-body"></tbody>
+            </table>
+          </div>
+          <nav class="db-pager" aria-label="التنقل بين صفحات الطلاب">
+            <button type="button" class="db-btn db-btn--ghost db-btn--sm" data-db-action="students-prev" id="db-students-prev">السابق</button>
+            <span class="db-pager__info" id="db-students-page" aria-live="polite"></span>
+            <button type="button" class="db-btn db-btn--ghost db-btn--sm" data-db-action="students-next" id="db-students-next">التالي</button>
+          </nav>
+        </div>
+
+        <!-- ====== التعليقات ====== -->
+        <div class="db-panel" role="tabpanel" id="db-panel-comments" aria-labelledby="db-tab-comments" tabindex="0" hidden>
+          <div class="db-toolbar">
+            <h3 class="db-toolbar__title">إدارة التعليقات العامة</h3>
+            <div class="db-field">
+              <label class="db-sr-only" for="db-comments-filter">تصفية التعليقات</label>
+              <select id="db-comments-filter" class="db-input">
+                <option value="all">كل التعليقات</option>
+                <option value="pinned">المثبّت فقط</option>
+              </select>
+            </div>
+          </div>
+          <div class="db-stack" id="db-comments-list" aria-live="polite"></div>
+          <div class="db-more">
+            <button type="button" class="db-btn db-btn--ghost" data-db-action="comments-more" id="db-comments-more" hidden>تحميل المزيد</button>
+          </div>
+        </div>
+
+        <!-- ====== المشرفون ====== -->
+        <div class="db-panel" role="tabpanel" id="db-panel-moderators" aria-labelledby="db-tab-moderators" tabindex="0" hidden>
+          <div class="db-toolbar">
+            <h3 class="db-toolbar__title">إدارة المشرفين</h3>
+            <p class="db-count" id="db-moderators-count"></p>
+          </div>
+          <div class="db-mod-grid" id="db-moderators-list"></div>
+        </div>
+
+        <!-- ====== المهملات ====== -->
+        <div class="db-panel" role="tabpanel" id="db-panel-trash" aria-labelledby="db-tab-trash" tabindex="0" hidden>
+          <div class="db-segment" role="group" aria-label="نوع المهملات">
+            <button type="button" class="db-segment__btn" data-db-action="trash-type" data-type="lessons" aria-pressed="true">الدروس</button>
+            <button type="button" class="db-segment__btn" data-db-action="trash-type" data-type="exams" aria-pressed="false">الامتحانات</button>
+            <button type="button" class="db-segment__btn" data-db-action="trash-type" data-type="comments" aria-pressed="false">التعليقات</button>
+          </div>
+          <div class="db-table-wrap">
+            <table class="db-table" id="db-trash-table">
+              <thead>
+                <tr>
+                  <th scope="col">النوع</th>
+                  <th scope="col">الاسم / العنوان</th>
+                  <th scope="col">تاريخ الحذف</th>
+                  <th scope="col">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="db-trash-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ====== الشكاوى ====== -->
+        <div class="db-panel" role="tabpanel" id="db-panel-complaints" aria-labelledby="db-tab-complaints" tabindex="0" hidden>
+          <div class="db-toolbar">
+            <h3 class="db-toolbar__title">شكاوى الطلاب</h3>
+            <div class="db-field">
+              <label class="db-sr-only" for="db-complaints-filter">تصفية الشكاوى حسب الحالة</label>
+              <select id="db-complaints-filter" class="db-input">
+                <option value="all">كل الحالات</option>
+                <option value="pending">قيد المعالجة</option>
+                <option value="resolved">تم الرد</option>
+                <option value="closed">مغلقة</option>
+              </select>
+            </div>
+          </div>
+          <div class="db-stack" id="db-complaints-list" aria-live="polite"></div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,93 @@
+/*
+ * css/themes/theme-orange.css — الثيم البرتقالي (Orange Energy)
+ * الإصدار: v5.0.0 | Biologist Platform
+ * ============================================================================
+ * المسؤولية: متغيرات الألوان والظلال للوضعين النهاري والليلي
+ * البنية:    primary → secondary → accent → الخلفيات → النصوص → الحدود → التفاعل → الظلال → XP والتحديات
+ * ============================================================================
+ */
+
+:root,
+[data-theme="light"] {
+  --primary: #ff9800;
+  --primary-dark: #f57c00;
+  --primary-light: #ffb74d;
+  --primary-rgb: 255, 152, 0;
+
+  --secondary: #ef6c00;
+  --secondary-light: #ffa726;
+  --secondary-rgb: 239, 108, 0;
+
+  --accent: #ff5722;
+  --accent-dark: #e64a19;
+  --accent-rgb: 255, 87, 34;
+
+  --background-light: #fff8e7;
+  --surface-light: #ffffff;
+  --surface-hover-light: rgba(255, 152, 0, 0.08);
+
+  --text-primary-light: #3a2a1a;
+  --text-secondary-light: #6a5a4a;
+  --text-tertiary-light: #7d6e5f;
+
+  --border-color-light: rgba(255, 152, 0, 0.2);
+
+  --hover-light: rgba(255, 152, 0, 0.1);
+  --active-light: rgba(255, 152, 0, 0.2);
+
+  --shadow-sm: 0 2px 8px rgba(255, 152, 0, 0.1);
+  --shadow-md: 0 4px 16px rgba(255, 152, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(255, 152, 0, 0.2);
+  --shadow-xl: 0 12px 32px rgba(255, 152, 0, 0.25);
+
+  --challenge-bg: rgba(255, 152, 0, 0.1);
+  --challenge-border: rgba(255, 152, 0, 0.3);
+
+  --on-primary: #14100a;
+  --level-badge-text: var(--on-primary);
+  --level-badge-bg: var(--primary);
+  --xp-start: #FFD700;
+  --xp-end: #FFA000;
+  --border-color-dark: rgba(255, 152, 0, 0.3);
+}
+
+[data-theme="dark"] {
+  --primary: #ffb74d;
+  --primary-dark: #ff9800;
+  --primary-light: #ffcc80;
+  --primary-rgb: 255, 183, 77;
+  --on-primary: #1a0a00;
+
+  --secondary: #ffa726;
+  --secondary-light: #ffb74d;
+  --secondary-rgb: 255, 167, 38;
+
+  --accent: #ff8a65;
+  --accent-dark: #ff5722;
+  --accent-rgb: 255, 138, 101;
+
+  --background-light: #1a0a00;
+  --surface-light: #2a1a0a;
+  --surface-hover-light: rgba(255, 152, 0, 0.12);
+
+  --text-primary-light: #fff3e0;
+  --text-secondary-light: #ffcc80;
+  --text-tertiary-light: #ffb74d;
+
+  --border-color-light: rgba(255, 152, 0, 0.3);
+
+  --hover-light: rgba(255, 183, 77, 0.15);
+  --active-light: rgba(255, 183, 77, 0.25);
+
+  --challenge-bg: rgba(255, 183, 77, 0.15);
+  --challenge-border: rgba(255, 183, 77, 0.4);
+
+  --level-badge-text: var(--on-primary);
+  --xp-start: #FFD700;
+  --xp-end: #FF8F00;
+  --border-color-dark: rgba(255, 255, 255, 0.1);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.8);
+}

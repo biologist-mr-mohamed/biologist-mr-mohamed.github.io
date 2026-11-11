@@ -1,0 +1,229 @@
+<!-- ====== صفحة الإعدادات - الإصدار 5.0.0 ====== -->
+<div class="page-content settings-page" data-page="settings">
+  <h1 class="st-sr-only">الإعدادات - منصة بيولوجست</h1>
+
+  <div class="container st-container">
+
+    <!-- ====== رأس الصفحة ====== -->
+    <header class="st-header">
+      <h2 class="st-title"><i class="fas fa-cog" aria-hidden="true"></i> الإعدادات</h2>
+      <p class="st-subtitle">خصّص تجربتك على المنصة حسب احتياجاتك</p>
+    </header>
+
+    <!-- ====== شريط التبويبات ====== -->
+    <div class="st-tabs" role="tablist" aria-label="أقسام الإعدادات">
+      <button type="button" class="st-tab is-active" id="st-tab-profile" role="tab" data-tab="profile" aria-selected="true" aria-controls="st-pane-profile" aria-label="الملف الشخصي">
+        <i class="fas fa-user" aria-hidden="true"></i><span>الملف الشخصي</span>
+      </button>
+      <button type="button" class="st-tab" id="st-tab-avatar" role="tab" data-tab="avatar" aria-selected="false" aria-controls="st-pane-avatar" aria-label="الصورة الشخصية" tabindex="-1">
+        <i class="fas fa-image" aria-hidden="true"></i><span>الصورة الشخصية</span>
+      </button>
+      <button type="button" class="st-tab" id="st-tab-appearance" role="tab" data-tab="appearance" aria-selected="false" aria-controls="st-pane-appearance" aria-label="المظهر والإشعارات" tabindex="-1">
+        <i class="fas fa-palette" aria-hidden="true"></i><span>المظهر والإشعارات</span>
+      </button>
+      <button type="button" class="st-tab" id="st-tab-security" role="tab" data-tab="security" aria-selected="false" aria-controls="st-pane-security" aria-label="الأمان" tabindex="-1">
+        <i class="fas fa-lock" aria-hidden="true"></i><span>الأمان</span>
+      </button>
+      <button type="button" class="st-tab" id="st-tab-advanced" role="tab" data-tab="advanced" aria-selected="false" aria-controls="st-pane-advanced" aria-label="متقدم" tabindex="-1" hidden>
+        <i class="fas fa-sliders" aria-hidden="true"></i><span>متقدم</span>
+      </button>
+    </div>
+
+    <!-- ====== محتوى التبويبات ====== -->
+    <div class="st-panel">
+
+      <!-- ==== تبويب الملف الشخصي ==== -->
+      <section class="st-pane" id="st-pane-profile" role="tabpanel" aria-labelledby="st-tab-profile" data-pane="profile">
+        <form id="st-profile-form" class="st-form" novalidate>
+          <div class="st-grid">
+            <div class="st-field st-field--full">
+              <label class="st-label" for="st-fullname">الاسم الكامل</label>
+              <input type="text" id="st-fullname" class="st-input" maxlength="60" autocomplete="name" required>
+              <small class="st-error" role="alert" data-error-for="st-fullname"></small>
+            </div>
+
+            <div class="st-field">
+              <label class="st-label" for="st-email">البريد الإلكتروني</label>
+              <input type="email" id="st-email" class="st-input st-input--ltr" placeholder="example@domain.com" autocomplete="email">
+              <small class="st-hint">اختياري</small>
+              <small class="st-error" role="alert" data-error-for="st-email"></small>
+            </div>
+
+            <div class="st-field">
+              <label class="st-label" for="st-phone">رقم الهاتف</label>
+              <input type="tel" id="st-phone" class="st-input st-input--ltr" disabled readonly>
+              <small class="st-hint">رقم الهاتف هو معرّف الدخول ولا يُعدَّل من هنا</small>
+            </div>
+
+            <div class="st-field">
+              <label class="st-label" for="st-age">العمر</label>
+              <input type="number" id="st-age" class="st-input" min="10" max="80" inputmode="numeric">
+              <small class="st-error" role="alert" data-error-for="st-age"></small>
+            </div>
+
+            <div class="st-field">
+              <label class="st-label" for="st-gender">الجنس</label>
+              <select id="st-gender" class="st-input" disabled>
+                <option value="male">ذكر</option>
+                <option value="female">أنثى</option>
+              </select>
+            </div>
+
+            <!-- ==== حقول الطالب ==== -->
+            <div class="st-field" data-student-only hidden>
+              <label class="st-label" for="st-stage">المرحلة الدراسية</label>
+              <select id="st-stage" class="st-input">
+                <option value="إعدادي">المرحلة الإعدادية</option>
+                <option value="ثانوي">المرحلة الثانوية</option>
+              </select>
+            </div>
+
+            <div class="st-field" data-student-only hidden>
+              <label class="st-label" for="st-grade">الصف الدراسي</label>
+              <select id="st-grade" class="st-input">
+                <option value="1">الأول</option>
+                <option value="2">الثاني</option>
+                <option value="3">الثالث</option>
+              </select>
+            </div>
+
+            <p class="st-note st-field--full" data-student-only hidden>
+              تغيير المرحلة أو الصف يغيّر الدروس والامتحانات المعروضة لك.
+            </p>
+          </div>
+
+          <div class="st-actions">
+            <button type="submit" class="st-btn st-btn--primary" id="st-profile-save">حفظ التغييرات</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ==== تبويب الصورة الشخصية ==== -->
+      <section class="st-pane" id="st-pane-avatar" role="tabpanel" aria-labelledby="st-tab-avatar" data-pane="avatar" hidden>
+        <div class="st-avatar">
+          <div class="st-avatar-slot" id="st-avatar-slot"></div>
+          <p class="st-avatar-name" id="st-avatar-name"></p>
+          <p class="st-avatar-job" id="st-avatar-job"></p>
+          <button type="button" class="st-btn st-btn--secondary" id="st-avatar-change">
+            <i class="fas fa-user-pen" aria-hidden="true"></i> تغيير الصورة
+          </button>
+          <p class="st-hint" id="st-avatar-hint">تظهر صورتك في ملفك الشخصي وفي تعليقاتك</p>
+        </div>
+      </section>
+
+      <!-- ==== تبويب المظهر والإشعارات ==== -->
+      <section class="st-pane" id="st-pane-appearance" role="tabpanel" aria-labelledby="st-tab-appearance" data-pane="appearance" hidden>
+        <div class="st-form">
+
+          <fieldset class="st-group">
+            <legend class="st-label">الوضع</legend>
+            <div class="st-segment" role="radiogroup" aria-label="وضع العرض" id="st-mode-group">
+              <button type="button" class="st-segment-btn" role="radio" aria-checked="false" data-mode="light">
+                <i class="fas fa-sun" aria-hidden="true"></i><span>فاتح</span>
+              </button>
+              <button type="button" class="st-segment-btn" role="radio" aria-checked="false" data-mode="dark">
+                <i class="fas fa-moon" aria-hidden="true"></i><span>داكن</span>
+              </button>
+              <button type="button" class="st-segment-btn" role="radio" aria-checked="false" data-mode="system">
+                <i class="fas fa-circle-half-stroke" aria-hidden="true"></i><span>تلقائي</span>
+              </button>
+            </div>
+            <small class="st-hint">الوضع التلقائي يتبع إعداد جهازك</small>
+          </fieldset>
+
+          <fieldset class="st-group">
+            <legend class="st-label">اللون الأساسي للمنصة</legend>
+            <div class="st-swatches" role="radiogroup" aria-label="اللون الأساسي" id="st-color-group">
+              <button type="button" class="st-swatch" role="radio" aria-checked="false" data-color="blue" aria-label="أزرق"></button>
+              <button type="button" class="st-swatch" role="radio" aria-checked="false" data-color="pink" aria-label="وردي"></button>
+              <button type="button" class="st-swatch" role="radio" aria-checked="false" data-color="green" aria-label="أخضر"></button>
+              <button type="button" class="st-swatch" role="radio" aria-checked="false" data-color="purple" aria-label="بنفسجي"></button>
+              <button type="button" class="st-swatch" role="radio" aria-checked="false" data-color="orange" aria-label="برتقالي"></button>
+            </div>
+          </fieldset>
+
+          <fieldset class="st-group">
+            <legend class="st-label">الإشعارات</legend>
+            <label class="st-switch-row" for="st-notifications">
+              <span class="st-switch-text">
+                <span class="st-switch-title">إشعارات المنصة</span>
+                <small class="st-hint">إظهار إشعارات المنصة داخل التطبيق</small>
+              </span>
+              <input type="checkbox" id="st-notifications" class="st-switch-input" role="switch">
+              <span class="st-switch-ui" aria-hidden="true"></span>
+            </label>
+          </fieldset>
+
+        </div>
+      </section>
+
+      <!-- ==== تبويب الأمان ==== -->
+      <section class="st-pane" id="st-pane-security" role="tabpanel" aria-labelledby="st-tab-security" data-pane="security" hidden>
+        <form id="st-security-form" class="st-form" novalidate>
+          <div class="st-field">
+            <label class="st-label" for="st-current-password">كلمة المرور الحالية</label>
+            <div class="st-password">
+              <input type="password" id="st-current-password" class="st-input st-input--ltr" required autocomplete="current-password">
+              <button type="button" class="st-password-toggle" data-toggle-password="st-current-password" aria-label="إظهار كلمة المرور" aria-pressed="false">
+                <i class="fas fa-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+            <small class="st-error" role="alert" data-error-for="st-current-password"></small>
+          </div>
+
+          <div class="st-field">
+            <label class="st-label" for="st-new-password">كلمة المرور الجديدة</label>
+            <div class="st-password">
+              <input type="password" id="st-new-password" class="st-input st-input--ltr" minlength="6" maxlength="10" required autocomplete="new-password">
+              <button type="button" class="st-password-toggle" data-toggle-password="st-new-password" aria-label="إظهار كلمة المرور" aria-pressed="false">
+                <i class="fas fa-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+            <small class="st-hint">من 6 إلى 10 أحرف أو أرقام</small>
+            <small class="st-error" role="alert" data-error-for="st-new-password"></small>
+          </div>
+
+          <div class="st-field">
+            <label class="st-label" for="st-confirm-password">تأكيد كلمة المرور الجديدة</label>
+            <div class="st-password">
+              <input type="password" id="st-confirm-password" class="st-input st-input--ltr" maxlength="10" required autocomplete="new-password">
+              <button type="button" class="st-password-toggle" data-toggle-password="st-confirm-password" aria-label="إظهار كلمة المرور" aria-pressed="false">
+                <i class="fas fa-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+            <small class="st-error" role="alert" data-error-for="st-confirm-password"></small>
+          </div>
+
+          <div class="st-actions">
+            <button type="submit" class="st-btn st-btn--primary" id="st-security-save">تغيير كلمة المرور</button>
+          </div>
+        </form>
+
+        <!-- ==== منطقة الخطر ==== -->
+        <div class="st-danger" id="st-danger-zone" hidden>
+          <h3 class="st-danger-title"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> منطقة الخطر</h3>
+          <p class="st-danger-text">حذف حسابك يحذف نتائجك وتقدّمك وتعليقاتك وإشعاراتك نهائيًا، ولا يمكن التراجع عنه.</p>
+          <button type="button" class="st-btn st-btn--danger" id="st-delete-account">حذف الحساب</button>
+        </div>
+      </section>
+
+      <!-- ==== تبويب متقدم (للمعلم والمشرف) ==== -->
+      <section class="st-pane" id="st-pane-advanced" role="tabpanel" aria-labelledby="st-tab-advanced" data-pane="advanced" hidden>
+        <div class="st-form">
+          <fieldset class="st-group">
+            <legend class="st-label">الخصوصية والعرض</legend>
+            <label class="st-switch-row" for="st-show-sensitive">
+              <span class="st-switch-text">
+                <span class="st-switch-title">إظهار بيانات المستخدمين الكاملة</span>
+                <small class="st-hint">عرض أرقام الهواتف والبريد الإلكتروني دون إخفاء عند فتح ملفات الطلاب</small>
+              </span>
+              <input type="checkbox" id="st-show-sensitive" class="st-switch-input" role="switch">
+              <span class="st-switch-ui" aria-hidden="true"></span>
+            </label>
+          </fieldset>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>

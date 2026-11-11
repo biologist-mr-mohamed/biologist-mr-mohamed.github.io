@@ -1,0 +1,184 @@
+<!-- صفحة تسجيل الدخول - v5.0.0 -->
+
+<div class="auth-page" data-page="login">
+  <h1 class="visually-hidden">تسجيل الدخول - منصة بيولوجست التعليمية</h1>
+
+  <div class="auth-container">
+
+    <!-- ==== 1. بطاقة النموذج ==== -->
+
+    <div class="auth-card login-card">
+
+      <!-- ==== 2. رأس البطاقة ==== -->
+
+      <div class="auth-header">
+        <div class="logo-section">
+          <img src="/assets/images/biologist.png"
+               alt="شعار بيولوجست"
+               class="auth-logo"
+               loading="eager"
+               width="80"
+               height="80">
+          <h2 class="auth-title">مرحبًا بك مرة أخرى</h2>
+        </div>
+        <p class="auth-subtitle">سجل الدخول لمواصلة رحلتك التعليمية</p>
+      </div>
+
+      <!-- ==== 3. محتوى النموذج ==== -->
+
+      <div class="auth-content">
+        <form id="login-form" novalidate>
+
+          <!-- ==== 4. رقم الهاتف ==== -->
+
+          <div class="form-group" id="group-login-phone">
+            <label for="login-phone" class="form-label">
+              <i class="fas fa-mobile-alt input-icon" aria-hidden="true"></i>
+              رقم الهاتف
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="tel"
+                id="login-phone"
+                name="phone"
+                class="form-control"
+                placeholder="01•••••••••"
+                inputmode="numeric"
+                pattern="[0-9]{11}"
+                maxlength="11"
+                autocomplete="username"
+                required
+                aria-required="true"
+                aria-describedby="error-login-phone">
+              <div class="input-validation-icon" aria-hidden="true">
+                <i class="fas fa-check-circle success-icon"></i>
+                <i class="fas fa-exclamation-circle error-icon"></i>
+              </div>
+            </div>
+            <div class="form-error" id="error-login-phone" data-error="phone" role="alert" aria-live="polite"></div>
+          </div>
+
+          <!-- ==== 5. كلمة المرور ==== -->
+
+          <div class="form-group" id="group-login-password">
+            <label for="login-password" class="form-label">
+              <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+              كلمة المرور
+            </label>
+            <div class="input-with-icon">
+              <input
+                type="password"
+                id="login-password"
+                name="password"
+                class="form-control"
+                placeholder="••••••••"
+                inputmode="numeric"
+                minlength="6"
+                maxlength="10"
+                autocomplete="current-password"
+                required
+                aria-required="true"
+                aria-describedby="hint-login-password error-login-password">
+              <button
+                type="button"
+                class="toggle-password"
+                aria-label="إظهار كلمة المرور"
+                aria-pressed="false">
+                <i class="fas fa-eye icon-eye" aria-hidden="true"></i>
+                <i class="fas fa-eye-slash icon-eye-off" aria-hidden="true"></i>
+              </button>
+              <div class="input-validation-icon" aria-hidden="true">
+                <i class="fas fa-check-circle success-icon"></i>
+                <i class="fas fa-exclamation-circle error-icon"></i>
+              </div>
+            </div>
+            <div class="form-hint" id="hint-login-password">كلمة المرور مكونة من 6-10 أرقام</div>
+            <div class="form-error" id="error-login-password" data-error="password" role="alert" aria-live="polite"></div>
+          </div>
+
+          <!-- ==== 6. تذكرني ونسيت كلمة المرور ==== -->
+
+          <div class="form-options">
+            <div class="remember-me">
+              <input type="checkbox" id="remember-me" name="remember" class="checkbox">
+              <label for="remember-me" class="checkbox-label">تذكرني</label>
+            </div>
+            <button type="button" class="forgot-password" data-action="forgot-password">
+              نسيت كلمة المرور؟
+            </button>
+          </div>
+
+          <!-- ==== 7. زر تسجيل الدخول ==== -->
+
+          <button type="submit" class="btn btn-primary btn-block auth-btn" data-action="submit-login">
+            <span class="btn-text">تسجيل الدخول</span>
+            <i class="fas fa-sign-in-alt btn-icon" aria-hidden="true"></i>
+          </button>
+
+          <!-- ==== 8. تسجيل الدخول الاجتماعي ==== -->
+
+          <div class="social-login">
+            <p class="divider-text">
+              <span class="divider-line"></span>
+              <span class="divider-content">أو سجل الدخول باستخدام</span>
+              <span class="divider-line"></span>
+            </p>
+            <div class="social-buttons">
+              <button type="button" class="social-btn facebook" data-social="facebook">
+                <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                فيسبوك
+              </button>
+              <button type="button" class="social-btn google" data-social="google">
+                <i class="fab fa-google" aria-hidden="true"></i>
+                جوجل
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- ==== 9. تذييل البطاقة ==== -->
+
+      <div class="auth-footer">
+        <p>ليس لديك حساب؟
+          <button type="button" class="switch-tab" data-nav-target="register">
+            أنشئ حسابًا جديدًا
+          </button>
+        </p>
+      </div>
+
+    </div>
+
+    <!-- ==== 10. قسم التوضيح ==== -->
+
+    <div class="auth-illustration" aria-hidden="true">
+      <div class="illustration-content">
+
+        <div class="floating-container">
+          <img src="/assets/images/biologist2.png"
+               alt=""
+               class="floating-image"
+               loading="lazy">
+        </div>
+
+        <div class="illustration-text">
+          <h3 class="illustration-title">تعلم الأحياء بطرق مبسطة</h3>
+          <p class="illustration-description">انضم إلى آلاف الطلاب الذين حققوا تفوقهم مع منصتنا التعليمية المتكاملة</p>
+          <div class="stats-highlight">
+            <div class="stat-item">
+              <div class="stat-number">98%</div>
+              <div class="stat-label">نسبة نجاح</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">5000+</div>
+              <div class="stat-label">طالب متميز</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

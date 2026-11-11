@@ -1,0 +1,785 @@
+/* شاشة التحميل وحالتي الخطأ وعدم الاتصال - v5.0.0 */
+
+/* ==== 1. الحاوية الرئيسية ==== */
+
+.preloader {
+  --pl-bg: var(--background-light);
+  --pl-ink: var(--logo-dark);
+  --pl-text: var(--text-primary-light);
+  --pl-text-muted: var(--text-secondary-light);
+  --pl-text-faint: var(--text-tertiary-light);
+  --pl-line: var(--border-color-light);
+  --pl-card: color-mix(in srgb, var(--surface-light) 84%, transparent);
+  --pl-track: color-mix(in srgb, var(--pl-ink) 10%, transparent);
+  --pl-wash-color: var(--primary);
+  --pl-wash-strength: 9%;
+  --pl-wash: color-mix(in srgb, var(--pl-wash-color) var(--pl-wash-strength), transparent);
+  --pl-grid-opacity: 0.06;
+
+  --pl-reveal: var(--logo-reveal-duration);
+  --pl-ease: var(--logo-motion-ease);
+  --pl-sheen: 1100ms;
+  --pl-swap: 160ms;
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-preloader);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: var(--pl-bg);
+  background-image: radial-gradient(ellipse 80% 60% at 50% 40%, var(--pl-wash), transparent 72%);
+  font-family: var(--font-family-arabic);
+  opacity: 1;
+  visibility: visible;
+}
+
+.preloader.preloader-fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 0.7s var(--transition-ease) 0.12s,
+    visibility 0.7s var(--transition-ease) 0.12s;
+}
+
+.preloader.preloader-hidden {
+  display: none !important;
+  pointer-events: none;
+}
+
+.preloader[data-preloader-state="error"] {
+  --pl-wash-color: var(--error);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+[data-theme="dark"] .preloader {
+  --pl-wash-strength: 16%;
+  --pl-grid-opacity: 0.08;
+}
+
+.preloader:focus {
+  outline: none;
+}
+
+body:has(.preloader.preloader-visible) {
+  overflow: hidden;
+}
+
+/* ==== 2. الأرضية الجمالية ==== */
+
+.pl-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pl-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, var(--pl-ink) 1px, transparent 1.4px);
+  background-size: 28px 28px;
+  opacity: var(--pl-grid-opacity);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 0%, transparent 78%);
+}
+
+.pl-orb {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.85;
+  will-change: transform;
+  transition: transform 7s var(--ease-out), opacity 2s ease;
+}
+
+.pl-orb--a {
+  width: 52vmax;
+  height: 52vmax;
+  top: -22vmax;
+  inset-inline-start: -16vmax;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 20%, transparent), transparent);
+  transform: translate3d(0, 0, 0) scale(0.88);
+}
+
+.pl-orb--b {
+  width: 46vmax;
+  height: 46vmax;
+  bottom: -20vmax;
+  inset-inline-end: -14vmax;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 18%, transparent), transparent);
+  transform: translate3d(0, 0, 0) scale(0.88);
+}
+
+.preloader[data-pl-stage="reveal"] .pl-orb--a,
+.preloader[data-pl-stage="loading"] .pl-orb--a {
+  transform: translate3d(7vmax, 5vmax, 0) scale(1.06);
+}
+
+.preloader[data-pl-stage="reveal"] .pl-orb--b,
+.preloader[data-pl-stage="loading"] .pl-orb--b {
+  transform: translate3d(-6vmax, -4vmax, 0) scale(1.06);
+}
+
+/* ==== 3. المشهد ==== */
+
+.pl-stage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+  padding-inline: var(--space-5);
+  transition:
+    opacity 0.55s ease,
+    transform 0.85s var(--transition-ease),
+    filter 0.55s ease;
+}
+
+.preloader[data-pl-stage="exit"] .pl-stage {
+  opacity: 0;
+  transform: scale(1.06);
+  filter: blur(6px);
+}
+
+/* ==== 4. حاضنة اللوجو والهالة ==== */
+
+.pl-brand {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: clamp(40px, 8vh, 64px);
+}
+
+.pl-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(240px, 62vw, 440px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 26%, transparent), transparent);
+  opacity: 0.4;
+  transform: translate(-50%, -50%) scale(0.78);
+  pointer-events: none;
+  transition: opacity 1.4s ease, transform 1.8s var(--ease-out);
+}
+
+.preloader[data-pl-stage="reveal"] .pl-glow,
+.preloader[data-pl-stage="loading"] .pl-glow {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* ==== 5. اللوجو الديناميكي ==== */
+
+.pl-logo {
+  --pl-icon: clamp(56px, 16vw, 84px);
+  --pl-unit: calc(var(--pl-icon) / 30);
+  --pl-word-w: calc(var(--pl-unit) * 59);
+  --pl-word-left: calc(var(--pl-unit) * 19);
+  --pl-overlap: calc(var(--pl-unit) * 2);
+  --pl-b-shift: calc(var(--pl-word-left) - var(--pl-icon) + var(--pl-overlap));
+  --pl-center-compact: calc((var(--pl-word-left) + var(--pl-word-w) - var(--pl-icon)) / 2);
+  --pl-center-full: calc((var(--pl-icon) - var(--pl-word-left) - var(--pl-overlap)) / 2);
+
+  direction: ltr;
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: calc(var(--pl-word-left) + var(--pl-word-w));
+  height: var(--pl-icon);
+  isolation: isolate;
+  white-space: nowrap;
+  transform: translateX(var(--pl-center-compact));
+  transition: transform var(--pl-reveal) var(--ease-out);
+  will-change: transform;
+}
+
+.pl-logo[data-state="full"] {
+  transform: translateX(var(--pl-center-full));
+}
+
+.pl-logo-icon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: var(--pl-icon);
+  height: var(--pl-icon);
+  transform-origin: center center;
+  transform: translateX(0) scale(var(--logo-b-scale-closed));
+  transition: transform var(--pl-reveal) var(--pl-ease);
+  will-change: transform;
+}
+
+.pl-logo[data-state="full"] .pl-logo-icon {
+  transform: translateX(var(--pl-b-shift)) scale(var(--logo-b-scale-open));
+}
+
+.pl-logo-word {
+  position: absolute;
+  left: var(--pl-word-left);
+  top: 0;
+  z-index: 1;
+  width: var(--pl-word-w);
+  height: var(--pl-icon);
+  overflow: hidden;
+  clip-path: inset(0 0 0 100%);
+  -webkit-clip-path: inset(0 0 0 100%);
+  transition: clip-path var(--pl-reveal) var(--pl-ease);
+  will-change: clip-path;
+}
+
+.pl-logo[data-state="full"] .pl-logo-word {
+  clip-path: inset(0 0 0 0%);
+  -webkit-clip-path: inset(0 0 0 0%);
+}
+
+.pl-mask {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  pointer-events: none;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.pl-icon-teal {
+  color: var(--accent);
+  -webkit-mask-image: var(--logo-mask-icon-teal);
+  mask-image: var(--logo-mask-icon-teal);
+}
+
+.pl-icon-dark {
+  color: var(--logo-dark);
+  -webkit-mask-image: var(--logo-mask-icon-dark);
+  mask-image: var(--logo-mask-icon-dark);
+}
+
+.pl-word-teal {
+  color: var(--accent);
+  -webkit-mask-image: var(--logo-mask-word-teal);
+  mask-image: var(--logo-mask-word-teal);
+}
+
+.pl-word-dark {
+  color: var(--logo-dark);
+  -webkit-mask-image: var(--logo-mask-word-dark);
+  mask-image: var(--logo-mask-word-dark);
+}
+
+/* ==== 6. اللمعة ==== */
+
+.pl-mask::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, 0.92) 50%, transparent 58%);
+  background-size: 260% 100%;
+  background-repeat: no-repeat;
+  background-position: 100% 0;
+}
+
+.pl-logo[data-sheen="run"] .pl-mask::after {
+  background-position: 0% 0;
+  transition: background-position var(--pl-sheen) var(--transition-ease);
+}
+
+.pl-logo[data-sheen="run"] .pl-logo-word .pl-mask::after {
+  transition-delay: 0.32s;
+}
+
+/* ==== 7. مؤشر التقدم ==== */
+
+.pl-meter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: min(72vw, 260px);
+  direction: rtl;
+}
+
+.pl-meter-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.pl-status {
+  min-height: 1.5em;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: var(--pl-text);
+  transition: opacity var(--pl-swap) ease, transform var(--pl-swap) ease;
+}
+
+.pl-percent {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--pl-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.pl-bar {
+  position: relative;
+  height: 3px;
+  overflow: hidden;
+  border-radius: var(--border-radius-full);
+  background: var(--pl-track);
+}
+
+.pl-bar-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transform: scaleX(calc(var(--pl-progress, 0) / 100));
+  transform-origin: 100% 50%;
+  transition: transform var(--duration-slow) var(--ease-out);
+  will-change: transform;
+}
+
+[dir="ltr"] .pl-bar-fill {
+  transform-origin: 0 50%;
+}
+
+.pl-sub {
+  min-height: 1.4em;
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--pl-text-muted);
+  opacity: 0.85;
+  transition: opacity var(--pl-swap) ease, transform var(--pl-swap) ease;
+}
+
+.pl-status.is-swapping,
+.pl-sub.is-swapping {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.pl-foot {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--space-5));
+  z-index: 2;
+  text-align: center;
+  font-family: var(--font-family-english);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: var(--pl-text-faint);
+  opacity: 0.7;
+  transition: opacity 0.4s ease;
+}
+
+.preloader[data-pl-stage="exit"] .pl-foot {
+  opacity: 0;
+}
+
+/* ==== 8. شاشة الخطأ ==== */
+
+.error-initialization {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 90%;
+  max-width: 440px;
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  background-color: var(--pl-card);
+  border: 1px solid var(--pl-line);
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: preloaderFadeIn 0.5s var(--ease-out) both;
+}
+
+.error-initialization .error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  border: 2px solid color-mix(in srgb, var(--error) 20%, transparent);
+  animation: errorIconPulse 2s ease-in-out infinite;
+}
+
+.error-initialization .error-icon i {
+  font-size: 2.2rem;
+  color: var(--error);
+}
+
+.error-initialization h2 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--pl-text);
+}
+
+.error-initialization .error-message {
+  width: 100%;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  text-align: start;
+  word-break: break-word;
+  color: var(--error);
+  background-color: color-mix(in srgb, var(--error) 7%, transparent);
+  border-inline-start: 3px solid var(--error);
+  border-radius: var(--border-radius-md);
+}
+
+[data-theme="dark"] .error-initialization .error-message {
+  color: var(--error-light);
+}
+
+.error-initialization .error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.error-initialization .retry-btn,
+.error-initialization .retry-components-btn,
+.error-initialization .support-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--border-radius-full);
+  font-family: var(--font-family-arabic);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--transition-ease),
+    box-shadow var(--duration-fast) var(--transition-ease),
+    background-color var(--duration-fast) var(--transition-ease),
+    border-color var(--duration-fast) var(--transition-ease),
+    color var(--duration-fast) var(--transition-ease),
+    opacity var(--duration-fast) var(--transition-ease);
+}
+
+.error-initialization .retry-btn {
+  padding: var(--space-2) var(--space-5);
+  font-weight: 600;
+  color: var(--on-primary);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border: none;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.error-initialization .retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--primary) 45%, transparent);
+}
+
+.error-initialization .retry-btn:active {
+  transform: translateY(0);
+  opacity: 0.9;
+}
+
+.error-initialization .retry-components-btn,
+.error-initialization .support-btn {
+  padding: var(--space-2) var(--space-4);
+  font-weight: 500;
+  color: var(--pl-text-muted);
+  background: transparent;
+  border: 1.5px solid var(--pl-line);
+}
+
+.error-initialization .retry-components-btn:hover:not(:disabled),
+.error-initialization .support-btn:hover {
+  transform: translateY(-1px);
+  color: var(--pl-text);
+  background-color: color-mix(in srgb, var(--pl-ink) 6%, transparent);
+  border-color: color-mix(in srgb, var(--pl-ink) 22%, transparent);
+}
+
+.error-initialization .retry-components-btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.error-initialization .retry-btn:focus-visible,
+.error-initialization .retry-components-btn:focus-visible,
+.error-initialization .support-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.error-initialization .error-details {
+  width: 100%;
+  margin-top: var(--space-1);
+}
+
+.error-initialization .error-details details {
+  text-align: start;
+}
+
+.error-initialization .error-details summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) 0;
+  list-style: none;
+  font-size: var(--font-size-xs);
+  color: var(--pl-text-faint);
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--duration-fast) var(--transition-ease);
+}
+
+.error-initialization .error-details summary:hover {
+  color: var(--pl-text-muted);
+}
+
+.error-initialization .error-details summary::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border: solid currentColor;
+  border-width: 0 0 2px 2px;
+  transform: rotate(45deg);
+  transition: transform var(--duration-fast) var(--transition-ease);
+}
+
+.error-initialization .error-details details[open] summary::before {
+  transform: rotate(-45deg);
+}
+
+.error-initialization .error-details pre {
+  max-height: 150px;
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  overflow: auto;
+  direction: ltr;
+  text-align: start;
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--pl-text-muted);
+  background-color: color-mix(in srgb, var(--pl-ink) 5%, transparent);
+  border-radius: var(--border-radius-md);
+}
+
+/* ==== 9. حالات المحتوى الرئيسي ==== */
+
+#main-content.content-loading {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-base) ease;
+}
+
+#main-content.content-ready {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.6s ease;
+}
+
+/* ==== 10. التجاوب ==== */
+
+@media (max-width: 767.98px) {
+  .pl-meter {
+    width: min(76vw, 260px);
+  }
+
+  .error-initialization {
+    width: 92%;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .error-initialization .error-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .error-initialization .error-icon i {
+    font-size: 1.8rem;
+  }
+
+  .error-initialization h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .error-initialization .error-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .error-initialization .retry-btn,
+  .error-initialization .retry-components-btn,
+  .error-initialization .support-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-initialization {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+
+@media (max-height: 480px) {
+  .pl-logo {
+    --pl-icon: clamp(40px, 13vh, 56px);
+  }
+
+  .pl-brand {
+    margin-bottom: var(--space-5);
+  }
+
+  .pl-foot {
+    display: none;
+  }
+}
+
+/* ==== 11. تقليل الحركة ==== */
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-logo,
+  .pl-logo-icon,
+  .pl-logo-word,
+  .pl-mask::after,
+  .pl-glow,
+  .pl-orb,
+  .pl-stage,
+  .pl-status,
+  .pl-sub,
+  .pl-foot,
+  .error-initialization,
+  .error-initialization .error-icon {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .pl-bar-fill {
+    transition: transform 0.1s linear !important;
+  }
+
+  .preloader[data-pl-stage="exit"] .pl-stage {
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .preloader.preloader-fade-out {
+    opacity: 0 !important;
+    transition: none !important;
+  }
+
+  #main-content.content-ready {
+    transition: none !important;
+  }
+}
+
+/* ==== 12. شاشة عدم الاتصال ==== */
+/* تعيد استخدام .preloader و .pl-logo و .error-initialization دون تعريف بديل */
+
+.preloader[data-preloader-state="offline"] {
+  --pl-wash-color: var(--warning);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.offline-state {
+  gap: var(--space-4);
+}
+
+.offline-state .pl-brand {
+  margin-bottom: 0;
+}
+
+.offline-state .error-icon {
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  border-color: color-mix(in srgb, var(--warning) 28%, transparent);
+}
+
+.offline-state .error-icon svg {
+  width: 2.2rem;
+  height: 2.2rem;
+  fill: none;
+  stroke: var(--warning);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.offline-state .offline-subtitle {
+  margin: calc(var(--space-2) * -1) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--pl-text-muted);
+}
+
+.offline-state .offline-note {
+  width: 100%;
+  margin: 0;
+  padding: var(--space-3);
+  font-size: var(--font-size-sm);
+  line-height: 1.8;
+  text-align: start;
+  color: var(--pl-text-muted);
+  background-color: color-mix(in srgb, var(--warning) 8%, transparent);
+  border-inline-start: 3px solid var(--warning);
+  border-radius: var(--border-radius-md);
+}
+
+.offline-state .offline-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--pl-text-muted);
+  background-color: color-mix(in srgb, var(--pl-ink) 6%, transparent);
+  border-radius: var(--border-radius-full);
+}
+
+.offline-state .offline-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--warning);
+}
+
+.offline-state .offline-status[data-online="true"]::before {
+  background-color: var(--success);
+}
+
+.offline-state .support-btn,
+.offline-state .support-btn:hover {
+  text-decoration: none;
+}
+
+.offline-state .support-btn {
+  padding: var(--space-2) var(--space-4);
+}

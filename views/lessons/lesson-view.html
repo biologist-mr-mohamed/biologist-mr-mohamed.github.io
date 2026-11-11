@@ -1,0 +1,207 @@
+<!-- صفحة عرض الدرس - v5.0.0 -->
+<div class="page-content lesson-view-page is-loading" data-page="lesson-view">
+
+  <!-- ==== 1. التنقل التفصيلي (Breadcrumb) ==== -->
+  <nav class="breadcrumb-nav" aria-label="مسار التنقل">
+    <ol class="breadcrumb-list">
+      <li class="breadcrumb-item"><a href="#" class="breadcrumb-link" data-nav-target="home" aria-label="الرئيسية"><i class="fas fa-home"></i></a></li>
+      <li class="breadcrumb-item"><a href="#" class="breadcrumb-link" data-nav-target="lessons" aria-label="قائمة الدروس">الدروس</a></li>
+      <li class="breadcrumb-item active" aria-current="page"><span id="breadcrumb-lesson-title">جاري التحميل...</span></li>
+    </ol>
+  </nav>
+
+  <!-- ==== 2. شريط إجراءات المعلم (للمعلم/المشرف فقط) ==== -->
+  <div class="teacher-toolbar teacher-only" data-ui-initial="hidden">
+    <h2 class="teacher-toolbar-title"><i class="fas fa-user-cog" aria-hidden="true"></i> إجراءات المعلم</h2>
+    <div class="admin-actions">
+      <button type="button" class="btn btn-outline btn-sm" data-action="edit-lesson"><i class="fas fa-edit" aria-hidden="true"></i> تعديل</button>
+      <button type="button" class="btn btn-outline btn-sm" data-action="delete-lesson"><i class="fas fa-trash" aria-hidden="true"></i> حذف</button>
+    </div>
+  </div>
+
+  <!-- ==== 3. حالة التحميل ==== -->
+  <div class="loading-state" aria-live="polite" data-ui-initial="hidden">
+    <div class="loading-spinner">
+      <div class="bio-loader bio-loader--auto bio-loader--lg" role="status" aria-label="جاري تحميل الدرس"></div>
+    </div>
+    <p class="loading-text">جاري تحميل الدرس...</p>
+  </div>
+
+  <!-- ==== 4. شاشة المقدمة ==== -->
+  <section class="lesson-intro-section" id="lesson-intro-section" aria-labelledby="lesson-title">
+    <div class="intro-content">
+      <div class="lesson-header">
+        <div class="lesson-meta">
+          <span class="lesson-tag lesson-tag-primary" id="lesson-stage-badge">جاري التحميل...</span>
+          <span class="lesson-tag lesson-tag-secondary" id="lesson-grade-badge">جاري التحميل...</span>
+          <span class="lesson-tag lesson-tag-success" id="lesson-semester-badge">جاري التحميل...</span>
+          <span class="lesson-tag lesson-tag-info" id="lesson-unit-badge" data-ui-initial="hidden"></span>
+        </div>
+        <h1 class="lesson-title" id="lesson-title">جاري تحميل عنوان الدرس...</h1>
+        <p class="lesson-description" id="lesson-description">جاري تحميل وصف الدرس...</p>
+        <div class="lesson-stats" id="lesson-stats">
+          <span class="lesson-stat"><i class="fas fa-clock" aria-hidden="true"></i> <span id="lesson-duration">0</span> دقيقة</span>
+          <span class="lesson-stat"><i class="fas fa-heart" aria-hidden="true"></i> <span id="likes-count">0</span> إعجاب</span>
+        </div>
+      </div>
+
+      <!-- ==== 5. صورة الغلاف ==== -->
+      <div class="lesson-cover-wrapper" id="lesson-cover-wrapper" data-ui-initial="hidden">
+        <img id="lesson-cover-image" src="" alt="غلاف الدرس" class="lesson-cover-image" decoding="async">
+      </div>
+
+      <div class="lesson-instructions">
+        <h2 class="section-title" id="intro-title">تعليمات المشاهدة</h2>
+        <ul class="instructions-list" id="instructions-list">
+          <li class="instruction-item"><i class="fas fa-check-circle instruction-icon" aria-hidden="true"></i> شاهد الفيديو كاملاً للاستفادة القصوى.</li>
+          <li class="instruction-item"><i class="fas fa-check-circle instruction-icon" aria-hidden="true"></i> يمكنك تحميل ملف PDF وطباعته.</li>
+          <li class="instruction-item"><i class="fas fa-check-circle instruction-icon" aria-hidden="true"></i> اضغط على زر الإعجاب إذا أعجبك الدرس.</li>
+          <li class="instruction-item"><i class="fas fa-check-circle instruction-icon" aria-hidden="true"></i> سيتم حفظ تقدمك تلقائياً.</li>
+        </ul>
+      </div>
+
+      <div class="lesson-actions">
+        <button type="button" class="btn btn-primary btn-large lesson-start-btn" data-action="start-lesson">
+          <i class="fas fa-play" aria-hidden="true"></i> بدء المشاهدة
+        </button>
+        <button type="button" class="btn btn-outline like-btn" data-action="toggle-lesson-like" id="lesson-like-btn">
+          <i class="far fa-heart" aria-hidden="true"></i> أعجبني
+        </button>
+        <!-- حاوية زر الامتحان تُملأ بواسطة JS -->
+        <div id="exam-btn-container" class="exam-btn-container"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 6. شاشة الدرس (المحتوى) ==== -->
+  <section class="lesson-screen-section" id="lesson-screen-section" aria-labelledby="lesson-screen-title" data-ui-initial="hidden">
+    <h2 class="screen-title" id="lesson-screen-title">الدرس: <span id="lesson-screen-title-span"></span></h2>
+
+    <!-- ==== 7. شريط التحكم ==== -->
+    <div class="lesson-controls">
+      <div class="lesson-timer" role="timer" aria-label="الوقت المستغرق في المشاهدة">
+        <i class="fas fa-clock timer-icon" aria-hidden="true"></i>
+        <span class="timer-value" aria-live="off" id="timer-value">00:00</span>
+      </div>
+
+      <div class="lesson-progress">
+        <div class="progress-label">
+          <span>تقدمك في الدرس</span>
+          <span class="progress-percentage" id="lesson-progress-percentage">0%</span>
+        </div>
+        <div class="progress-bar-container" role="progressbar" aria-label="تقدمك في الدرس" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-bar-fill" id="lesson-progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="control-buttons">
+        <button type="button" class="btn btn-outline favorite-btn" data-action="toggle-favorite">
+          <i class="far fa-bookmark" aria-hidden="true"></i> <span>حفظ الدرس</span>
+        </button>
+        <button type="button" class="btn btn-success complete-btn" data-action="complete-lesson">
+          <i class="fas fa-check-circle" aria-hidden="true"></i> إنهاء الدرس
+        </button>
+      </div>
+    </div>
+
+    <!-- ==== 8. محتوى الدرس (فيديو + PDF) ==== -->
+    <div class="main-content">
+      <section class="video-section" aria-labelledby="video-title">
+        <h3 id="video-title" class="content-subtitle"><i class="fas fa-video" aria-hidden="true"></i> فيديو الشرح</h3>
+        <div class="video-container" id="video-container">
+          <div class="video-placeholder">
+            <i class="fas fa-play-circle video-icon" aria-hidden="true"></i>
+            <p class="video-text">جاري تحميل الفيديو...</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="pdf-section" aria-labelledby="pdf-title">
+        <h3 id="pdf-title" class="content-subtitle"><i class="fas fa-file-pdf" aria-hidden="true"></i> ملف الدرس PDF</h3>
+        <div class="pdf-container" id="pdf-container">
+          <div class="pdf-placeholder">
+            <i class="fas fa-file-pdf pdf-icon" aria-hidden="true"></i>
+            <p class="pdf-text">جاري تحميل ملف PDF...</p>
+          </div>
+        </div>
+        <div class="pdf-actions">
+          <a class="btn btn-primary" data-action="download-pdf" href="#" target="_blank" rel="noopener noreferrer">
+            <i class="fas fa-download" aria-hidden="true"></i> تحميل الملف
+          </a>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ==== 9. شاشة النتائج ==== -->
+  <section class="lesson-results-section" id="lesson-results-section" aria-labelledby="results-title" data-ui-initial="hidden">
+    <h2 class="section-title" id="results-title">تم إكمال الدرس</h2>
+    <div class="results-summary">
+      <div class="result-icon">
+        <i class="fas fa-trophy" aria-hidden="true"></i>
+      </div>
+      <div class="result-score">
+        <div class="score-circle">
+          <span class="score-value" id="completion-score">100%</span>
+        </div>
+        <div class="score-label">
+          <h3 class="score-title">تهانينا!</h3>
+          <p class="score-description" id="completion-message">لقد أكملت هذا الدرس بنجاح.</p>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button type="button" class="btn btn-primary result-btn" data-action="back-to-lessons">
+          <i class="fas fa-list" aria-hidden="true"></i> العودة للدروس
+        </button>
+      </div>
+
+      <!-- ==== 10. بطاقة امتحان الدرس ==== -->
+      <div class="exam-card-container" id="exam-card-container" data-ui-initial="hidden">
+        <div class="exam-card-info">
+          <div class="exam-card-header">
+            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+            <h4>امتحان الدرس</h4>
+          </div>
+          <div class="exam-card-details">
+            <div class="exam-detail">
+              <i class="fas fa-clock" aria-hidden="true"></i>
+              <span>المدة: <strong id="exam-duration-value">10</strong> دقائق</span>
+            </div>
+            <div class="exam-detail">
+              <i class="fas fa-question-circle" aria-hidden="true"></i>
+              <span>الأسئلة: <strong id="exam-questions-value">10</strong> سؤال</span>
+            </div>
+            <div class="exam-detail">
+              <i class="fas fa-chart-line" aria-hidden="true"></i>
+              <span>درجة النجاح: <strong id="exam-passing-value">50</strong>%</span>
+            </div>
+          </div>
+          <button type="button" class="btn btn-success exam-start-btn" id="start-lesson-exam-btn">
+            <i class="fas fa-play" aria-hidden="true"></i> ابدأ الامتحان الآن
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-details">
+      <div class="performance-analysis">
+        <h3 class="analysis-title"><i class="fas fa-chart-bar" aria-hidden="true"></i> ملخص المشاهدة</h3>
+        <div class="analysis-item">
+          <span class="analysis-label">الوقت المستغرق:</span>
+          <span class="analysis-value" id="time-spent">00:00</span>
+        </div>
+        <div class="analysis-item">
+          <span class="analysis-label">آخر مشاهدة:</span>
+          <span class="analysis-value" id="last-watched">-</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 11. قسم التوصيات ==== -->
+  <section class="recommendations-section" aria-labelledby="recommendations-title">
+    <h3 id="recommendations-title" class="content-subtitle"><i class="fas fa-lightbulb" aria-hidden="true"></i> قد يهمك أيضاً</h3>
+    <div class="recommendations-container" id="recommendations-container"></div>
+  </section>
+</div>

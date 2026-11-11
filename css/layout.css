@@ -1,0 +1,235 @@
+/* تخطيطات المنصة والتذييل - v5.0.0 */
+
+/* ==== 1. التذييل ==== */
+.main-footer {
+  background-color: var(--surface-light);
+  border-top: 1px solid var(--border-color-light);
+  padding: var(--space-6) 0 var(--space-4);
+  margin-top: auto;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-5);
+}
+
+.footer-logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.footer-logo-img {
+  width: 48px;
+  height: 48px;
+}
+
+.footer-logo-text {
+  font-size: var(--font-size-2xl);
+  font-weight: 800;
+  background: linear-gradient(to right, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.footer-description {
+  color: var(--text-secondary-light);
+  margin-bottom: var(--space-4);
+  line-height: 1.6;
+}
+
+.social-links {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.social-link {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius-full);
+  background-color: var(--background-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: var(--font-size-lg);
+  transition: all var(--transition-fast);
+}
+
+.social-link:hover {
+  background-color: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.footer-links-section,
+.footer-contact-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.footer-column-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary-light);
+  margin-bottom: var(--space-2);
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.footer-link {
+  display: block;
+  color: var(--text-secondary-light);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+  text-align: right;
+}
+
+.footer-link:hover {
+  color: var(--primary);
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary-light);
+}
+
+.contact-icon {
+  color: var(--primary);
+  font-size: var(--font-size-lg);
+}
+
+.contact-text {
+  font-weight: 500;
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-color-light);
+  margin-top: var(--space-4);
+  color: var(--text-secondary-light);
+  font-size: var(--font-size-sm);
+}
+
+.copyright,
+.footer-credits {
+  display: block;
+}
+
+/* ==== 2. تعديلات الموبايل ==== */
+@media (max-width: 767.98px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .footer-bottom {
+    text-align: center;
+  }
+  
+  .copyright,
+  .footer-credits {
+    display: inline-block;
+  }
+  
+  .main-footer {
+    padding: var(--space-4) 0;
+  }
+  
+  .footer-logo-text {
+    font-size: var(--font-size-xl);
+  }
+  
+  .footer-logo-img {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* ==== 3. حاوية التطبيق الرئيسية ==== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#main-content,
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-top: 0;
+  padding-bottom: var(--bottom-nav-height);
+}
+
+/* ==== 4. حاوية المحتوى الديناميكي ==== */
+#app-router-view,
+.router-view {
+  flex: 1;
+  padding: var(--space-4) var(--space-2);
+  max-width: var(--container-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ==== 5. الوضع الليلي للتذييل ==== */
+[data-theme="dark"] .main-footer {
+  background-color: var(--surface-dark);
+  border-top-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .footer-column-title {
+  color: var(--text-primary-dark);
+}
+
+[data-theme="dark"] .footer-description,
+[data-theme="dark"] .footer-link,
+[data-theme="dark"] .contact-item,
+[data-theme="dark"] .footer-bottom {
+  color: var(--text-secondary-dark);
+}
+
+[data-theme="dark"] .social-link {
+  background-color: var(--background-dark);
+  border-color: var(--border-color-dark);
+}
+
+[data-theme="dark"] .social-link:hover {
+  background-color: var(--primary);
+}
+
+[data-theme="dark"] .footer-bottom {
+  border-top-color: var(--border-color-dark);
+}

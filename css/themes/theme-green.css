@@ -1,0 +1,88 @@
+/* ====== 🌿 الثيم الأخضر (Green Nature) - الإصدار 5.0.0 ====== */
+/* ====== يحتوي على جميع المتغيرات اللونية للوضعين النهاري والليلي ====== */
+
+:root,
+[data-theme="light"] {
+  --primary: #4caf50;
+  --primary-dark: #388e3c;
+  --primary-light: #81c784;
+  --primary-rgb: 76, 175, 80;
+  
+  --secondary: #2e7d32;
+  --secondary-light: #66bb6a;
+  --secondary-rgb: 46, 125, 50;
+  
+  --accent: #00e676;
+  --accent-dark: #00c853;
+  --accent-rgb: 0, 230, 118;
+  
+  --background-light: #f1f8e9;
+  --surface-light: #ffffff;
+  --surface-hover-light: rgba(76, 175, 80, 0.08);
+  
+  --text-primary-light: #1b3b1b;
+  --text-secondary-light: #4a674a;
+  --text-tertiary-light: #5b775b;
+  
+  --border-color-light: rgba(76, 175, 80, 0.2);
+  --border-color-dark: rgba(76, 175, 80, 0.3);
+  
+  --hover-light: rgba(76, 175, 80, 0.1);
+  --active-light: rgba(76, 175, 80, 0.2);
+  
+  --shadow-sm: 0 2px 8px rgba(76, 175, 80, 0.1);
+  --shadow-md: 0 4px 16px rgba(76, 175, 80, 0.15);
+  --shadow-lg: 0 8px 24px rgba(76, 175, 80, 0.2);
+  --shadow-xl: 0 12px 32px rgba(76, 175, 80, 0.25);
+  
+  --xp-start: #FFD700;
+  --xp-end: #FFA000;
+  --level-badge-bg: var(--primary);
+  --level-badge-text: #ffffff;
+  --challenge-bg: rgba(76, 175, 80, 0.1);
+  --challenge-border: rgba(76, 175, 80, 0.3);
+
+  --on-primary: #14100a;
+}
+
+[data-theme="dark"] {
+  --primary: #81c784;
+  --primary-dark: #4caf50;
+  --primary-light: #a5d6a7;
+  --primary-rgb: 129, 199, 132;
+  
+  --secondary: #66bb6a;
+  --secondary-light: #81c784;
+  --secondary-rgb: 102, 187, 106;
+  
+  --accent: #69f0ae;
+  --accent-dark: #00e676;
+  --accent-rgb: 105, 240, 174;
+  
+  --background-light: #0a1a0a;
+  --surface-light: #1a2e1a;
+  --surface-hover-light: rgba(76, 175, 80, 0.12);
+  
+  --text-primary-light: #e8f5e9;
+  --text-secondary-light: #a5d6a7;
+  --text-tertiary-light: #7cb342;
+  
+  --border-color-light: rgba(76, 175, 80, 0.3);
+  --border-color-dark: rgba(255, 255, 255, 0.1);
+  
+  --hover-light: rgba(129, 199, 132, 0.15);
+  --active-light: rgba(129, 199, 132, 0.25);
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.8);
+  
+  --xp-start: #FFD700;
+  --xp-end: #FF8F00;
+  --challenge-bg: rgba(129, 199, 132, 0.15);
+  --challenge-border: rgba(129, 199, 132, 0.4);
+
+  --on-primary: #14100a;
+  --level-badge-text: var(--on-primary);
+}

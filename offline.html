@@ -1,0 +1,89 @@
+<!-- صفحة عدم الاتصال - v5.0.0 -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+
+  <!-- ==== 1. البيانات الأساسية ==== -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2196f3" id="theme-color-meta" />
+  <meta name="robots" content="noindex" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://www.gstatic.com; object-src 'none'; base-uri 'self';">
+
+  <title>غير متصل | بيولوجست</title>
+
+  <!-- ==== 2. الأيقونات ==== -->
+  <link rel="icon" href="/assets/images/biologist.png" type="image/png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/assets/images/biologist.png" sizes="180x180" />
+
+  <!-- ==== 3. الخط ==== -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- ==== 4. الأنماط الأساسية ==== -->
+  <link rel="stylesheet" href="/css/variables.css" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/animations.css" />
+  <link rel="stylesheet" href="/css/layout/preloader.css" />
+
+  <!-- ==== 5. الثيمات الخمسة ==== -->
+  <link rel="stylesheet" href="/css/themes/theme-blue.css" />
+  <link rel="stylesheet" href="/css/themes/theme-pink.css" disabled />
+  <link rel="stylesheet" href="/css/themes/theme-green.css" disabled />
+  <link rel="stylesheet" href="/css/themes/theme-purple.css" disabled />
+  <link rel="stylesheet" href="/css/themes/theme-orange.css" disabled />
+
+  <!-- ==== 6. منطق الصفحة ==== -->
+  <script src="/js/ui/offline.js" defer></script>
+</head>
+<body data-theme="light">
+  <main class="preloader preloader-visible" id="offline-screen" data-preloader-state="offline" aria-labelledby="offline-title">
+
+    <!-- ==== 7. الأرضية الجمالية ==== -->
+    <div class="pl-ambient" aria-hidden="true">
+      <span class="pl-grid"></span>
+      <span class="pl-orb pl-orb--a"></span>
+      <span class="pl-orb pl-orb--b"></span>
+    </div>
+
+    <!-- ==== 8. بطاقة الحالة ==== -->
+    <section class="error-initialization offline-state">
+      <div class="pl-brand">
+        <div class="pl-logo" data-state="full" role="img" aria-label="شعار بيولوجست">
+          <span class="pl-logo-icon">
+            <span class="pl-mask pl-icon-teal"></span>
+            <span class="pl-mask pl-icon-dark"></span>
+          </span>
+          <span class="pl-logo-word" aria-hidden="true">
+            <span class="pl-mask pl-word-teal"></span>
+            <span class="pl-mask pl-word-dark"></span>
+          </span>
+        </div>
+      </div>
+
+      <div class="error-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8A15 15 0 0 0 10 5.1M5 12.9a10 10 0 0 1 5.2-2.7M19 12.9a10 10 0 0 0-4.4-2.6M8.5 16.4a5 5 0 0 1 7 0M12 20h.01M2 2l20 20" />
+        </svg>
+      </div>
+
+      <h2 id="offline-title">أنت غير متصل بالإنترنت</h2>
+      <p class="offline-subtitle">منصة بيولوجست التعليمية</p>
+
+      <p class="offline-note" id="offline-message" role="status" aria-live="polite">
+        يبدو أن اتصالك انقطع. تحقق من الواي فاي أو بيانات الجوال ثم حاول مرة أخرى. المحتوى الذي زرته من قبل متاح دون اتصال.
+      </p>
+
+      <span class="offline-status" id="offline-status" data-online="false">غير متصل</span>
+
+      <div class="error-actions">
+        <button type="button" class="retry-btn" id="offline-retry">إعادة المحاولة</button>
+        <a class="support-btn" href="/">تصفّح المحتوى المحفوظ</a>
+      </div>
+    </section>
+
+    <noscript>
+      <p class="offline-note">فعّل JavaScript ثم أعد تحميل الصفحة عند عودة الاتصال.</p>
+    </noscript>
+  </main>
+</body>
+</html>

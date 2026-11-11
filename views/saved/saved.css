@@ -1,0 +1,897 @@
+/*
+ * 🔖 saved.css - نظام صفحة الدروس المحفوظة v5.0.0
+ * ============================================================================
+ * 📝 المسؤولية: تنسيق صفحة الدروس المحفوظة (views/saved) فقط
+ * ✅ التكامل مع: variables.css · main.css · animations.css · themes/*.css
+ * 🎯 المبادئ: RTL-First · كلاسات بادئتها saved- لمنع التسرب · الوضع الليلي عبر المتغيرات
+ *    · حركات الـ hover داخل (hover: hover) فقط · احترام تقليل الحركة
+ * ⚠️ ملاحظة: متغيرات --transition-* في variables.css اختصارات كاملة (all 0.2s ...)
+ *    فلا تُستخدم بعد اسم خاصية؛ نستخدم --duration-* مع --transition-ease
+ * ============================================================================
+ */
+
+@keyframes savedRise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes savedFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* اتجاه اللمعة من اليمين لليسار (RTL) */
+@keyframes savedShimmer {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(-100%); }
+}
+
+/* ==========================================================================
+ * 1. المتغيرات المحلية
+ * ========================================================================== */
+.saved-page {
+  --saved-border: rgba(var(--primary-rgb), 0.16);
+  --saved-brand-gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+  --saved-glow: rgba(var(--primary-rgb), 0.35);
+  --saved-hover-shadow: 0 16px 36px -14px rgba(var(--primary-rgb), 0.45), 0 0 0 1px rgba(var(--primary-rgb), 0.28);
+  --saved-card-radius: var(--border-radius-xl);
+  --saved-card-min-width: 260px;
+  --saved-cover-ratio: 5 / 3;
+  --saved-clear-size: 32px;
+  --saved-tap-size: 44px;
+}
+
+[data-theme="dark"] .saved-page {
+  --saved-border: rgba(var(--accent-rgb), 0.16);
+  --saved-glow: rgba(var(--accent-rgb), 0.3);
+  --saved-hover-shadow: 0 16px 36px -14px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(var(--accent-rgb), 0.3);
+}
+
+/* أجهزة اللمس: أهداف ضغط أكبر */
+@media (pointer: coarse) {
+  .saved-page {
+    --saved-clear-size: 40px;
+  }
+}
+
+/* ==========================================================================
+ * 2. حاوية الصفحة (حركة الدخول يتولاها الـ router عبر animations.css)
+ * ========================================================================== */
+.saved-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  width: 100%;
+  max-width: var(--container-width);
+  margin-inline: auto;
+  padding-block: var(--space-4) var(--space-6); /* المسافة السفلية للشريط والفوتر يتولاها تخطيط المنصة */
+  padding-inline: max(var(--space-4), env(safe-area-inset-right, 0px)) max(var(--space-4), env(safe-area-inset-left, 0px));
+}
+
+.saved-page [hidden] {
+  display: none;
+}
+
+/* ==========================================================================
+ * 3. مسار التنقل
+ * ========================================================================== */
+.saved-breadcrumb-list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-sm);
+}
+
+.saved-breadcrumb-item {
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary-light);
+}
+
+.saved-breadcrumb-item:not(:last-child)::after {
+  content: '/';
+  margin-inline: var(--space-2);
+  color: var(--text-tertiary-light);
+  font-size: var(--font-size-xs);
+}
+
+.saved-breadcrumb-item.active {
+  color: var(--text-primary-light);
+  font-weight: 600;
+}
+
+.saved-breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.saved-breadcrumb-link:hover {
+  color: var(--primary-dark);
+  text-decoration: none;
+}
+
+/* ==========================================================================
+ * 4. الهيدر والبحث
+ * ========================================================================== */
+.saved-header {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: var(--space-6);
+  border: var(--border-width) solid var(--saved-border);
+  border-radius: var(--border-radius-xl);
+  background:
+    radial-gradient(60% 140% at 100% 0%, rgba(var(--primary-rgb), 0.14), transparent 60%),
+    radial-gradient(50% 120% at 0% 100%, rgba(var(--accent-rgb), 0.12), transparent 60%),
+    var(--surface-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.saved-header-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.saved-header-title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.saved-page-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--text-primary-light);
+}
+
+.saved-title-icon {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-base);
+  background: var(--saved-brand-gradient);
+  color: var(--on-primary);
+  font-size: var(--font-size-xl);
+  box-shadow: 0 8px 20px var(--saved-glow);
+}
+
+.saved-page-subtitle {
+  margin: 0;
+  color: var(--text-secondary-light);
+  font-size: var(--font-size-base);
+}
+
+.saved-search-wrapper {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 240px;
+  max-width: 380px;
+  border-radius: var(--border-radius-full);
+  transition: box-shadow var(--duration-base) var(--ease-out);
+}
+
+.saved-search-wrapper:focus-within {
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.22), 0 10px 26px -8px var(--saved-glow);
+}
+
+.saved-search-icon {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  top: 50%;
+  z-index: 1;
+  transform: translateY(-50%);
+  color: var(--text-tertiary-light);
+  font-size: var(--font-size-sm);
+  pointer-events: none;
+  transition: color var(--duration-fast) var(--transition-ease);
+}
+
+.saved-search-wrapper:focus-within .saved-search-icon {
+  color: var(--primary);
+}
+
+.saved-search-input {
+  width: 100%;
+  height: var(--saved-tap-size);
+  padding-block: var(--space-2);
+  padding-inline-start: calc(var(--space-4) + 24px);
+  padding-inline-end: calc(var(--space-2) + var(--saved-clear-size) + var(--space-1));
+  border: 1.5px solid var(--border-color-light);
+  border-radius: var(--border-radius-full);
+  background-color: var(--surface-light);
+  color: var(--text-primary-light);
+  font-family: var(--font-family-arabic);
+  font-size: 1rem; /* 16px على اللمس يمنع تكبير الصفحة تلقائياً في iOS */
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color var(--duration-fast) var(--transition-ease);
+}
+
+.saved-search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.saved-search-input::placeholder {
+  color: var(--text-tertiary-light);
+}
+
+.saved-search-input::-webkit-search-cancel-button,
+.saved-search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  display: none;
+}
+
+.saved-clear-search {
+  position: absolute;
+  inset-inline-end: var(--space-2);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--saved-clear-size);
+  height: var(--saved-clear-size);
+  min-width: var(--saved-clear-size);
+  min-height: var(--saved-clear-size);
+  padding: 0;
+  border-radius: 50%;
+  color: var(--text-tertiary-light);
+  transition: background-color var(--duration-fast) var(--transition-ease), color var(--duration-fast) var(--transition-ease);
+}
+
+.saved-clear-search:active {
+  background-color: rgba(var(--error-rgb), 0.12);
+  color: var(--error);
+}
+
+/* ==========================================================================
+ * 5. شريط الترتيب والعدّاد
+ * ========================================================================== */
+.saved-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.saved-sort {
+  display: flex;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-block: var(--space-1); /* مساحة لظل الشريحة النشطة داخل منطقة التمرير */
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.saved-sort::-webkit-scrollbar {
+  display: none;
+}
+
+.saved-sort-chip {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px solid rgba(var(--primary-rgb), 0.25);
+  border-radius: var(--border-radius-full);
+  background-color: var(--surface-light);
+  color: var(--text-secondary-light);
+  font-family: var(--font-family-arabic);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-base) var(--ease-spring), background-color 0.25s, border-color 0.25s, color 0.25s, box-shadow var(--duration-base) var(--ease-out);
+}
+
+.saved-sort-chip:active {
+  transform: scale(0.96);
+}
+
+.saved-sort-chip.active {
+  border-color: transparent;
+  background: var(--saved-brand-gradient);
+  color: var(--on-primary);
+  font-weight: 700;
+  box-shadow: 0 10px 24px -8px var(--saved-glow), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.saved-count {
+  flex-shrink: 0;
+  padding: 4px var(--space-3);
+  border-radius: var(--border-radius-full);
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+ * 6. الشبكة
+ * ========================================================================== */
+.saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--saved-card-min-width)), 1fr));
+  gap: var(--space-5);
+  align-items: stretch;
+}
+
+/* حركة الظهور في أول عرض فقط (لا تتكرر مع البحث والترتيب) */
+.saved-grid.is-entering .saved-card {
+  animation: savedRise 0.5s var(--ease-out) backwards;
+  animation-delay: calc(var(--saved-i, 0) * 45ms);
+}
+
+/* ==========================================================================
+ * 7. بطاقة الدرس المحفوظ
+ * ========================================================================== */
+.saved-card {
+  --saved-stripe: transparent;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: var(--border-width) solid var(--saved-border);
+  border-radius: var(--saved-card-radius);
+  background-color: var(--surface-light);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  contain: layout paint;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out),
+              border-color 0.25s, opacity var(--duration-base) ease, scale var(--duration-base) ease;
+}
+
+.saved-card::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 4;
+  width: 4px;
+  background: var(--saved-stripe);
+  pointer-events: none;
+}
+
+.saved-card.completed {
+  --saved-stripe: var(--success);
+  border-color: rgba(var(--success-rgb), 0.35);
+}
+
+.saved-card.in-progress {
+  --saved-stripe: var(--warning);
+}
+
+.saved-card:active {
+  transform: scale(0.985);
+}
+
+.saved-card.is-removing {
+  opacity: 0;
+  scale: 0.92;
+  pointer-events: none;
+}
+
+.saved-card-cover {
+  position: relative;
+  flex-shrink: 0;
+  aspect-ratio: var(--saved-cover-ratio);
+  overflow: hidden;
+  background: var(--saved-brand-gradient);
+}
+
+.saved-card-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--transition-ease);
+}
+
+.saved-cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--saved-brand-gradient);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 3rem;
+}
+
+.saved-duration {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-full);
+  background-color: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.saved-status {
+  position: absolute;
+  inset-block-end: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--border-radius-full);
+  color: #fff;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.saved-status-completed {
+  background-color: var(--success);
+}
+
+.saved-status-inprogress {
+  background-color: var(--warning);
+  color: #212121;
+}
+
+.saved-unsave-btn {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-end: var(--space-2);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--saved-tap-size);
+  height: var(--saved-tap-size);
+  min-width: var(--saved-tap-size);
+  min-height: var(--saved-tap-size);
+  padding: 0;
+  border-radius: 50%;
+  background: var(--saved-brand-gradient);
+  color: var(--on-primary);
+  font-size: var(--font-size-base);
+  box-shadow: 0 8px 18px -6px var(--saved-glow);
+  transition: transform var(--duration-base) var(--ease-spring), box-shadow var(--duration-base) var(--ease-out);
+}
+
+.saved-unsave-btn:active {
+  transform: scale(0.9);
+}
+
+.saved-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+}
+
+.saved-card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-primary-light);
+  overflow-wrap: anywhere;
+  transition: color var(--duration-fast) var(--transition-ease);
+}
+
+.saved-card-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: calc(var(--space-2) * -1) 0 0;
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  color: var(--text-secondary-light);
+  overflow-wrap: anywhere;
+}
+
+.saved-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: auto;
+}
+
+.saved-tag {
+  padding: 2px var(--space-3);
+  border-radius: var(--border-radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.saved-tag-primary {
+  background: rgba(var(--primary-rgb), 0.12);
+  color: var(--primary);
+}
+
+.saved-tag-secondary {
+  background: rgba(var(--secondary-rgb), 0.14);
+  color: var(--text-secondary-light);
+}
+
+.saved-tag-success {
+  background: rgba(var(--success-rgb), 0.14);
+  color: var(--success);
+}
+
+.saved-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.saved-progress-track {
+  flex: 1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--border-radius-full);
+  background: var(--border-color-light);
+}
+
+/* العرض يُمرَّر من saved.js عبر المتغير --saved-progress (بدون style مضمّن في HTML) */
+.saved-progress-fill {
+  width: calc(var(--saved-progress, 0) * 1%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--saved-brand-gradient);
+}
+
+.saved-progress-text {
+  min-width: 2.6em;
+  color: var(--primary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.saved-card-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--border-color-light);
+  background-color: rgba(var(--primary-rgb), 0.03);
+}
+
+.saved-start-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--saved-tap-size);
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-radius: var(--border-radius-md);
+  background: var(--saved-brand-gradient);
+  color: var(--on-primary);
+  font-family: var(--font-family-arabic);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  transition: transform var(--duration-base) var(--ease-spring), box-shadow var(--duration-base) var(--ease-out);
+}
+
+.saved-start-btn:active {
+  transform: translateY(1px);
+}
+
+/* ==========================================================================
+ * 8. حالات: لا محفوظات · لا نتائج · زائر · خطأ
+ * ========================================================================== */
+.saved-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-10) var(--space-5);
+  border: 1.5px dashed rgba(var(--primary-rgb), 0.3);
+  border-radius: var(--border-radius-xl);
+  background-color: rgba(var(--primary-rgb), 0.03);
+  text-align: center;
+  animation: savedFade 0.4s var(--transition-ease) backwards;
+}
+
+.saved-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary);
+  font-size: 2rem;
+}
+
+.saved-empty-title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary-light);
+}
+
+.saved-empty-text {
+  max-width: 38ch;
+  margin: 0;
+  color: var(--text-secondary-light);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+/* زر الحالة الفارغة مستقل (لا يعتمد على .btn من components.css) */
+.saved-empty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--saved-tap-size);
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-6);
+  border: none;
+  border-radius: var(--border-radius-full);
+  background: var(--saved-brand-gradient);
+  color: var(--on-primary);
+  font-family: var(--font-family-arabic);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  box-shadow: 0 10px 24px -8px var(--saved-glow);
+  transition: transform var(--duration-base) var(--ease-spring), box-shadow var(--duration-base) var(--ease-out);
+}
+
+.saved-empty-btn:active {
+  transform: scale(0.97);
+}
+
+/* ==========================================================================
+ * 9. التحميل الهيكلي (Skeleton)
+ * ========================================================================== */
+.saved-skeleton {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: var(--border-width) solid var(--saved-border);
+  border-radius: var(--saved-card-radius);
+  background-color: var(--surface-light);
+}
+
+.saved-skeleton-cover {
+  aspect-ratio: var(--saved-cover-ratio);
+}
+
+.saved-skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.saved-skeleton-block {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius-md);
+  background: var(--border-color-light);
+}
+
+.saved-skeleton-block::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  animation: savedShimmer 1.4s linear infinite;
+}
+
+[data-theme="dark"] .saved-skeleton-block::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+}
+
+.saved-skeleton-line {
+  height: 16px;
+}
+
+.saved-skeleton-line.short {
+  width: 60%;
+}
+
+.saved-skeleton-btn {
+  height: var(--saved-tap-size);
+  margin-top: var(--space-2);
+}
+
+/* ==========================================================================
+ * 10. التجاوب
+ * ========================================================================== */
+
+/* ---- هاتف ---- */
+@media (max-width: 767px) {
+  .saved-page {
+    gap: var(--space-4);
+  }
+
+  .saved-header {
+    padding: var(--space-4);
+  }
+
+  .saved-header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .saved-page-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .saved-title-icon {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-lg);
+  }
+
+  .saved-search-wrapper {
+    flex: none;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+
+  .saved-grid {
+    gap: var(--space-4);
+  }
+
+  .saved-card-cover,
+  .saved-skeleton-cover {
+    --saved-cover-ratio: 16 / 9;
+  }
+}
+
+/* ---- هاتف صغير: العدّاد فوق شرائح الترتيب ---- */
+@media (max-width: 479px) {
+  .saved-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .saved-count {
+    align-self: flex-start;
+    order: -1;
+  }
+
+  .saved-empty {
+    padding-block: var(--space-8);
+  }
+}
+
+/* ---- تابلت وحاسوب ---- */
+@media (min-width: 768px) {
+  .saved-page {
+    padding-inline: max(var(--space-5), env(safe-area-inset-right, 0px)) max(var(--space-5), env(safe-area-inset-left, 0px));
+  }
+}
+
+@media (min-width: 1200px) {
+  .saved-grid {
+    gap: var(--space-6);
+  }
+}
+
+/* ==========================================================================
+ * 11. التفاعلات (أجهزة المؤشر فقط)
+ * ========================================================================== */
+@media (hover: hover) and (pointer: fine) {
+  .saved-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(var(--primary-rgb), 0.35);
+    box-shadow: var(--saved-hover-shadow);
+  }
+
+  .saved-card.completed:hover {
+    border-color: rgba(var(--success-rgb), 0.5);
+    box-shadow: 0 16px 36px -14px rgba(var(--success-rgb), 0.4), 0 0 0 1px rgba(var(--success-rgb), 0.45);
+  }
+
+  .saved-card:hover .saved-card-cover img {
+    transform: scale(1.06);
+  }
+
+  .saved-card:hover .saved-card-title {
+    color: var(--primary);
+  }
+
+  .saved-start-btn:hover,
+  .saved-empty-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px -6px var(--saved-glow);
+  }
+
+  .saved-unsave-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 12px 24px -6px var(--saved-glow);
+  }
+
+  .saved-sort-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .saved-sort-chip.active:hover {
+    color: var(--on-primary);
+  }
+
+  .saved-clear-search:hover {
+    background-color: rgba(var(--error-rgb), 0.1);
+    color: var(--error);
+  }
+}
+
+/* ==========================================================================
+ * 12. إمكانية الوصول
+ * ========================================================================== */
+.saved-card:focus-visible,
+.saved-sort-chip:focus-visible,
+.saved-unsave-btn:focus-visible,
+.saved-start-btn:focus-visible,
+.saved-empty-btn:focus-visible,
+.saved-clear-search:focus-visible,
+.saved-breadcrumb-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .saved-grid.is-entering .saved-card,
+  .saved-empty {
+    animation: none;
+  }
+
+  .saved-card:hover,
+  .saved-card:hover .saved-card-cover img {
+    transform: none;
+  }
+
+  .saved-skeleton-block::after {
+    display: none;
+  }
+}

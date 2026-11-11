@@ -1,0 +1,405 @@
+<!-- صفحة إنشاء حساب جديد - v5.0.0 -->
+
+<div class="auth-page" data-page="register">
+  <h1 class="visually-hidden">إنشاء حساب جديد - منصة بيولوجست التعليمية</h1>
+
+  <div class="auth-container">
+
+    <!-- ==== 1. بطاقة النموذج ==== -->
+
+    <div class="auth-card register-card">
+
+      <!-- ==== 2. رأس البطاقة ==== -->
+
+      <div class="auth-header">
+        <div class="logo-section">
+          <img src="/assets/images/biologist.png"
+               alt="شعار منصة بيولوجست"
+               class="auth-logo"
+               loading="eager"
+               width="80"
+               height="80">
+          <h2 class="auth-title">أنشئ حسابك الجديد 🌿</h2>
+        </div>
+        <p class="auth-subtitle">سجّل بياناتك للانضمام إلى مجتمع بيولوجست التعليمي</p>
+      </div>
+
+      <!-- ==== 3. محتوى النموذج ==== -->
+
+      <div class="auth-content">
+        <form id="register-form" novalidate>
+
+          <!-- ==== 4. الاسم الأول واسم العائلة ==== -->
+
+          <div class="form-row">
+            <div class="form-group" id="group-register-first-name">
+              <label for="register-first-name" class="form-label">
+                <i class="fas fa-user input-icon" aria-hidden="true"></i>
+                الاسم الأول
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="register-first-name"
+                  name="first_name"
+                  class="form-control"
+                  placeholder="اسمك"
+                  autocomplete="given-name"
+                  required
+                  aria-required="true"
+                  aria-describedby="error-first-name">
+                <div class="input-validation-icon" aria-hidden="true">
+                  <i class="fas fa-check-circle success-icon"></i>
+                  <i class="fas fa-exclamation-circle error-icon"></i>
+                </div>
+              </div>
+              <div class="form-error" id="error-first-name" data-error="first-name" role="alert" aria-live="polite"></div>
+            </div>
+
+            <div class="form-group" id="group-register-last-name">
+              <label for="register-last-name" class="form-label">
+                <i class="fas fa-user input-icon" aria-hidden="true"></i>
+                اسم العائلة
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="register-last-name"
+                  name="last_name"
+                  class="form-control"
+                  placeholder="اسم الاب او العيلة"
+                  autocomplete="family-name"
+                  required
+                  aria-required="true"
+                  aria-describedby="error-last-name">
+                <div class="input-validation-icon" aria-hidden="true">
+                  <i class="fas fa-check-circle success-icon"></i>
+                  <i class="fas fa-exclamation-circle error-icon"></i>
+                </div>
+              </div>
+              <div class="form-error" id="error-last-name" data-error="last-name" role="alert" aria-live="polite"></div>
+            </div>
+          </div>
+
+          <!-- ==== 5. الجنس والعمر ==== -->
+
+          <div class="form-row">
+            <div class="form-group" id="group-register-gender">
+              <label for="register-gender" class="form-label">
+                <i class="fas fa-venus-mars input-icon" aria-hidden="true"></i>
+                الجنس
+              </label>
+              <div class="input-wrapper input-wrapper--select">
+                <select
+                  id="register-gender"
+                  name="gender"
+                  class="form-control"
+                  required
+                  aria-required="true"
+                  aria-describedby="error-gender">
+                  <option value="">اختر الجنس</option>
+                  <option value="male">ذكر</option>
+                  <option value="female">أنثى</option>
+                </select>
+                <div class="input-validation-icon" aria-hidden="true">
+                  <i class="fas fa-check-circle success-icon"></i>
+                  <i class="fas fa-exclamation-circle error-icon"></i>
+                </div>
+              </div>
+              <div class="form-error" id="error-gender" data-error="gender" role="alert" aria-live="polite"></div>
+            </div>
+
+            <div class="form-group" id="group-register-age">
+              <label for="register-age" class="form-label">
+                <i class="fas fa-birthday-cake input-icon" aria-hidden="true"></i>
+                العمر
+              </label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="register-age"
+                  name="age"
+                  class="form-control"
+                  placeholder="سنك"
+                  inputmode="numeric"
+                  min="10"
+                  max="80"
+                  required
+                  aria-required="true"
+                  aria-describedby="error-age">
+                <div class="input-validation-icon" aria-hidden="true">
+                  <i class="fas fa-check-circle success-icon"></i>
+                  <i class="fas fa-exclamation-circle error-icon"></i>
+                </div>
+              </div>
+              <div class="form-error" id="error-age" data-error="age" role="alert" aria-live="polite"></div>
+            </div>
+          </div>
+
+          <!-- ==== 6. رقم الهاتف ==== -->
+
+          <div class="form-group" id="group-register-phone">
+            <label for="register-phone" class="form-label">
+              <i class="fas fa-mobile-alt input-icon" aria-hidden="true"></i>
+              رقم الهاتف
+            </label>
+            <div class="input-wrapper">
+              <input
+                type="tel"
+                id="register-phone"
+                name="phone"
+                class="form-control"
+                placeholder="01xxxxxxxxx"
+                inputmode="numeric"
+                pattern="[0-9]{11}"
+                maxlength="11"
+                autocomplete="tel"
+                required
+                aria-required="true"
+                aria-describedby="hint-phone error-phone">
+              <div class="input-validation-icon" aria-hidden="true">
+                <i class="fas fa-check-circle success-icon"></i>
+                <i class="fas fa-exclamation-circle error-icon"></i>
+              </div>
+            </div>
+            <div class="form-hint" id="hint-phone">سيُستخدم رقم هاتفك لتسجيل الدخول لاحقاً</div>
+            <div class="form-error" id="error-phone" data-error="phone" role="alert" aria-live="polite"></div>
+          </div>
+
+          <!-- ==== 7. كلمة المرور ==== -->
+
+          <div class="form-group" id="group-register-password">
+            <label for="register-password" class="form-label">
+              <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+              كلمة المرور
+            </label>
+            <div class="input-with-icon">
+              <input
+                type="password"
+                id="register-password"
+                name="password"
+                class="form-control"
+                placeholder="••••••"
+                inputmode="numeric"
+                minlength="6"
+                maxlength="10"
+                pattern="\d{6,10}"
+                autocomplete="new-password"
+                required
+                aria-required="true"
+                aria-describedby="hint-password error-password">
+              <button
+                type="button"
+                class="toggle-password"
+                aria-label="إظهار كلمة المرور"
+                aria-pressed="false">
+                <i class="fas fa-eye icon-eye" aria-hidden="true"></i>
+                <i class="fas fa-eye-slash icon-eye-off" aria-hidden="true"></i>
+              </button>
+              <div class="input-validation-icon" aria-hidden="true">
+                <i class="fas fa-check-circle success-icon"></i>
+                <i class="fas fa-exclamation-circle error-icon"></i>
+              </div>
+            </div>
+            <div class="form-hint" id="hint-password">كلمة المرور يجب أن تكون 6-10 أرقام فقط</div>
+            <div class="form-error" id="error-password" data-error="password" role="alert" aria-live="polite"></div>
+          </div>
+
+          <!-- ==== 8. تأكيد كلمة المرور ==== -->
+
+          <div class="form-group" id="group-register-confirm-password">
+            <label for="register-confirm-password" class="form-label">
+              <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+              تأكيد كلمة المرور
+            </label>
+            <div class="input-with-icon">
+              <input
+                type="password"
+                id="register-confirm-password"
+                name="confirm_password"
+                class="form-control"
+                placeholder="••••••"
+                inputmode="numeric"
+                minlength="6"
+                maxlength="10"
+                pattern="\d{6,10}"
+                autocomplete="new-password"
+                required
+                aria-required="true"
+                aria-describedby="error-confirm-password">
+              <button
+                type="button"
+                class="toggle-password"
+                aria-label="إظهار تأكيد كلمة المرور"
+                aria-pressed="false">
+                <i class="fas fa-eye icon-eye" aria-hidden="true"></i>
+                <i class="fas fa-eye-slash icon-eye-off" aria-hidden="true"></i>
+              </button>
+              <div class="input-validation-icon" aria-hidden="true">
+                <i class="fas fa-check-circle success-icon"></i>
+                <i class="fas fa-exclamation-circle error-icon"></i>
+              </div>
+            </div>
+            <div class="form-error" id="error-confirm-password" data-error="confirm-password" role="alert" aria-live="polite"></div>
+          </div>
+
+          <!-- ==== 9. المرحلة والصف ==== -->
+
+          <div class="form-row">
+            <div class="form-group" id="group-register-stage">
+              <label for="register-stage" class="form-label">
+                <i class="fas fa-school input-icon" aria-hidden="true"></i>
+                المرحلة الدراسية
+              </label>
+              <div class="input-wrapper input-wrapper--select">
+                <select
+                  id="register-stage"
+                  name="stage"
+                  class="form-control"
+                  required
+                  aria-required="true"
+                  aria-describedby="error-stage">
+                  <option value="">اختر المرحلة</option>
+                  <option value="preparatory">الإعدادية</option>
+                  <option value="secondary">الثانوية</option>
+                </select>
+                <div class="input-validation-icon" aria-hidden="true">
+                  <i class="fas fa-check-circle success-icon"></i>
+                  <i class="fas fa-exclamation-circle error-icon"></i>
+                </div>
+              </div>
+              <div class="form-error" id="error-stage" data-error="stage" role="alert" aria-live="polite"></div>
+            </div>
+
+            <div class="form-group" id="group-register-grade">
+              <label for="register-grade" class="form-label">
+                <i class="fas fa-graduation-cap input-icon" aria-hidden="true"></i>
+                الصف الدراسي
+              </label>
+              <div class="input-wrapper input-wrapper--select">
+                <select
+                  id="register-grade"
+                  name="grade"
+                  class="form-control"
+                  required
+                  disabled
+                  aria-required="true"
+                  aria-describedby="hint-grade error-grade">
+                  <option value="">اختر الصف أولاً</option>
+                </select>
+                <div class="input-validation-icon" aria-hidden="true">
+                  <i class="fas fa-check-circle success-icon"></i>
+                  <i class="fas fa-exclamation-circle error-icon"></i>
+                </div>
+              </div>
+              <div class="form-hint" id="hint-grade">اختر المرحلة أولاً لتظهر الصفوف</div>
+              <div class="form-error" id="error-grade" data-error="grade" role="alert" aria-live="polite"></div>
+            </div>
+          </div>
+
+          <!-- ==== 10. الموافقة على الشروط والإشعارات ==== -->
+
+          <div class="form-checkbox-group">
+
+            <div class="form-checkbox">
+              <input
+                type="checkbox"
+                id="terms-agree"
+                name="terms"
+                class="checkbox"
+                required
+                aria-required="true"
+                aria-describedby="hint-terms error-terms">
+              <div class="form-checkbox-body">
+                <label for="terms-agree" class="checkbox-label">
+                  أوافق على
+                  <button type="button" class="text-link" data-action="show-terms" aria-haspopup="dialog">
+                    شروط الاستخدام
+                  </button>
+                  و
+                  <button type="button" class="text-link" data-action="show-privacy" aria-haspopup="dialog">
+                    سياسة الخصوصية
+                  </button>
+                </label>
+                <div class="form-hint" id="hint-terms">* لا يمكن إنشاء الحساب بدون الموافقة على الشروط</div>
+                <div class="form-error" id="error-terms" data-error="terms" role="alert" aria-live="polite"></div>
+              </div>
+            </div>
+
+            <div class="form-checkbox">
+              <input
+                type="checkbox"
+                id="notifications-agree"
+                name="notifications"
+                class="checkbox"
+                checked>
+              <div class="form-checkbox-body">
+                <label for="notifications-agree" class="checkbox-label">
+                  أرغب في استقبال الإشعارات والتحديثات التعليمية
+                </label>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ==== 11. زر إنشاء الحساب ==== -->
+
+          <button
+            type="submit"
+            class="btn btn-primary btn-block auth-btn"
+            data-action="submit-register"
+            disabled>
+            <span class="btn-text">إنشاء الحساب</span>
+            <i class="fas fa-user-plus btn-icon" aria-hidden="true"></i>
+          </button>
+
+        </form>
+      </div>
+
+      <!-- ==== 12. تذييل البطاقة ==== -->
+
+      <div class="auth-footer">
+        <p>
+          لديك حساب بالفعل؟
+          <button type="button" class="switch-tab" data-nav-target="login">
+            تسجيل الدخول
+          </button>
+        </p>
+      </div>
+
+    </div>
+
+    <!-- ==== 13. قسم التوضيح ==== -->
+
+    <div class="auth-illustration" aria-hidden="true">
+      <div class="illustration-content">
+
+        <div class="floating-container">
+          <img src="/assets/images/biologist3.png"
+               alt=""
+               class="floating-image"
+               loading="lazy">
+        </div>
+
+        <div class="illustration-text">
+          <h3 class="illustration-title">انضم إلى أفضل منصة لتعليم الأحياء 🌿</h3>
+          <p class="illustration-description">
+            مجتمع بيولوجست التعليمي يساعدك على تحقيق التفوّق العلمي في مادة الأحياء خطوة بخطوة
+          </p>
+          <div class="stats-highlight">
+            <div class="stat-item">
+              <div class="stat-number">98%</div>
+              <div class="stat-label">نسبة النجاح</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">5000+</div>
+              <div class="stat-label">طالب متميّز</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

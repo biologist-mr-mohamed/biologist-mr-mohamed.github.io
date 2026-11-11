@@ -1,0 +1,223 @@
+<!-- صفحة أداء الامتحان - v5.0.0 -->
+<div class="page-content exam-view-page is-loading" data-page="exam-view">
+
+  <!-- ==== 1. التنقل التفصيلي (Breadcrumb) ==== -->
+  <nav class="breadcrumb-nav" aria-label="مسار التنقل">
+    <ol class="breadcrumb-list">
+      <li class="breadcrumb-item"><a href="#" class="breadcrumb-link" data-nav-target="home" aria-label="الرئيسية"><i class="fas fa-home"></i></a></li>
+      <li class="breadcrumb-item"><a href="#" class="breadcrumb-link" data-nav-target="exams" aria-label="قائمة الامتحانات">الامتحانات</a></li>
+      <li class="breadcrumb-item active" aria-current="page"><span id="breadcrumb-exam-title">جاري التحميل...</span></li>
+    </ol>
+  </nav>
+
+  <!-- ==== 2. حالة التحميل ==== -->
+  <div class="loading-state" aria-live="polite" data-ui-initial="hidden">
+    <div class="loading-spinner">
+      <div class="bio-loader bio-loader--auto bio-loader--lg" role="status" aria-label="جاري تحميل الامتحان"></div>
+    </div>
+    <p class="loading-text">جاري تحميل الامتحان...</p>
+  </div>
+
+  <!-- ==== 3. شاشة المقدمة ==== -->
+  <section class="exam-intro-section" id="exam-intro-section" aria-labelledby="exam-title">
+    <div class="intro-content">
+      <div class="exam-header">
+        <div class="exam-meta">
+          <span class="exam-tag exam-tag-primary" id="exam-stage-badge">جاري التحميل...</span>
+          <span class="exam-tag exam-tag-secondary" id="exam-grade-badge">جاري التحميل...</span>
+          <span class="exam-tag exam-tag-success" id="exam-semester-badge">جاري التحميل...</span>
+          <span class="exam-tag exam-tag-info" id="exam-scope-badge">جاري التحميل...</span>
+          <span class="exam-tag exam-tag-warning" id="exam-challenge-badge" data-ui-initial="hidden"><i class="fas fa-trophy" aria-hidden="true"></i> امتحان المتفوقين</span>
+        </div>
+        <h1 class="exam-title" id="exam-title">جاري تحميل عنوان الامتحان...</h1>
+        <p class="exam-description" id="exam-description">جاري تحميل وصف الامتحان...</p>
+        <div class="exam-stats" id="exam-stats">
+          <span class="exam-stat"><i class="fas fa-question-circle" aria-hidden="true"></i><strong id="exam-questions-count">0</strong><small>سؤال</small></span>
+          <span class="exam-stat"><i class="fas fa-clock" aria-hidden="true"></i><strong id="exam-duration">0</strong><small>دقيقة</small></span>
+          <span class="exam-stat"><i class="fas fa-chart-line" aria-hidden="true"></i><strong><span id="exam-pass-score">50</span>%</strong><small>درجة النجاح</small></span>
+          <span class="exam-stat" id="exam-best-stat" data-ui-initial="hidden"><i class="fas fa-medal" aria-hidden="true"></i><strong><span id="exam-best-score">0</span>%</strong><small>أفضل نتيجة</small></span>
+        </div>
+      </div>
+
+      <div class="exam-instructions">
+        <h2 class="section-title" id="intro-title">تعليمات الامتحان</h2>
+        <ul class="instructions-list" id="instructions-list">
+          <li class="instruction-item"><i class="fas fa-check-circle instruction-icon" aria-hidden="true"></i> الوقت محدد، وسيُسلَّم الامتحان تلقائياً عند انتهائه.</li>
+          <li class="instruction-item"><i class="fas fa-check-circle instruction-icon" aria-hidden="true"></i> يمكنك التنقل بين الأسئلة وتعليم ما تريد مراجعته.</li>
+          <li class="instruction-item"><i class="fas fa-check-circle instruction-icon" aria-hidden="true"></i> إجاباتك تُحفظ مؤقتاً فلا تضيع عند تحديث الصفحة.</li>
+          <li class="instruction-item"><i class="fas fa-check-circle instruction-icon" aria-hidden="true"></i> بعد التسليم تظهر نتيجتك ومراجعة إجاباتك.</li>
+        </ul>
+      </div>
+
+      <!-- ==== 4. بطاقة استئناف المحاولة ==== -->
+      <div class="exam-resume-card" id="exam-resume-card" data-ui-initial="hidden">
+        <div class="exam-resume-info">
+          <i class="fas fa-history" aria-hidden="true"></i>
+          <p><b>لديك محاولة غير مكتملة</b><span class="exam-resume-time">الوقت المتبقي: <strong id="exam-resume-time">00:00</strong></span></p>
+        </div>
+        <div class="exam-resume-actions">
+          <button type="button" class="btn btn-primary" data-action="resume-exam"><i class="fas fa-play" aria-hidden="true"></i> متابعة</button>
+          <button type="button" class="btn btn-outline" data-action="restart-exam"><i class="fas fa-redo" aria-hidden="true"></i> من جديد</button>
+        </div>
+      </div>
+
+      <div class="exam-actions">
+        <button type="button" class="btn btn-primary btn-large exam-start-btn" data-action="start-exam">
+          <i class="fas fa-play" aria-hidden="true"></i> ابدأ الامتحان
+        </button>
+        <button type="button" class="btn btn-outline" data-action="back-to-exams">
+          <i class="fas fa-list" aria-hidden="true"></i> العودة للامتحانات
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 5. شاشة الامتحان ==== -->
+  <section class="exam-screen-section" id="exam-screen-section" aria-labelledby="exam-screen-title" data-ui-initial="hidden">
+    <h2 class="visually-hidden" id="exam-screen-title">أسئلة الامتحان</h2>
+
+    <!-- ==== 6. بطاقة الحالة والتقدم ==== -->
+    <div class="exam-status-card">
+      <div class="exam-status-bar">
+        <div class="status-pill status-pill-time" role="timer" aria-label="الوقت المتبقي">
+          <span class="status-pill-label"><i class="fas fa-clock" aria-hidden="true"></i> الوقت</span>
+          <span class="status-pill-value" id="timer-value">00:00</span>
+        </div>
+        <div class="status-pill status-pill-current">
+          <span class="status-pill-label"><i class="fas fa-list-ol" aria-hidden="true"></i> السؤال</span>
+          <span class="status-pill-value" id="question-counter">1 / 1</span>
+        </div>
+        <div class="status-pill status-pill-answered">
+          <span class="status-pill-label"><i class="fas fa-check-circle" aria-hidden="true"></i> المجاب</span>
+          <span class="status-pill-value" id="answered-count">0</span>
+        </div>
+      </div>
+      <div class="exam-progress">
+        <div class="progress-bar-meta">
+          <span class="progress-bar-label">نسبة الإنجاز</span>
+          <span class="progress-bar-percentage" id="exam-progress-percentage">0%</span>
+        </div>
+        <div class="progress-bar-container" id="exam-progressbar" role="progressbar" aria-label="نسبة الأسئلة المجابة" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-bar-fill" id="exam-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==== 7. لوحة التنقل بين الأسئلة ==== -->
+    <div class="question-palette">
+      <div class="palette-header">
+        <h3 class="palette-title">قائمة الأسئلة</h3>
+        <span class="palette-hint">اضغط على رقم للانتقال إلى السؤال</span>
+      </div>
+      <div class="palette-scroller">
+        <button type="button" class="palette-arrow" data-action="palette-prev" aria-label="السابق"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+        <div class="palette-grid" id="question-palette-grid"></div>
+        <button type="button" class="palette-arrow" data-action="palette-next" aria-label="التالي"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+      </div>
+      <div class="palette-legend" aria-hidden="true">
+        <span class="legend-item"><span class="legend-dot legend-dot-current"></span> الحالي</span>
+        <span class="legend-item"><span class="legend-dot legend-dot-answered"></span> تمت الإجابة</span>
+        <span class="legend-item"><span class="legend-dot legend-dot-empty"></span> بدون إجابة</span>
+        <span class="legend-item"><i class="fas fa-bookmark legend-icon-marked"></i> معلّم للمراجعة</span>
+      </div>
+    </div>
+
+    <!-- ==== 8. بطاقة السؤال ==== -->
+    <div class="exam-question-container" id="exam-question-container">
+      <div class="question-header">
+        <span class="question-number-pill">السؤال <span id="question-number">1</span></span>
+        <div class="question-header-actions">
+          <button type="button" class="mark-review-btn clear-answer-btn" id="clear-answer-btn" data-action="clear-answer" aria-label="مسح الإجابة" title="مسح الإجابة">
+            <i class="fas fa-eraser" aria-hidden="true"></i> <span class="btn-label">مسح الإجابة</span>
+          </button>
+          <button type="button" class="mark-review-btn" id="mark-review-btn" data-action="mark-review" aria-pressed="false" aria-label="تعليم للمراجعة" title="تعليم للمراجعة">
+            <i class="fas fa-bookmark" aria-hidden="true"></i> <span class="btn-label" id="mark-review-label">تعليم للمراجعة</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="question-body">
+        <div class="question-image-col" id="question-image-col" data-ui-initial="hidden">
+          <button type="button" class="question-image-frame" id="question-image-frame" aria-label="تكبير صورة السؤال">
+            <img id="question-image" src="" alt="صورة السؤال" decoding="async">
+          </button>
+          <button type="button" class="image-zoom-btn" id="image-zoom-btn">
+            <i class="fas fa-search-plus" aria-hidden="true"></i> تكبير الصورة
+          </button>
+        </div>
+        <div class="question-main-col">
+          <p class="question-text" id="question-text"></p>
+          <div class="question-options" id="question-options" role="radiogroup" aria-label="خيارات الإجابة"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==== 9. أزرار التنقل والتسليم ==== -->
+    <div class="exam-nav-bar">
+      <button type="button" class="nav-btn" id="prev-question-btn">
+        <i class="fas fa-arrow-right" aria-hidden="true"></i> <span>السابق</span>
+      </button>
+      <span class="nav-counter" id="nav-counter">1 / 1</span>
+      <button type="button" class="nav-btn" id="next-question-btn">
+        <span>التالي</span> <i class="fas fa-arrow-left" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <div class="exam-submit-wrapper">
+      <button type="button" class="submit-btn" id="submit-exam-btn" data-action="submit-exam">
+        <i class="fas fa-paper-plane" aria-hidden="true"></i> تسليم الامتحان
+      </button>
+      <p class="submit-hint"><i class="fas fa-info-circle" aria-hidden="true"></i> يمكنك التنقل بالأسهم، واختيار الإجابة بالأرقام، وتعليم السؤال بحرف M.</p>
+    </div>
+
+    <!-- ==== 10. نافذة تكبير الصورة ==== -->
+    <div class="image-zoom-overlay" id="image-zoom-overlay" role="dialog" aria-modal="true" aria-label="صورة السؤال مكبّرة" hidden>
+      <button type="button" class="image-zoom-close" id="image-zoom-close" aria-label="إغلاق"><i class="fas fa-times" aria-hidden="true"></i></button>
+      <img id="image-zoom-img" src="" alt="صورة السؤال مكبّرة">
+    </div>
+  </section>
+
+  <!-- ==== 11. شاشة النتائج ==== -->
+  <section class="exam-results-section" id="exam-results-section" aria-labelledby="results-title" data-ui-initial="hidden">
+    <div class="results-card">
+      <div class="results-header">
+        <h2 class="section-title" id="results-title">نتيجة الامتحان</h2>
+      </div>
+      <div class="results-summary">
+        <div class="score-circle" id="score-circle">
+          <span class="score-value" id="score-value">0%</span>
+        </div>
+        <div class="score-details">
+          <span class="level-badge" id="level-badge"></span>
+          <div class="medal-display" id="medal-display" data-ui-initial="hidden">
+            <span class="medal-badge"><i class="fas fa-medal" aria-hidden="true"></i> <span id="medal-name"></span></span>
+          </div>
+          <p>الإجابات الصحيحة: <strong id="result-correct">0</strong> • الخاطئة: <strong id="result-wrong">0</strong> • بدون إجابة: <strong id="result-skipped">0</strong></p>
+          <p>الوقت المستغرق: <strong id="result-time">00:00</strong></p>
+          <p class="prev-best-note" id="prev-best-note" data-ui-initial="hidden"></p>
+        </div>
+      </div>
+      <div class="results-feedback" id="results-feedback" aria-live="polite"></div>
+      <div class="results-actions">
+        <button type="button" class="btn btn-primary" data-action="open-review"><i class="fas fa-search" aria-hidden="true"></i> مراجعة الإجابات</button>
+        <button type="button" class="btn btn-outline" data-action="retry-exam"><i class="fas fa-redo" aria-hidden="true"></i> إعادة المحاولة</button>
+        <button type="button" class="btn btn-outline" data-action="back-to-exams"><i class="fas fa-list" aria-hidden="true"></i> العودة للامتحانات</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 12. شاشة المراجعة ==== -->
+  <section class="exam-review-section" id="exam-review-section" aria-labelledby="review-title" data-ui-initial="hidden">
+    <div class="review-header">
+      <button type="button" class="btn btn-outline" data-action="back-to-results"><i class="fas fa-arrow-right" aria-hidden="true"></i> العودة للنتيجة</button>
+    </div>
+    <h2 class="section-title" id="review-title">مراجعة الإجابات</h2>
+    <div class="review-filters" id="review-filters" role="group" aria-label="تصفية الأسئلة">
+      <button type="button" class="review-filter-chip active" data-filter="all">الكل</button>
+      <button type="button" class="review-filter-chip" data-filter="wrong">الخاطئة</button>
+      <button type="button" class="review-filter-chip" data-filter="skipped">بدون إجابة</button>
+      <button type="button" class="review-filter-chip" data-filter="marked">المعلّمة</button>
+    </div>
+    <div class="review-questions" id="review-questions"></div>
+  </section>
+</div>

@@ -1,0 +1,310 @@
+/* الإعلانات المنبثقة بكلاسات ann- - v5.0.0 */
+
+/* ==== 1. المتغيرات المحلية ==== */
+
+.ann-overlay {
+  --ann-surface: var(--surface-light, #ffffff);
+  --ann-bg: var(--background-light, #f4f7fb);
+  --ann-border: var(--border-color-light, rgba(0, 0, 0, 0.1));
+  --ann-text: var(--text-primary-light, #1b2a3a);
+  --ann-muted: var(--text-secondary-light, #5b6b7c);
+  --ann-ease: var(--ease-out, cubic-bezier(0.22, 1, 0.36, 1));
+  --ann-lock: 3s;
+  --ann-ring: 44px;
+}
+
+[data-theme="dark"] .ann-overlay {
+  --ann-surface: var(--surface-dark, #16212e);
+  --ann-bg: var(--background-dark, #0d1520);
+  --ann-border: var(--border-color-dark, rgba(255, 255, 255, 0.12));
+  --ann-text: var(--text-primary-dark, #e8eef6);
+  --ann-muted: var(--text-secondary-dark, #a4b2c2);
+}
+
+/* ==== 2. الغلاف بملء الشاشة ==== */
+
+body.ann-open {
+  overflow: hidden;
+}
+
+.ann-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(var(--primary-rgb), 0.16), transparent 60%),
+    var(--ann-bg);
+  color: var(--ann-text);
+  opacity: 0;
+  transition: opacity 0.22s var(--ann-ease);
+}
+
+.ann-overlay--visible {
+  opacity: 1;
+}
+
+.ann-overlay--leaving {
+  opacity: 0;
+}
+
+/* ==== 3. البطاقة ==== */
+
+.ann-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 760px;
+  min-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block-start: env(safe-area-inset-top, 0px);
+  padding-block-end: env(safe-area-inset-bottom, 0px);
+  transform: translateY(12px) scale(0.985);
+  transition: transform 0.3s var(--ann-ease);
+}
+
+.ann-overlay--visible .ann-card {
+  transform: none;
+}
+
+.ann-card:focus {
+  outline: none;
+}
+
+/* ==== 4. الشريط العلوي وزر الإغلاق ==== */
+
+.ann-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 12px);
+  padding: var(--space-3, 12px) var(--space-4, 16px);
+}
+
+.ann-counter {
+  padding: var(--space-1, 4px) var(--space-3, 12px);
+  border-radius: var(--border-radius-full, 999px);
+  background: rgba(var(--primary-rgb), 0.12);
+  color: var(--primary);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 700;
+}
+
+.ann-counter:empty {
+  display: none;
+}
+
+.ann-close {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: var(--ann-ring);
+  block-size: var(--ann-ring);
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ann-surface);
+  color: var(--ann-muted);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  cursor: not-allowed;
+  touch-action: manipulation;
+  transition: background 0.2s var(--ann-ease), color 0.2s var(--ann-ease), transform 0.2s var(--ann-ease);
+}
+
+.ann-close:focus-visible,
+.ann-action:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.ann-ring {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  transform: rotate(-90deg);
+}
+
+.ann-ring circle {
+  fill: none;
+  stroke-width: 3;
+}
+
+.ann-ring-track {
+  stroke: var(--ann-border);
+}
+
+.ann-ring-fill {
+  stroke: var(--primary);
+  stroke-linecap: round;
+  stroke-dasharray: 125.66;
+  stroke-dashoffset: 125.66;
+  animation: ann-ring-fill var(--ann-lock) linear forwards;
+}
+
+@keyframes ann-ring-fill {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.ann-close-count {
+  position: relative;
+  font-size: var(--font-size-base, 1rem);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ann-close-icon {
+  display: none;
+  font-size: 1.05rem;
+}
+
+.ann-close--ready {
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+}
+
+.ann-close--ready .ann-close-icon {
+  display: block;
+}
+
+.ann-close--ready .ann-ring {
+  display: none;
+}
+
+@media (hover: hover) {
+  .ann-close--ready:hover {
+    transform: scale(1.08);
+  }
+}
+
+/* ==== 5. الصورة ==== */
+
+.ann-media {
+  margin-inline: var(--space-4, 16px);
+  border-radius: var(--card-border-radius, 16px);
+  overflow: hidden;
+  background: var(--ann-surface);
+  border: 1px solid var(--ann-border);
+}
+
+.ann-image {
+  display: block;
+  inline-size: 100%;
+  max-block-size: 42vh;
+  object-fit: cover;
+}
+
+/* ==== 6. العنوان والنص ==== */
+
+.ann-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+  padding: var(--space-5, 20px) var(--space-5, 20px) var(--space-4, 16px);
+}
+
+.ann-title {
+  margin: 0;
+  font-size: var(--font-size-2xl, 1.5rem);
+  font-weight: 800;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.ann-text {
+  margin: 0;
+  font-size: var(--font-size-base, 1rem);
+  line-height: 1.9;
+  color: var(--ann-muted);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* ==== 7. زر الإجراء ==== */
+
+.ann-actions {
+  position: sticky;
+  bottom: 0;
+  padding: var(--space-4, 16px) var(--space-5, 20px) var(--space-5, 20px);
+  background: linear-gradient(to top, var(--ann-bg) 60%, transparent);
+}
+
+.ann-action {
+  display: block;
+  inline-size: 100%;
+  padding: var(--space-3, 12px) var(--space-5, 20px);
+  border: 0;
+  border-radius: var(--border-radius-full, 999px);
+  background: var(--primary);
+  color: #fff;
+  font: inherit;
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(var(--primary-rgb), 0.35);
+  touch-action: manipulation;
+  transition: transform 0.2s var(--ann-ease), box-shadow 0.2s var(--ann-ease);
+}
+
+@media (hover: hover) {
+  .ann-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(var(--primary-rgb), 0.42);
+  }
+}
+
+.ann-action:active {
+  transform: scale(0.98);
+}
+
+/* ==== 8. الشاشات الكبيرة ==== */
+
+@media (min-width: 768px) {
+  .ann-card {
+    margin-block: var(--space-6, 24px);
+    min-height: 0;
+    max-height: calc(100% - (var(--space-6, 24px) * 2));
+    align-self: center;
+    border-radius: calc(var(--card-border-radius, 16px) + 8px);
+    background: var(--ann-surface);
+    border: 1px solid var(--ann-border);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+  }
+
+  .ann-actions {
+    background: linear-gradient(to top, var(--ann-surface) 60%, transparent);
+  }
+
+  .ann-title {
+    font-size: calc(var(--font-size-2xl, 1.5rem) + 0.25rem);
+  }
+}
+
+/* ==== 9. تقليل الحركة ==== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ann-overlay,
+  .ann-card,
+  .ann-close,
+  .ann-action {
+    transition: none;
+  }
+
+  .ann-ring-fill {
+    animation-duration: 0.01s;
+    stroke-dashoffset: 0;
+  }
+}

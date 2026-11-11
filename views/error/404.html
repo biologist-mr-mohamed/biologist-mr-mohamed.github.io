@@ -1,0 +1,116 @@
+<!-- ==== صفحة 404: المسار غير موجود (نسخة متكاملة v5.0.0) ==== -->
+<div class="page-content error-page" data-page="not-found">
+  <h1 class="visually-hidden">الصفحة غير موجودة - منصة بيولوجست</h1>
+
+  <!-- ==== حالة التحميل ==== -->
+  <div class="loading-state" aria-live="polite" style="display: none;">
+    <div class="loading-spinner">
+      <div class="spinner-circle"></div>
+    </div>
+    <p class="loading-text">جاري تحميل الاقتراحات...</p>
+  </div>
+
+  <!-- ==== المحتوى الرئيسي ==== -->
+  <div class="error-container">
+    <!-- ==== رمز الخطأ والرسالة ==== -->
+    <div class="error-code-section">
+      <!-- رسمة توضيحية: 404 + شخصية الورقة التايهة في الريح -->
+      <div class="error-illustration" aria-hidden="true">
+        <svg class="error-illustration__svg" viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="illDigitGradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="var(--primary)"></stop>
+              <stop offset="100%" stop-color="var(--secondary)"></stop>
+            </linearGradient>
+          </defs>
+
+          <!-- ظل الأرضية -->
+          <ellipse class="ill-ground" cx="320" cy="300" rx="220" ry="12"></ellipse>
+
+          <!-- خطوط الريح -->
+          <g class="ill-wind">
+            <path class="ill-wind__line ill-wind__line--1" d="M35,145 C115,132 155,165 218,148"></path>
+            <path class="ill-wind__line ill-wind__line--2" d="M18,188 C108,172 150,208 228,190"></path>
+            <path class="ill-wind__line ill-wind__line--3" d="M55,232 C125,220 168,248 226,234"></path>
+          </g>
+
+          <!-- الرقمين 4 و4 -->
+          <text class="ill-digit" x="18" y="272" font-size="230">4</text>
+          <text class="ill-digit" x="418" y="272" font-size="230">4</text>
+
+          <!-- شخصية الورقة (بدل الصفر) -->
+          <g class="ill-character">
+            <path class="ill-body" d="M320,140 c-45,0 -78,38 -78,88 c0,50 33,88 78,88 c45,0 78,-38 78,-88 c0,-50 -33,-88 -78,-88 z"></path>
+            <path class="ill-arm" d="M270,210 C250,225 245,247 251,267"></path>
+            <path class="ill-arm" d="M370,210 C390,225 395,247 389,267"></path>
+            <circle class="ill-hand" cx="251" cy="269" r="5"></circle>
+            <circle class="ill-hand" cx="389" cy="269" r="5"></circle>
+            <path class="ill-head" d="M296,68 L346,58 L339,120 C339,133 328,141 316,139 L300,136 C289,134 283,124 284,113 Z"></path>
+            <path class="ill-head-fold" d="M296,68 L317,90 L339,58 Z"></path>
+            <circle class="ill-eye" cx="306" cy="101" r="3"></circle>
+            <circle class="ill-eye" cx="324" cy="98" r="3"></circle>
+            <path class="ill-mouth" d="M303,113 Q313,106 323,111"></path>
+          </g>
+        </svg>
+      </div>
+
+      <p class="error-eyebrow"><span class="error-eyebrow__dash"></span>خطأ 404<span class="error-eyebrow__dash"></span></p>
+      <h2 class="error-title">الصفحة دي مش موجودة</h2>
+      <p class="error-description">
+        شكل الرابط اللي كتبته فيه حاجة غلط، أو الصفحة اتشالت من مكانها.<br>
+        معدش فيه غير الهوا في العنوان ده 🍃 اختار من الاقتراحات دي 👇
+      </p>
+    </div>
+
+    <!-- ==== اقتراحات الدروس (يتم ملؤها عبر JS) ==== -->
+    <section class="suggestions-section" aria-labelledby="suggestions-title">
+      <h3 id="suggestions-title" class="section-title">
+        <i class="fas fa-lightbulb"></i> اقتراحات ممكن تساعدك
+      </h3>
+      <div class="suggestions-grid" id="suggestions-grid">
+        <!-- ==== بطاقات skeleton (تختفي بعد التحميل) ==== -->
+        <div class="skeleton-card">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-meta"></div>
+          <div class="skeleton-button"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-meta"></div>
+          <div class="skeleton-button"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-title"></div>
+          <div class="skeleton-meta"></div>
+          <div class="skeleton-button"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==== أزرار الإجراءات الرئيسية ==== -->
+    <div class="error-actions">
+      <button class="btn btn-primary btn-large" data-action="go-home">
+        العودة للرئيسية <i class="fas fa-arrow-left"></i>
+      </button>
+      <button class="error-text-link" data-action="go-back">
+        <i class="fas fa-arrow-right"></i> رجوع للخلف
+      </button>
+      <button class="error-text-link" data-action="go-lessons">
+        <i class="fas fa-book-open"></i> استكشف الدروس
+      </button>
+      <!-- ==== زر البحث يظهر فقط للمعلم والمشرف ==== -->
+      <button class="error-text-link teacher-only" data-action="open-search" style="display: none;">
+        <i class="fas fa-search"></i> بحث متقدم
+      </button>
+    </div>
+
+    <!-- ==== مساعدة إضافية ==== -->
+    <div class="error-help">
+      <p>
+        <i class="fas fa-headset"></i>
+        محتاج مساعدة؟ تواصل مع 
+        <a href="https://wa.me/201208388529" target="_blank" rel="noopener noreferrer">الدعم الفني <i class="fab fa-whatsapp"></i></a>
+      </p>
+    </div>
+  </div>
+</div>

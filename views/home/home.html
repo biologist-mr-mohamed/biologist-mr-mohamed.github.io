@@ -1,0 +1,617 @@
+<!-- الصفحة الرئيسية - v5.0.0 -->
+<div class="page-content home-page" data-page="home">
+  <h1 class="visually-hidden">الرئيسية - منصة بيولوجست التعليمية</h1>
+
+  <!-- ==== 1. قسم الترحيب ==== -->
+  <section class="welcome-section reveal" aria-labelledby="welcome-section-title">
+    <h2 id="welcome-section-title" class="visually-hidden">
+      مرحبًا بك في منصة بيولوجست التعليمية
+    </h2>
+
+    <div class="container">
+
+      <!-- ==== 2. ترحيب الزائر ==== -->
+      <div class="welcome-guest" data-role-gate="guest">
+        <div class="welcome-content">
+          <span class="welcome-eyebrow">
+            <i class="fas fa-dna" aria-hidden="true"></i>
+            للمرحلتين الإعدادية والثانوية
+          </span>
+
+          <h2 class="welcome-title">
+            <span class="welcome-line">مرحبًا بك في</span>
+            <span class="welcome-highlight">منصة بيولوجست</span>
+            <span class="welcome-subtitle">العلم المبسط للجميع</span>
+          </h2>
+
+          <p class="welcome-description">
+            منصة تعليمية شاملة للمرحلة الإعدادية والثانوية مع دروس مصورة،
+            امتحانات تفاعلية، وتتبع تقدمك خطوة بخطوة
+          </p>
+
+          <div class="welcome-buttons">
+            <button
+              type="button"
+              class="btn btn-primary btn-large welcome-btn"
+              data-action="start-learning"
+              aria-label="سجّل الآن وابدأ رحلتك التعليمية"
+            >
+              <i class="fas fa-rocket" aria-hidden="true"></i>
+              ابدأ رحلتك التعليمية
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-outline btn-large welcome-btn"
+              data-action="explore-lessons"
+              aria-label="استكشف الدروس"
+            >
+              <i class="fas fa-book" aria-hidden="true"></i>
+              استكشف الدروس
+            </button>
+          </div>
+
+          <ul class="welcome-chips" aria-label="ما ستجده في المنصة">
+            <li class="welcome-chip"><i class="fas fa-video" aria-hidden="true"></i> دروس مصورة</li>
+            <li class="welcome-chip"><i class="fas fa-file-circle-check" aria-hidden="true"></i> امتحانات تفاعلية</li>
+            <li class="welcome-chip"><i class="fas fa-chart-line" aria-hidden="true"></i> تتبّع التقدم</li>
+          </ul>
+        </div>
+
+        <div class="welcome-image">
+          <div class="floating-image-container">
+            <img
+              src="assets/images/biologist4.png"
+              alt="الأستاذ محمد إبراهيم يشرح الأحياء أمام السبورة"
+              class="floating-image"
+              width="800"
+              height="600"
+              decoding="async"
+            >
+          </div>
+        </div>
+
+        <div class="welcome-stats" aria-label="إحصائيات المنصة">
+          <div class="stat-item">
+            <div class="stat-icon stat-icon--students" aria-hidden="true"><i class="fas fa-users"></i></div>
+            <div class="stat-number" data-stat="students" aria-live="off" aria-label="عدد الطلاب الناجحين">0</div>
+            <div class="stat-label">طالب ناجح</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon stat-icon--lessons" aria-hidden="true"><i class="fas fa-book-open"></i></div>
+            <div class="stat-number" data-stat="lessons" aria-live="off" aria-label="عدد الدروس التفاعلية">0</div>
+            <div class="stat-label">درس تفاعلي</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon stat-icon--exams" aria-hidden="true"><i class="fas fa-file-circle-check"></i></div>
+            <div class="stat-number" data-stat="exams" aria-live="off" aria-label="عدد الامتحانات التفاعلية">0</div>
+            <div class="stat-label">امتحان تفاعلي</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==== 3. ترحيب الأعضاء ==== -->
+      <div class="welcome-member" data-role-gate="member">
+        <div class="member-header">
+          <div class="member-avatar" id="home-member-avatar" aria-hidden="true"></div>
+
+          <div class="member-heading">
+            <p class="member-greeting" id="home-member-greeting">مرحبًا بعودتك 👋</p>
+            <h2 class="member-name" id="home-member-name">—</h2>
+            <div class="member-meta">
+              <span class="role-pill" id="home-member-role-pill"></span>
+              <span class="member-subtitle" id="home-member-subtitle"></span>
+            </div>
+          </div>
+
+          <div id="user-streak-badge" class="user-streak-badge" data-role-gate="student"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 4. لوحة الطالب ==== -->
+  <section class="student-panel-section reveal" data-role-gate="student" aria-labelledby="student-panel-title">
+    <h2 id="student-panel-title" class="visually-hidden">لوحتك الشخصية</h2>
+    <div class="container">
+      <div class="student-panel-grid">
+
+        <!-- ==== 5. بطاقة استكمال التعلم ==== -->
+        <div class="continue-learning-card" id="home-continue-learning" aria-live="polite">
+          <div class="clc-loading">
+            <div class="placeholder-spinner"><div class="spinner-circle"></div></div>
+            <p>جاري تجهيز درسك التالي...</p>
+          </div>
+        </div>
+
+        <!-- ==== 6. إحصائيات شخصية سريعة ==== -->
+        <div class="student-stats-grid" aria-label="إحصائياتك الشخصية">
+          <div class="mini-stat-card mini-stat-card--progress">
+            <i class="fas fa-chart-line mini-stat-icon" aria-hidden="true"></i>
+            <div class="mini-stat-value" data-student-stat="progress">0%</div>
+            <div class="mini-stat-label">التقدم العام</div>
+          </div>
+          <div class="mini-stat-card mini-stat-card--exams">
+            <i class="fas fa-file-circle-check mini-stat-icon" aria-hidden="true"></i>
+            <div class="mini-stat-value" data-student-stat="exams">0</div>
+            <div class="mini-stat-label">امتحانات مكتملة</div>
+          </div>
+          <div class="mini-stat-card mini-stat-card--average">
+            <i class="fas fa-star mini-stat-icon" aria-hidden="true"></i>
+            <div class="mini-stat-value" data-student-stat="average">0%</div>
+            <div class="mini-stat-label">متوسط الدرجات</div>
+          </div>
+          <div class="mini-stat-card mini-stat-card--streak">
+            <i class="fas fa-fire mini-stat-icon" aria-hidden="true"></i>
+            <div class="mini-stat-value" data-student-stat="streak">0</div>
+            <div class="mini-stat-label">يوم متواصل</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==== 7. اختصارات الطالب ==== -->
+      <div class="quick-actions quick-actions--student" aria-label="اختصارات سريعة">
+        <button class="quick-action-card" data-action="explore-lessons" type="button">
+          <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span>
+          <span class="quick-action-label">الدروس</span>
+        </button>
+        <button class="quick-action-card" data-action="explore-exams" type="button">
+          <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-file-pen"></i></span>
+          <span class="quick-action-label">الامتحانات</span>
+        </button>
+        <button class="quick-action-card" data-action="goto-groups" type="button">
+          <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-people-group"></i></span>
+          <span class="quick-action-label">المجموعات</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 8. لوحة طاقم العمل ==== -->
+  <section class="staff-panel-section reveal" data-role-gate="staff" aria-labelledby="staff-panel-title">
+    <div class="container">
+      <div class="section-header section-header--start">
+        <h2 id="staff-panel-title" class="section-title">
+          <i class="fas fa-gauge-high section-icon" aria-hidden="true"></i>
+          لوحة سريعة
+        </h2>
+        <p class="section-subtitle">نظرة سريعة على نشاط المنصة قبل الانتقال للوحة التحكم الكاملة</p>
+      </div>
+
+      <!-- ==== 9. مؤشرات الأداء ==== -->
+      <div class="staff-kpi-grid" aria-label="مؤشرات المنصة">
+        <div class="staff-kpi-card staff-kpi-card--students">
+          <i class="fas fa-users staff-kpi-icon" aria-hidden="true"></i>
+          <div class="staff-kpi-value" data-staff-stat="students">—</div>
+          <div class="staff-kpi-label">الطلاب</div>
+        </div>
+        <div class="staff-kpi-card staff-kpi-card--lessons">
+          <i class="fas fa-book-open staff-kpi-icon" aria-hidden="true"></i>
+          <div class="staff-kpi-value" data-staff-stat="lessons">—</div>
+          <div class="staff-kpi-label">الدروس</div>
+        </div>
+        <div class="staff-kpi-card staff-kpi-card--exams">
+          <i class="fas fa-file-pen staff-kpi-icon" aria-hidden="true"></i>
+          <div class="staff-kpi-value" data-staff-stat="exams">—</div>
+          <div class="staff-kpi-label">الامتحانات</div>
+        </div>
+        <div class="staff-kpi-card staff-kpi-card--comments">
+          <i class="fas fa-comments staff-kpi-icon" aria-hidden="true"></i>
+          <div class="staff-kpi-value" data-staff-stat="comments">—</div>
+          <div class="staff-kpi-label">التعليقات</div>
+        </div>
+        <!-- ==== 10. الشكاوى (المعلم فقط) ==== -->
+        <div class="staff-kpi-card staff-kpi-card--alert" data-role-gate="teacher">
+          <i class="fas fa-triangle-exclamation staff-kpi-icon" aria-hidden="true"></i>
+          <div class="staff-kpi-value" data-staff-stat="pendingComplaints">—</div>
+          <div class="staff-kpi-label">شكاوى قيد المراجعة</div>
+        </div>
+        <!-- ==== 11. المشرفون (المعلم فقط) ==== -->
+        <div class="staff-kpi-card staff-kpi-card--moderators" data-role-gate="teacher">
+          <i class="fas fa-user-shield staff-kpi-icon" aria-hidden="true"></i>
+          <div class="staff-kpi-value" data-staff-stat="moderators">—</div>
+          <div class="staff-kpi-label">المشرفون (من 5)</div>
+        </div>
+      </div>
+
+      <!-- ==== 12. اختصارات سريعة ==== -->
+      <div class="quick-actions quick-actions--staff" aria-label="اختصارات سريعة">
+        <button class="quick-action-card" data-action="goto-dashboard" type="button">
+          <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-gauge-high"></i></span>
+          <span class="quick-action-label">لوحة التحكم الكاملة</span>
+        </button>
+        <button class="quick-action-card" data-action="explore-lessons" type="button">
+          <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span>
+          <span class="quick-action-label">إدارة الدروس</span>
+        </button>
+        <button class="quick-action-card" data-action="explore-exams" type="button">
+          <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-file-pen"></i></span>
+          <span class="quick-action-label">إدارة الامتحانات</span>
+        </button>
+        <button class="quick-action-card" data-action="goto-groups" type="button">
+          <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-people-group"></i></span>
+          <span class="quick-action-label">المجموعات</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 13. كيف تبدأ (للزائر) ==== -->
+  <section class="how-section reveal" data-role-gate="guest" aria-labelledby="how-section-title">
+    <div class="container">
+      <div class="section-header">
+        <h2 id="how-section-title" class="section-title">
+          <i class="fas fa-route section-icon" aria-hidden="true"></i>
+          ابدأ في ثلاث خطوات
+        </h2>
+        <p class="section-subtitle">من التسجيل إلى التفوق — رحلة واضحة وبسيطة</p>
+      </div>
+
+      <ol class="how-steps">
+        <li class="how-step">
+          <span class="how-step-num" aria-hidden="true">1</span>
+          <span class="how-step-icon" aria-hidden="true"><i class="fas fa-user-plus"></i></span>
+          <h3 class="how-step-title">أنشئ حسابك مجانًا</h3>
+          <p class="how-step-text">سجّل بياناتك في دقيقة واحدة وانضم إلى مجتمع بيولوجست.</p>
+        </li>
+        <li class="how-step">
+          <span class="how-step-num" aria-hidden="true">2</span>
+          <span class="how-step-icon" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
+          <h3 class="how-step-title">اختر مرحلتك وصفّك</h3>
+          <p class="how-step-text">تظهر لك الدروس والامتحانات المناسبة لمرحلتك الدراسية.</p>
+        </li>
+        <li class="how-step">
+          <span class="how-step-num" aria-hidden="true">3</span>
+          <span class="how-step-icon" aria-hidden="true"><i class="fas fa-seedling"></i></span>
+          <h3 class="how-step-title">تعلّم وتابع تقدمك</h3>
+          <p class="how-step-text">شاهد الدروس، حُلّ الامتحانات، واجمع الشارات والميداليات.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ==== 14. أبطال الأسبوع ==== -->
+  <div class="container home-duo-wrap">
+    <div class="home-duo">
+
+      <section class="champions-section home-panel reveal" aria-labelledby="champions-section-title">
+        <div class="section-header section-header--start">
+          <h2 id="champions-section-title" class="section-title">
+            <i class="fas fa-crown section-icon" aria-hidden="true"></i>
+            أبطال هذا الأسبوع
+          </h2>
+          <p class="section-subtitle">الطلاب المتفوقون في أدائهم التعليمي</p>
+        </div>
+
+        <div class="champions-grid" aria-label="قائمة أبطال الأسبوع" aria-busy="true">
+          <div class="champion-card is-skeleton" aria-hidden="true">
+            <span class="sk sk-circle sk-avatar"></span>
+            <span class="sk sk-line sk-w70"></span>
+            <span class="sk sk-line sk-w40"></span>
+          </div>
+          <div class="champion-card is-skeleton" aria-hidden="true">
+            <span class="sk sk-circle sk-avatar"></span>
+            <span class="sk sk-line sk-w70"></span>
+            <span class="sk sk-line sk-w40"></span>
+          </div>
+          <div class="champion-card is-skeleton" aria-hidden="true">
+            <span class="sk sk-circle sk-avatar"></span>
+            <span class="sk sk-line sk-w70"></span>
+            <span class="sk sk-line sk-w40"></span>
+          </div>
+        </div>
+
+        <div class="view-all-champions">
+          <button
+            class="btn btn-secondary"
+            data-action="view-all-champions"
+            aria-label="عرض جميع الأبطال"
+            type="button"
+          >
+            عرض جميع الأبطال
+            <i class="fas fa-arrow-left" aria-hidden="true"></i>
+          </button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ==== 15. دروس مقترحة ==== -->
+  <section class="recommended-section reveal" data-role-gate="guest student" aria-labelledby="recommended-title">
+    <div class="container">
+      <div class="section-header">
+        <h2 id="recommended-title" class="section-title">
+          <i class="fas fa-book-open section-icon" aria-hidden="true"></i>
+          <span id="recommended-title-text">دروس مقترحة لك</span>
+        </h2>
+        <p class="section-subtitle">ابدأ من هنا واستكمل رحلتك خطوة بخطوة</p>
+      </div>
+      <div id="home-recommended" class="recommended-grid" aria-busy="true">
+        <div class="recommended-card is-skeleton" aria-hidden="true">
+          <span class="sk sk-media"></span>
+          <span class="sk-body">
+            <span class="sk sk-line sk-w80"></span>
+            <span class="sk sk-line sk-w50"></span>
+          </span>
+        </div>
+        <div class="recommended-card is-skeleton" aria-hidden="true">
+          <span class="sk sk-media"></span>
+          <span class="sk-body">
+            <span class="sk sk-line sk-w80"></span>
+            <span class="sk sk-line sk-w50"></span>
+          </span>
+        </div>
+        <div class="recommended-card is-skeleton" aria-hidden="true">
+          <span class="sk sk-media"></span>
+          <span class="sk-body">
+            <span class="sk sk-line sk-w80"></span>
+            <span class="sk sk-line sk-w50"></span>
+          </span>
+        </div>
+        <div class="recommended-card is-skeleton" aria-hidden="true">
+          <span class="sk sk-media"></span>
+          <span class="sk-body">
+            <span class="sk sk-line sk-w80"></span>
+            <span class="sk sk-line sk-w50"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 16. من نحن ==== -->
+  <section class="about-section reveal" data-role-gate="guest" aria-labelledby="about-section-title">
+    <div class="container">
+      <div class="about-content">
+        <div class="about-image">
+          <div
+            class="about-carousel"
+            id="about-carousel"
+            role="region"
+            aria-roledescription="كاروسيل"
+            aria-label="صور تعليمية من داخل الفصول"
+          >
+            <div class="carousel-slide active">
+              <img
+                src="assets/images/biologist3.png"
+                alt="شرح مادة الأحياء داخل الفصل الدراسي"
+                loading="lazy"
+                decoding="async"
+              >
+            </div>
+
+            <div class="carousel-slide">
+              <img
+                src="assets/images/biologist4.png"
+                alt="الأستاذ أثناء شرح درس أحياء"
+                loading="lazy"
+                decoding="async"
+              >
+            </div>
+
+            <div class="carousel-slide">
+              <img
+                src="assets/images/biologist2.png"
+                alt="تفاعل الطلاب مع شرح مادة الأحياء"
+                loading="lazy"
+                decoding="async"
+              >
+            </div>
+
+            <button
+              class="carousel-prev"
+              aria-label="الشريحة السابقة"
+              aria-controls="about-carousel"
+              aria-disabled="true"
+              disabled
+              type="button"
+            >
+              <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            </button>
+
+            <button
+              class="carousel-next"
+              aria-label="الشريحة التالية"
+              aria-controls="about-carousel"
+              type="button"
+            >
+              <i class="fas fa-chevron-left" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="about-text">
+          <h2 id="about-section-title" class="about-title">
+            <i class="fas fa-info-circle section-icon" aria-hidden="true"></i>
+            من نحن
+          </h2>
+
+          <div class="about-description">
+            <p class="about-paragraph">
+              <strong>بيولوجست</strong> منصة تعليمية تهدف إلى تبسيط
+              العلوم والأحياء لطلاب المرحلة الإعدادية والثانوية العامة بطريقة تفاعلية.
+            </p>
+
+            <p class="about-paragraph about-paragraph--icon">
+              <i class="fas fa-user-graduate about-icon" aria-hidden="true"></i>
+              <span>
+                <strong>الأستاذ محمد إبراهيم طه</strong><br>
+                خريج كلية التربية – قسم الأحياء.
+              </span>
+            </p>
+
+            <p class="about-paragraph about-paragraph--icon">
+              <i class="fas fa-trophy about-icon" aria-hidden="true"></i>
+              <span>خبرة قوية في التدريس والتعامل مع المناهج الحديثة</span>
+            </p>
+          </div>
+
+          <button
+            class="btn btn-primary btn-large about-btn"
+            data-action="register-now"
+            aria-label="سجل الآن مجانًا"
+            type="button"
+          >
+            <i class="fas fa-user-plus" aria-hidden="true"></i>
+            سجل الآن مجانًا
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 17. آراء الطلاب ==== -->
+  <section class="testimonials-section reveal" aria-labelledby="testimonials-section-title">
+    <div class="container">
+      <div class="section-header">
+        <h2 id="testimonials-section-title" class="section-title">
+          <i class="fas fa-comments section-icon" aria-hidden="true"></i>
+          آراء طلابنا
+        </h2>
+        <p class="section-subtitle">
+          مشاركة تجاربك تساعد الآخرين، وتصنع مجتمع بيولوجست التعليمي الأفضل
+        </p>
+      </div>
+
+      <!-- يُملأ بواسطة buildTestimonialsUI في home.js -->
+      <div class="testimonials-container" role="region" aria-label="آراء الطلاب">
+        <div class="testimonials-loading">
+          <div class="spinner"></div>
+          <p>جاري تحميل الآراء...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 18. مزايا المنصة ==== -->
+  <section class="features-section" data-role-gate="guest" aria-labelledby="features-section-title">
+    <div class="container">
+      <div class="section-header">
+        <h2 id="features-section-title" class="section-title">
+          <i class="fas fa-star section-icon" aria-hidden="true"></i>
+          مزايا منصة بيولوجست
+        </h2>
+        <p class="section-subtitle">
+          لماذا تختار بيولوجست كمساعدك التعليمي
+        </p>
+      </div>
+
+      <div
+        class="features-carousel"
+        id="featuresCarousel"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="مزايا منصة بيولوجست"
+      >
+        <div class="fc-row">
+          <button type="button" class="fc-arrow fc-arrow-prev" aria-label="عرض الميزة السابقة">
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+          </button>
+
+          <div class="fc-viewport">
+            <div class="fc-track">
+              <div class="fc-slide">
+                <div class="feature-card">
+                  <div class="feature-icon"><i class="fas fa-video" aria-hidden="true"></i></div>
+                  <h3 class="feature-title">دروس مصورة عالية الجودة</h3>
+                  <p class="feature-description">
+                    فيديوهات شرح واضحة مع مؤثرات بصرية
+                  </p>
+                </div>
+              </div>
+
+              <div class="fc-slide">
+                <div class="feature-card">
+                  <div class="feature-icon"><i class="fas fa-brain" aria-hidden="true"></i></div>
+                  <h3 class="feature-title">امتحانات تفاعلية</h3>
+                  <p class="feature-description">
+                    تحليل فوري واقتراحات ذكية للمراجعة
+                  </p>
+                </div>
+              </div>
+
+              <div class="fc-slide">
+                <div class="feature-card">
+                  <div class="feature-icon"><i class="fas fa-chart-line" aria-hidden="true"></i></div>
+                  <h3 class="feature-title">تتبع التقدم</h3>
+                  <p class="feature-description">
+                    لوحة تحكم شخصية لقياس تقدمك
+                  </p>
+                </div>
+              </div>
+
+              <div class="fc-slide">
+                <div class="feature-card">
+                  <div class="feature-icon"><i class="fas fa-headset" aria-hidden="true"></i></div>
+                  <h3 class="feature-title">دعم فني دائم</h3>
+                  <p class="feature-description">
+                    فريق دعم جاهز لمساعدتك في أي وقت
+                  </p>
+                </div>
+              </div>
+
+              <div class="fc-slide">
+                <div class="feature-card">
+                  <div class="feature-icon"><i class="fas fa-mobile-alt" aria-hidden="true"></i></div>
+                  <h3 class="feature-title">التعلم في أي مكان</h3>
+                  <p class="feature-description">
+                    متوافق مع الهاتف والكمبيوتر
+                  </p>
+                </div>
+              </div>
+
+              <div class="fc-slide">
+                <div class="feature-card">
+                  <div class="feature-icon"><i class="fas fa-gift" aria-hidden="true"></i></div>
+                  <h3 class="feature-title">التحفيز والمكافآت</h3>
+                  <p class="feature-description">
+                    نظام شارات وإنجازات محفّز
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="button" class="fc-arrow fc-arrow-next" aria-label="عرض الميزة التالية">
+            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <div class="fc-dots-row">
+          <div class="fc-dots" role="tablist" aria-label="التنقل بين مزايا المنصة"></div>
+          <button type="button" class="fc-toggle-auto" aria-label="إيقاف التبديل التلقائي للمزايا">
+            <i class="fas fa-pause" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==== 19. دعوة نهائية للتسجيل ==== -->
+  <section class="cta-section reveal" data-role-gate="guest" aria-labelledby="cta-section-title">
+    <div class="container">
+      <div class="cta-content">
+        <div class="cta-text">
+          <h2 id="cta-section-title" class="cta-title">
+            مستعد لبدء رحلتك التعليمية مع بيولوجست؟
+          </h2>
+          <p class="cta-description">
+            انضم لآلاف الطلاب المتفوقين
+          </p>
+        </div>
+
+        <div class="cta-buttons">
+          <button
+            class="btn btn-primary btn-xlarge cta-btn"
+            data-action="register-now"
+            aria-label="سجل الآن مجانًا"
+            type="button"
+          >
+            <i class="fas fa-user-plus" aria-hidden="true"></i>
+            سجل الآن مجانًا
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

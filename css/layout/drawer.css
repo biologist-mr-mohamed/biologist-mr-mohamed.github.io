@@ -1,0 +1,1245 @@
+/* القائمة الجانبية ومكوّناتها وقائمة الإضافة السريعة - v5.0.0 */
+
+/* ==== 1. الخلفية المعتمة ==== */
+
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-drawer-overlay);
+  background-color: var(--overlay-color);
+  backdrop-filter: blur(var(--overlay-blur));
+  -webkit-backdrop-filter: blur(var(--overlay-blur));
+  opacity: 0;
+  visibility: hidden;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    opacity var(--drawer-transition),
+    visibility 0s linear var(--drawer-duration);
+  will-change: opacity;
+}
+
+.sidebar-overlay.overlay-visible {
+  opacity: var(--overlay-progress, 1);
+  visibility: visible;
+  transition:
+    opacity var(--drawer-transition),
+    visibility 0s linear 0s;
+}
+
+.sidebar-overlay.drawer-dragging {
+  transition: none;
+}
+
+/* ==== 2. هيكل القائمة ==== */
+
+.sidebar {
+  --sb-tint: color-mix(in srgb, var(--primary) 10%, transparent);
+  --sb-tint-strong: color-mix(in srgb, var(--primary) 16%, transparent);
+  --sb-line: var(--border-color-light);
+  --sb-surface: color-mix(in srgb, var(--surface-light) 62%, transparent);
+  --sb-gradient: linear-gradient(135deg, var(--primary), var(--accent));
+  --sb-radius: var(--border-radius-lg);
+  --sb-icon-radius: var(--border-radius-base);
+  --sb-slide: -14px;
+
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  width: min(var(--drawer-width), 88vw);
+  height: 100dvh;
+  overflow: hidden;
+  font-family: var(--font-family-arabic);
+  background: var(--glass-bg-light);
+  backdrop-filter: var(--drawer-blur);
+  -webkit-backdrop-filter: var(--drawer-blur);
+  border-right: 1px solid var(--sb-line);
+  box-shadow: var(--drawer-shadow);
+  transform: translateX(var(--drawer-direction));
+  visibility: hidden;
+  transition:
+    transform var(--drawer-transition),
+    visibility 0s linear var(--drawer-duration);
+  will-change: transform;
+}
+
+.sidebar.drawer-open {
+  visibility: visible;
+  transform: translateX(var(--drawer-drag, 0px));
+  transition:
+    transform var(--drawer-transition),
+    visibility 0s linear 0s;
+}
+
+.sidebar.drawer-dragging {
+  transition: none;
+}
+
+.sidebar::before,
+.sidebar::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.sidebar::before {
+  top: -62%;
+  inset-inline-end: -40%;
+  width: 130%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 20%, transparent), transparent);
+}
+
+.sidebar::after {
+  bottom: -52%;
+  inset-inline-start: -46%;
+  width: 110%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 14%, transparent), transparent);
+}
+
+.sidebar > * {
+  position: relative;
+  z-index: 1;
+}
+
+body.drawer-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* ==== 3. رأس القائمة ==== */
+
+.sidebar-header {
+  flex-shrink: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + var(--space-2)) var(--space-4) var(--space-2);
+}
+
+.sidebar-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 38px;
+}
+
+.close-sidebar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary-light);
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-icon-radius);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    transform var(--duration-base) var(--ease-spring);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.close-sidebar:hover,
+.close-sidebar:focus-visible {
+  color: var(--primary);
+  background: var(--sb-tint);
+  border-color: color-mix(in srgb, var(--primary) 40%, transparent);
+  transform: rotate(90deg);
+}
+
+.close-sidebar:active {
+  transform: rotate(90deg) scale(0.92);
+}
+
+/* ==== 4. لوجو الرأس ==== */
+
+.sb-logo {
+  --sb-logo-icon: 26px;
+  --sb-logo-unit: calc(var(--sb-logo-icon) / 30);
+  --sb-logo-word-w: calc(var(--sb-logo-unit) * 59);
+  --sb-logo-word-left: calc(var(--sb-logo-unit) * 19);
+  --sb-logo-overlap: calc(var(--sb-logo-unit) * 2);
+  --sb-logo-shift: calc(var(--sb-logo-word-left) - var(--sb-logo-icon) + var(--sb-logo-overlap));
+
+  direction: ltr;
+  position: relative;
+  flex-shrink: 0;
+  display: block;
+  width: calc(var(--sb-logo-word-left) + var(--sb-logo-word-w));
+  height: var(--sb-logo-icon);
+  margin-inline-start: calc(var(--sb-logo-unit) * 6);
+  isolation: isolate;
+  white-space: nowrap;
+}
+
+.sb-logo-icon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  width: var(--sb-logo-icon);
+  height: var(--sb-logo-icon);
+  transform-origin: center center;
+  transform: translateX(0) scale(var(--logo-b-scale-closed));
+  transition: transform var(--logo-reveal-duration) var(--logo-motion-ease) 0.3s;
+  will-change: transform;
+}
+
+.sidebar.drawer-open .sb-logo-icon {
+  transform: translateX(var(--sb-logo-shift)) scale(var(--logo-b-scale-open));
+}
+
+.sb-logo-word {
+  position: absolute;
+  left: var(--sb-logo-word-left);
+  top: 0;
+  z-index: 1;
+  width: var(--sb-logo-word-w);
+  height: var(--sb-logo-icon);
+  overflow: hidden;
+  clip-path: inset(0 0 0 100%);
+  -webkit-clip-path: inset(0 0 0 100%);
+  transition: clip-path var(--logo-reveal-duration) var(--logo-motion-ease) 0.3s;
+}
+
+.sidebar.drawer-open .sb-logo-word {
+  clip-path: inset(0 0 0 0%);
+  -webkit-clip-path: inset(0 0 0 0%);
+}
+
+.sb-mask {
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  pointer-events: none;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.sb-icon-teal {
+  color: var(--accent);
+  -webkit-mask-image: var(--logo-mask-icon-teal);
+  mask-image: var(--logo-mask-icon-teal);
+}
+
+.sb-icon-dark {
+  color: var(--logo-dark);
+  -webkit-mask-image: var(--logo-mask-icon-dark);
+  mask-image: var(--logo-mask-icon-dark);
+}
+
+.sb-word-teal {
+  color: var(--accent);
+  -webkit-mask-image: var(--logo-mask-word-teal);
+  mask-image: var(--logo-mask-word-teal);
+}
+
+.sb-word-dark {
+  color: var(--logo-dark);
+  -webkit-mask-image: var(--logo-mask-word-dark);
+  mask-image: var(--logo-mask-word-dark);
+}
+
+/* ==== 5. منطقة المستخدم ==== */
+
+.sidebar-user {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--space-1);
+  text-align: center;
+}
+
+.sidebar-user > .user-avatar-large { order: 1; }
+.sidebar-user > .sb-greeting       { order: 2; }
+.sidebar-user > .user-info         { order: 3; }
+.sidebar-user > .sb-stats          { order: 4; }
+.sidebar-user > .sb-progress       { order: 5; }
+.sidebar-user > .sb-last-activity  { order: 6; }
+
+.user-avatar-large {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--drawer-avatar-size);
+  height: var(--drawer-avatar-size);
+  margin: 0 auto var(--space-2);
+  opacity: 0;
+  transform: scale(0.82);
+  transition:
+    opacity var(--duration-slow) ease 0.15s,
+    transform 0.7s var(--ease-spring) 0.15s;
+}
+
+.sidebar.drawer-open .user-avatar-large {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.user-avatar-large::before {
+  content: '';
+  position: absolute;
+  inset: -34%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--primary) 30%, transparent), transparent);
+  opacity: 0;
+  transform: scale(0.7);
+  pointer-events: none;
+  transition: opacity 1s ease 0.3s, transform 1.2s var(--ease-out) 0.3s;
+}
+
+.sidebar.drawer-open .user-avatar-large::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.sidebar-avatar-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* ==== 6. تكامل avatar.js ==== */
+
+.sidebar-avatar-container .avatar-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-avatar-container .avatar-wrapper--lg {
+  --aw-size: var(--drawer-avatar-wrapper-size);
+  --aw-border: var(--drawer-avatar-wrapper-border);
+}
+
+.sidebar-avatar-container .avatar-wrapper:hover .avatar-frame {
+  transform: scale(1.05);
+  transition: transform 0.36s var(--ease-spring), box-shadow 0.36s ease;
+}
+
+.sidebar-avatar-container .avatar-image {
+  background-color: var(--background-light);
+  image-rendering: high-quality;
+}
+
+.sidebar-avatar-container .avatar-sprite-layer {
+  will-change: background-position;
+  image-rendering: high-quality;
+}
+
+.sidebar-avatar-container .avatar-shimmer {
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.sidebar-avatar-container .avatar-pulse-ring {
+  inset: -10px;
+  z-index: 0;
+  border: 2.5px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  pointer-events: none;
+  animation: drawerPulseRing 2.8s ease-out infinite;
+}
+
+.sidebar-avatar-container .avatar-pulse-ring::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 1.5px solid color-mix(in srgb, var(--primary) 14%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: drawerPulseRing 2.8s ease-out 0.9s infinite;
+}
+
+.sidebar-avatar-container .verification-badge {
+  position: absolute;
+  bottom: 4px;
+  inset-inline-end: 4px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--drawer-verification-size);
+  height: var(--drawer-verification-size);
+  font-size: var(--drawer-verification-font);
+  color: var(--on-primary);
+  background: var(--primary);
+  border: var(--drawer-verification-border) solid var(--surface-light);
+  border-radius: 50%;
+  box-shadow: var(--shadow-md);
+  transform: translate(10%, 10%);
+  pointer-events: none;
+  transition: transform var(--duration-base) var(--ease-spring), box-shadow var(--duration-base) ease;
+  animation: badgeEntrance 0.5s var(--ease-spring) both;
+}
+
+.sidebar-avatar-container .avatar-wrapper:hover .verification-badge {
+  transform: translate(10%, 10%) scale(1.2);
+  box-shadow: var(--shadow-lg);
+}
+
+.sidebar-avatar-container .verification-badge.badge--teacher {
+  color: #fff;
+  background: linear-gradient(135deg, var(--frame-teacher-start), var(--frame-teacher-end));
+}
+
+.sidebar-avatar-container .verification-badge.badge--moderator {
+  color: #fff;
+  background: linear-gradient(135deg, var(--frame-mod-start), var(--frame-mod-end));
+}
+
+.sidebar-avatar-container .avatar-frame--teacher {
+  filter: drop-shadow(0 6px 16px color-mix(in srgb, var(--frame-teacher-start) 30%, transparent));
+  animation: drawerFrameTeacher 2.6s ease-in-out infinite;
+}
+
+.sidebar-avatar-container .avatar-frame--moderator {
+  filter: drop-shadow(0 6px 16px color-mix(in srgb, var(--frame-mod-start) 28%, transparent));
+  animation: drawerFrameModerator 2.6s ease-in-out infinite;
+}
+
+.sidebar-avatar-container .avatar-frame--gold {
+  filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--frame-gold-end) 36%, transparent));
+  animation: drawerFrameGold 2.2s ease-in-out infinite;
+}
+
+.sidebar-avatar-container .avatar-frame--silver {
+  filter: drop-shadow(0 4px 12px color-mix(in srgb, var(--frame-silver-end) 22%, transparent));
+  animation: drawerFrameSilver 3.4s ease-in-out infinite;
+}
+
+.sidebar-avatar-container .avatar-frame--bronze {
+  filter: drop-shadow(0 4px 10px color-mix(in srgb, var(--frame-bronze-start) 18%, transparent));
+  transition: filter 0.35s ease;
+}
+
+.sidebar-avatar-container .avatar-frame--bronze:hover {
+  filter: drop-shadow(0 6px 16px color-mix(in srgb, var(--frame-bronze-start) 30%, transparent));
+}
+
+/* ==== 7. الهوية النصية ==== */
+
+.sb-greeting {
+  margin: 0 0 2px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary-light);
+}
+
+.sidebar-user .user-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.sidebar-user .user-name {
+  flex: 1 0 100%;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--font-size-xl);
+  font-weight: 800;
+  line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-primary-light);
+}
+
+.sidebar-user .user-role {
+  margin: 0;
+  padding: 3px var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--sb-tint);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  border-radius: var(--border-radius-full);
+}
+
+.sidebar-user .user-streak {
+  --streak-color: var(--warning);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 3px var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  color: var(--streak-color);
+  background: color-mix(in srgb, var(--streak-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--streak-color) 28%, transparent);
+  border-radius: var(--border-radius-full);
+  transition:
+    color var(--duration-base) ease,
+    background-color var(--duration-base) ease,
+    border-color var(--duration-base) ease;
+}
+
+.sidebar-user .user-streak i {
+  font-size: var(--font-size-sm);
+}
+
+.sidebar-user .user-streak.streak--medium {
+  --streak-color: color-mix(in srgb, var(--warning) 55%, var(--error));
+}
+
+.sidebar-user .user-streak.streak--high {
+  --streak-color: color-mix(in srgb, var(--warning) 25%, var(--error));
+  animation: streakGlow 1.8s ease-in-out infinite;
+}
+
+.sidebar-user .user-streak.streak--legend {
+  --streak-color: var(--error);
+  animation: streakGlow 1.2s ease-in-out infinite;
+}
+
+/* ==== 8. الإحصائيات السريعة ==== */
+
+.sb-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  width: 100%;
+  margin-top: var(--space-3);
+}
+
+.sb-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px var(--space-1) var(--space-2);
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+  transition:
+    transform var(--duration-base) var(--ease-spring),
+    border-color var(--duration-fast) ease;
+}
+
+.sb-stat:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.sb-stat-icon {
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  color: var(--primary);
+}
+
+.sb-stat-value {
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text-primary-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-stat-label {
+  font-size: 11px;
+  color: var(--text-tertiary-light);
+}
+
+/* ==== 9. شريط التقدم ==== */
+
+.sb-progress {
+  width: 100%;
+  margin-top: var(--space-3);
+}
+
+.sb-progress-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-xs);
+}
+
+.sb-progress-label {
+  font-weight: 600;
+  color: var(--text-secondary-light);
+}
+
+.sb-progress-percent {
+  font-weight: 700;
+  color: var(--text-primary-light);
+  font-variant-numeric: tabular-nums;
+}
+
+.sb-progress-track {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--border-radius-full);
+  background: color-mix(in srgb, var(--text-primary-light) 10%, transparent);
+}
+
+.sb-progress-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+  transform: scaleX(calc(var(--sb-progress, 0) / 100));
+  transform-origin: 100% 50%;
+  transition: transform 0.9s var(--ease-out) 0.4s;
+  will-change: transform;
+}
+
+[dir="ltr"] .sb-progress-fill {
+  transform-origin: 0 50%;
+}
+
+/* ==== 10. آخر نشاط ==== */
+
+.sb-last-activity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: 11px;
+  color: var(--text-tertiary-light);
+}
+
+.sb-last-activity i {
+  font-size: 11px;
+  color: var(--primary);
+}
+
+/* ==== 11. المحتوى القابل للتمرير ==== */
+
+.sidebar-content {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-2) var(--space-3) var(--space-4);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, var(--sb-line) 20%, var(--sb-line) 80%, transparent) 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sb-line) transparent;
+}
+
+.sidebar-content::-webkit-scrollbar { width: 5px; }
+.sidebar-content::-webkit-scrollbar-track { background: transparent; }
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--sb-line);
+  border-radius: var(--border-radius-full);
+}
+.sidebar-content::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ==== 12. المجموعات والقوائم ==== */
+
+.sidebar-group + .sidebar-group {
+  margin-top: var(--space-2);
+}
+
+.sidebar-group-label {
+  margin: var(--space-3) var(--space-3) var(--space-1);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary-light);
+}
+
+.sidebar-menu {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar-menu-item {
+  margin-bottom: 2px;
+  opacity: 0;
+  transform: translateX(var(--sb-slide));
+  transition: opacity 0.35s ease, transform 0.45s var(--ease-out);
+}
+
+.sidebar.drawer-open .sidebar-menu-item {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--sb-group-delay, 0ms) + var(--sb-i, 0) * 40ms + 150ms);
+}
+
+.sidebar-logged > :nth-child(2) { --sb-group-delay: 120ms; }
+.sidebar-logged > :nth-child(3) { --sb-group-delay: 240ms; }
+.sidebar-logged > :nth-child(4) { --sb-group-delay: 360ms; }
+
+.sidebar-menu-item:nth-child(1) { --sb-i: 0; }
+.sidebar-menu-item:nth-child(2) { --sb-i: 1; }
+.sidebar-menu-item:nth-child(3) { --sb-i: 2; }
+.sidebar-menu-item:nth-child(4) { --sb-i: 3; }
+.sidebar-menu-item:nth-child(5) { --sb-i: 4; }
+.sidebar-menu-item:nth-child(6) { --sb-i: 5; }
+
+/* ==== 13. الرابط ==== */
+
+.sidebar-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 48px;
+  padding: 7px 10px;
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: start;
+  color: var(--text-primary-light);
+  background: transparent;
+  border: 0;
+  border-radius: var(--sb-radius);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sidebar-link > i {
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  font-size: 15px;
+  color: var(--primary);
+  background: var(--sb-tint);
+  border-radius: var(--sb-icon-radius);
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    transform var(--duration-base) var(--ease-spring);
+}
+
+.sidebar-link > span:not(.sb-switch) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.sidebar-link::after {
+  content: '';
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-inline-end: 6px;
+  border: solid currentColor;
+  border-width: 0 0 2px 2px;
+  opacity: 0;
+  transform: translateX(4px) rotate(45deg);
+  transition: opacity var(--duration-fast) ease, transform var(--duration-base) ease;
+}
+
+.sidebar-link:hover,
+.sidebar-link:focus-visible {
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 7%, transparent);
+}
+
+.sidebar-link:hover > i,
+.sidebar-link:focus-visible > i {
+  color: var(--on-primary);
+  background: var(--primary);
+  transform: scale(1.06);
+}
+
+.sidebar-link:hover::after,
+.sidebar-link:focus-visible::after {
+  opacity: 0.55;
+  transform: translateX(0) rotate(45deg);
+}
+
+.sidebar-link:active {
+  transform: scale(0.98);
+}
+
+.sidebar-link.active {
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--sb-tint-strong);
+}
+
+.sidebar-link.active > i {
+  color: var(--on-primary);
+  background: var(--sb-gradient);
+}
+
+.sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: -6px;
+  top: 50%;
+  width: 3px;
+  height: 22px;
+  margin-top: -11px;
+  background: linear-gradient(180deg, var(--primary), var(--accent));
+  border-radius: var(--border-radius-full);
+}
+
+.sidebar-link.add-button {
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--primary) 40%, transparent);
+}
+
+.sidebar-link.add-button:hover {
+  border-style: solid;
+}
+
+.sidebar-link--danger,
+.sidebar-link--danger:hover,
+.sidebar-link--danger:focus-visible {
+  color: var(--error);
+}
+
+.sidebar-link--danger > i {
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+}
+
+.sidebar-link--danger:hover,
+.sidebar-link--danger:focus-visible {
+  background: color-mix(in srgb, var(--error) 8%, transparent);
+}
+
+.sidebar-link--danger:hover > i,
+.sidebar-link--danger:focus-visible > i {
+  color: var(--on-primary);
+  background: var(--error);
+}
+
+/* ==== 14. مفتاح الوضع الليلي ==== */
+
+.theme-toggle-sidebar .sb-icon-sun {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle-sidebar .sb-icon-moon {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle-sidebar .sb-icon-sun {
+  display: grid;
+}
+
+.theme-toggle-sidebar::after {
+  display: none;
+}
+
+.sb-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 38px;
+  height: 22px;
+  margin-inline-start: auto;
+  background: color-mix(in srgb, var(--text-primary-light) 18%, transparent);
+  border-radius: var(--border-radius-full);
+  transition: background-color var(--duration-base) ease;
+}
+
+.sb-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  inset-inline-start: 3px;
+  width: 16px;
+  height: 16px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  transition: inset-inline-start var(--duration-base) var(--ease-spring);
+}
+
+[data-theme="dark"] .sb-switch {
+  background: var(--primary);
+}
+
+[data-theme="dark"] .sb-switch::after {
+  inset-inline-start: calc(100% - 19px);
+}
+
+/* ==== 15. محتوى الضيف ==== */
+
+.sidebar-guest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-1);
+}
+
+.sidebar-guest .sidebar-message {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  color: var(--text-secondary-light);
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-radius);
+}
+
+.sidebar-guest .sidebar-message i {
+  margin-top: var(--space-1);
+  color: var(--primary);
+}
+
+.sidebar-guest .sidebar-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sidebar-guest .sidebar-btn {
+  min-height: 48px;
+  border-radius: var(--sb-radius);
+}
+
+/* ==== 16. عناصر المستخدم المسجل الإضافية ==== */
+
+.sb-role-banner,
+.sb-dev-info {
+  margin: var(--space-4) var(--space-1) 0;
+}
+
+.sb-role-banner {
+  padding: 10px var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  text-align: center;
+  color: var(--primary);
+  background: linear-gradient(135deg, var(--sb-tint-strong), color-mix(in srgb, var(--accent) 10%, transparent));
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+  border-radius: var(--sb-radius);
+}
+
+.sb-dev-info {
+  padding: var(--space-2) var(--space-3);
+  font-size: 11px;
+  color: var(--text-tertiary-light);
+  border: 1px dashed var(--sb-line);
+  border-radius: var(--border-radius-md);
+}
+
+.sb-dev-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: 3px 0;
+  direction: ltr;
+}
+
+.sb-dev-info-row i {
+  color: var(--primary);
+}
+
+/* ==== 17. التذييل ==== */
+
+.sidebar-footer {
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-4) calc(env(safe-area-inset-bottom, 0px) + var(--space-3));
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, var(--sb-line) 20%, var(--sb-line) 80%, transparent) 1;
+}
+
+.sidebar-social {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.social-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  color: var(--text-secondary-light);
+  background: var(--sb-surface);
+  border: 1px solid var(--sb-line);
+  border-radius: var(--sb-icon-radius);
+  transition:
+    background-color var(--duration-fast) ease,
+    color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    transform var(--duration-base) var(--ease-spring);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.social-icon:hover,
+.social-icon:focus-visible {
+  color: var(--on-primary);
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-3px);
+}
+
+.sidebar-version {
+  text-align: center;
+  font-family: var(--font-family-english);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  color: var(--text-tertiary-light);
+  opacity: 0.8;
+}
+
+/* ==== 18. إمكانية الوصول ==== */
+
+.sidebar:focus {
+  outline: none;
+}
+
+.sidebar-link:focus-visible,
+.close-sidebar:focus-visible,
+.social-icon:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.sidebar [hidden] {
+  display: none !important;
+}
+
+/* ==== 19. التجاوب ==== */
+
+@media (max-width: 767.98px) {
+  .sidebar-user .user-name {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@media (max-height: 560px) {
+  .sidebar-user {
+    margin-top: var(--space-1);
+  }
+
+  .sb-stats,
+  .sb-progress,
+  .sb-last-activity {
+    display: none;
+  }
+
+  .sidebar-footer {
+    padding-block: var(--space-2);
+  }
+
+  .sidebar-social {
+    margin-bottom: var(--space-2);
+  }
+}
+
+/* ==== 20. تقليل الحركة ==== */
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .sidebar-overlay,
+  .sidebar-link,
+  .sidebar-link > i,
+  .sidebar-link::after,
+  .sidebar-menu-item,
+  .sb-logo-icon,
+  .sb-logo-word,
+  .sb-switch::after,
+  .sb-progress-fill,
+  .sb-stat,
+  .user-avatar-large,
+  .user-avatar-large::before,
+  .close-sidebar,
+  .social-icon,
+  .user-streak {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .sidebar-menu-item,
+  .user-avatar-large {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .sb-logo-icon {
+    transform: translateX(var(--sb-logo-shift)) !important;
+  }
+
+  .sb-logo-word {
+    clip-path: inset(0 0 0 0%) !important;
+    -webkit-clip-path: inset(0 0 0 0%) !important;
+  }
+
+  .sidebar-avatar-container .avatar-frame--teacher,
+  .sidebar-avatar-container .avatar-frame--moderator,
+  .sidebar-avatar-container .avatar-frame--gold,
+  .sidebar-avatar-container .avatar-frame--silver,
+  .sidebar-avatar-container .avatar-pulse-ring,
+  .sidebar-avatar-container .avatar-pulse-ring::after,
+  .sidebar-avatar-container .verification-badge {
+    animation: none !important;
+  }
+}
+
+/* ==== 21. قائمة الإضافة السريعة ==== */
+
+.add-menu-container,
+.add-menu-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.add-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--modals-min-touch);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-family-arabic);
+  font-size: var(--font-size-base);
+  text-align: start;
+  color: var(--text-primary-light);
+  background-color: var(--background-light);
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
+}
+
+.add-menu-item:hover,
+.add-menu-item:focus-visible {
+  background-color: var(--hover-light);
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  transform: translateY(-1px);
+}
+
+.add-menu-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.add-menu-item:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.add-menu-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  font-size: var(--font-size-lg);
+  border-radius: 50%;
+  transition: transform var(--duration-fast) ease;
+}
+
+.add-menu-item:hover .add-menu-icon {
+  transform: scale(1.08);
+}
+
+.add-menu-icon--lesson    { color: var(--success);   background-color: color-mix(in srgb, var(--success) 12%, transparent); }
+.add-menu-icon--exam      { color: var(--info);      background-color: color-mix(in srgb, var(--info) 12%, transparent); }
+.add-menu-icon--event     { color: var(--warning);   background-color: color-mix(in srgb, var(--warning) 12%, transparent); }
+.add-menu-icon--unit      { color: var(--primary);   background-color: color-mix(in srgb, var(--primary) 12%, transparent); }
+.add-menu-icon--moderator { color: var(--error);     background-color: color-mix(in srgb, var(--error) 12%, transparent); }
+
+.add-menu-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.add-menu-arrow {
+  flex-shrink: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary-light);
+  transition: transform var(--duration-fast) ease, color var(--duration-fast) ease;
+}
+
+.add-menu-item:hover .add-menu-arrow {
+  color: var(--primary);
+  transform: translateX(-3px);
+}
+
+.add-menu-footer {
+  margin-top: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--border-color-light);
+}
+
+.add-menu-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary-light);
+}
+
+.add-menu-note i {
+  color: var(--primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .add-menu-item,
+  .add-menu-icon,
+  .add-menu-arrow {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ==== 22. نموذج إضافة حدث / إعلان ==== */
+
+.add-event-form .required-mark {
+  font-weight: 700;
+  color: var(--error);
+}
+
+.add-event-form textarea.form-control {
+  min-height: 90px;
+  line-height: 1.6;
+  resize: vertical;
+}

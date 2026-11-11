@@ -1,0 +1,86 @@
+/* ====== 🌟 الثيم الأزرق السماوي (Blue Sky) - الإصدار 5.0.0 ====== */
+/* ====== يحتوي على جميع المتغيرات اللونية للوضعين النهاري والليلي ====== */
+
+/* 🌞 الوضع النهاري */
+:root,
+[data-theme="light"] {
+  --primary: #2196f3;
+  --primary-dark: #1976d2;
+  --primary-light: #64b5f6;
+  --primary-rgb: 33, 150, 243;
+  --on-primary: #ffffff;
+  
+  --secondary: #1565c0;
+  --secondary-light: #42a5f5;
+  --secondary-rgb: 21, 101, 192;
+  
+  --accent: #00bcd4;
+  --accent-dark: #0097a7;
+  --accent-rgb: 0, 188, 212;
+  
+  --background-light: #f0f8ff;
+  --surface-light: #ffffff;
+  --surface-hover-light: rgba(33, 150, 243, 0.08);
+  
+  --text-primary-light: #1a2a3a;
+  --text-secondary-light: #4a5a6a;
+  --text-tertiary-light: #617486;
+  
+  --border-color-light: rgba(33, 150, 243, 0.2);
+  --border-color-dark: rgba(33, 150, 243, 0.3);
+  
+  --hover-light: rgba(33, 150, 243, 0.1);
+  --active-light: rgba(33, 150, 243, 0.2);
+  
+  --shadow-sm: 0 2px 8px rgba(33, 150, 243, 0.1);
+  --shadow-md: 0 4px 16px rgba(33, 150, 243, 0.15);
+  --shadow-lg: 0 8px 24px rgba(33, 150, 243, 0.2);
+  --shadow-xl: 0 12px 32px rgba(33, 150, 243, 0.25);
+  
+  --xp-start: #FFD700;
+  --xp-end: #FFA000;
+  --level-badge-bg: var(--primary);
+  --level-badge-text: #ffffff;
+  --challenge-bg: rgba(33, 150, 243, 0.1);
+  --challenge-border: rgba(33, 150, 243, 0.3);}
+
+/* 🌙 الوضع الليلي */
+[data-theme="dark"] {
+  --primary: #64b5f6;
+  --primary-dark: #42a5f5;
+  --primary-light: #90caf9;
+  --primary-rgb: 100, 181, 246;
+  --on-primary: #0a1929; /* نص داكن فوق الأزرق الفاتح لتباين مقروء */
+  
+  --secondary: #2196f3;
+  --secondary-light: #64b5f6;
+  --secondary-rgb: 33, 150, 243;
+  
+  --accent: #26c6da;
+  --accent-dark: #00bcd4;
+  --accent-rgb: 38, 198, 218;
+  
+  --background-light: #0a1929;
+  --surface-light: #132f4c;
+  --surface-hover-light: rgba(33, 150, 243, 0.12);
+  
+  --text-primary-light: #e3f2fd;
+  --text-secondary-light: #b0c4de;
+  --text-tertiary-light: #7a9bcb;
+  
+  --border-color-light: rgba(33, 150, 243, 0.3);
+  --border-color-dark: rgba(255, 255, 255, 0.1);
+  
+  --hover-light: rgba(100, 181, 246, 0.15);
+  --active-light: rgba(100, 181, 246, 0.25);
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.8);
+  
+  --xp-start: #FFD700;
+  --xp-end: #FF8F00;
+  --level-badge-text: var(--on-primary);
+  --challenge-bg: rgba(100, 181, 246, 0.15);
+  --challenge-border: rgba(100, 181, 246, 0.4);}

@@ -1,0 +1,222 @@
+<div class="pf-root page-content" data-page="profile" data-pf-mode="" data-pf-subject="" data-pf-state="loading">
+  <h1 class="visually-hidden" id="pf-page-title">الملف الشخصي - منصة بيولوجست</h1>
+
+  <!-- حالة الاتصال -->
+  <div class="pf-conn" id="pf-conn" role="status" aria-live="polite" hidden>
+    <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+    <span>أنت غير متصل حاليًا — قد لا تكون البيانات المعروضة محدّثة</span>
+  </div>
+
+  <!-- حالة عامة: غير متاح / خطأ -->
+  <section class="pf-state" id="pf-state" role="alert" hidden>
+    <div class="pf-state__icon" id="pf-state-icon" aria-hidden="true"><i class="fas fa-user-slash"></i></div>
+    <h2 class="pf-state__title" id="pf-state-title">الملف غير متاح</h2>
+    <p class="pf-state__text" id="pf-state-text">تعذّر العثور على هذا الملف الشخصي.</p>
+    <div class="pf-state__actions">
+      <button type="button" class="pf-btn pf-btn--primary" id="pf-state-retry" hidden>
+        <i class="fas fa-redo" aria-hidden="true"></i><span>إعادة المحاولة</span>
+      </button>
+      <button type="button" class="pf-btn pf-btn--ghost" data-pf-nav="home">
+        <i class="fas fa-home" aria-hidden="true"></i><span>الرئيسية</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- الهيدر -->
+  <header class="pf-header" id="pf-header" data-pf-section="header" aria-busy="true">
+    <div class="pf-cover" aria-hidden="true">
+      <svg class="pf-cover__art" viewBox="0 0 240 160" focusable="false" preserveAspectRatio="xMidYMid slice">
+        <g class="pf-cover__helix" fill="none" stroke-linecap="round">
+          <path d="M0 80 C20 20 40 20 60 80 S100 140 120 80 S160 20 180 80 S220 140 240 80" />
+          <path d="M0 80 C20 140 40 140 60 80 S100 20 120 80 S160 140 180 80 S220 20 240 80" />
+        </g>
+        <g class="pf-cover__rungs" stroke-linecap="round">
+          <line x1="30" y1="38" x2="30" y2="122" />
+          <line x1="90" y1="122" x2="90" y2="38" />
+          <line x1="150" y1="38" x2="150" y2="122" />
+          <line x1="210" y1="122" x2="210" y2="38" />
+        </g>
+        <g class="pf-cover__cells" fill="none">
+          <circle cx="30" cy="136" r="9" />
+          <circle cx="30" cy="136" r="3" />
+          <circle cx="205" cy="26" r="12" />
+          <circle cx="205" cy="26" r="4" />
+          <circle cx="118" cy="140" r="5" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="pf-cover-actions" id="pf-cover-actions"></div>
+
+    <div class="pf-identity">
+      <div class="pf-avatar-slot" id="pf-avatar-slot">
+        <div class="pf-skel pf-skel--avatar skeleton"></div>
+      </div>
+
+      <div class="pf-identity__text">
+        <h2 class="pf-name" id="pf-name"><span class="pf-skel pf-skel--title skeleton"></span></h2>
+        <div class="pf-chips" id="pf-chips"></div>
+        <ul class="pf-meta" id="pf-meta"></ul>
+      </div>
+
+      <div class="pf-identity__actions" id="pf-header-actions"></div>
+    </div>
+  </header>
+
+  <!-- الشبكة الرئيسية -->
+  <div class="pf-grid" id="pf-grid" hidden>
+
+    <!-- العمود الرئيسي -->
+    <div class="pf-col pf-col--main">
+
+      <!-- إجراءات الطاقم -->
+      <section class="pf-card pf-card--staff" id="pf-staff" data-pf-section="staff" aria-labelledby="pf-staff-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-staff-title"><i class="fas fa-user-shield" aria-hidden="true"></i><span>إجراءات الطاقم</span></h3>
+          <button type="button" class="pf-icon-btn pf-icon-btn--flat" id="pf-staff-toggle" aria-expanded="false" aria-controls="pf-staff-body" aria-label="إظهار إجراءات الطاقم">
+            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+          </button>
+        </header>
+        <div class="pf-card__body" id="pf-staff-body" data-pf-body hidden></div>
+      </section>
+
+      <!-- رحلة التعلم -->
+      <section class="pf-card" id="pf-journey" data-pf-section="journey" aria-labelledby="pf-journey-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-journey-title"><i class="fas fa-route" aria-hidden="true"></i><span>رحلة التعلم</span></h3>
+          <span class="pf-card__sub" id="pf-journey-sub"></span>
+        </header>
+        <div class="pf-card__body" data-pf-body></div>
+      </section>
+
+      <!-- تحليل الأداء -->
+      <section class="pf-card" id="pf-performance" data-pf-section="performance" aria-labelledby="pf-performance-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-performance-title"><i class="fas fa-chart-line" aria-hidden="true"></i><span>تحليل الأداء</span></h3>
+          <span class="pf-card__sub" id="pf-performance-sub"></span>
+        </header>
+        <div class="pf-card__body" data-pf-body></div>
+      </section>
+
+      <!-- سجل النشاط -->
+      <section class="pf-card" id="pf-activity" data-pf-section="activity" aria-labelledby="pf-activity-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-activity-title"><i class="fas fa-history" aria-hidden="true"></i><span>سجل النشاط</span></h3>
+          <span class="pf-card__sub" id="pf-activity-sub"></span>
+        </header>
+        <div class="pf-card__body" data-pf-body></div>
+      </section>
+    </div>
+
+    <!-- العمود الجانبي -->
+    <div class="pf-col pf-col--side">
+
+      <!-- المستوى -->
+      <section class="pf-card" id="pf-level" data-pf-section="level" aria-labelledby="pf-level-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-level-title"><i class="fas fa-bolt" aria-hidden="true"></i><span>المستوى</span></h3>
+        </header>
+        <div class="pf-card__body" data-pf-body></div>
+      </section>
+
+      <!-- الإحصاءات -->
+      <section class="pf-card" id="pf-stats" data-pf-section="stats" aria-labelledby="pf-stats-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-stats-title"><i class="fas fa-chart-pie" aria-hidden="true"></i><span>الإحصاءات</span></h3>
+        </header>
+        <div class="pf-card__body" data-pf-body></div>
+      </section>
+
+      <!-- الميداليات -->
+      <section class="pf-card" id="pf-medals" data-pf-section="medals" aria-labelledby="pf-medals-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-medals-title"><i class="fas fa-medal" aria-hidden="true"></i><span>الميداليات</span></h3>
+        </header>
+        <div class="pf-card__body" data-pf-body></div>
+      </section>
+
+      <!-- الاستمرارية -->
+      <section class="pf-card" id="pf-streak" data-pf-section="streak" aria-labelledby="pf-streak-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-streak-title"><i class="fas fa-fire" aria-hidden="true"></i><span>الاستمرارية</span></h3>
+        </header>
+        <div class="pf-card__body" data-pf-body></div>
+      </section>
+
+      <!-- بيانات الحساب -->
+      <section class="pf-card" id="pf-account" data-pf-section="account" aria-labelledby="pf-account-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-account-title"><i class="fas fa-id-card" aria-hidden="true"></i><span>بيانات الحساب</span></h3>
+        </header>
+        <div class="pf-card__body" data-pf-body></div>
+      </section>
+
+      <!-- إجماليات المنصة -->
+      <section class="pf-card" id="pf-platform" data-pf-section="platform" aria-labelledby="pf-platform-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-platform-title"><i class="fas fa-globe" aria-hidden="true"></i><span>إجماليات المنصة</span></h3>
+          <button type="button" class="pf-icon-btn pf-icon-btn--flat" id="pf-platform-refresh" aria-label="تحديث الإجماليات">
+            <i class="fas fa-sync-alt" aria-hidden="true"></i>
+          </button>
+        </header>
+        <div class="pf-card__body" data-pf-body></div>
+      </section>
+
+      <!-- اختصارات -->
+      <section class="pf-card" id="pf-shortcuts" data-pf-section="shortcuts" aria-labelledby="pf-shortcuts-title" hidden>
+        <header class="pf-card__head">
+          <h3 class="pf-card__title" id="pf-shortcuts-title"><i class="fas fa-compass" aria-hidden="true"></i><span>اختصارات</span></h3>
+        </header>
+        <div class="pf-card__body">
+          <div class="pf-shortcuts">
+            <button type="button" class="pf-shortcut" data-pf-nav="settings">
+              <i class="fas fa-cog" aria-hidden="true"></i><span>الإعدادات</span>
+            </button>
+            <button type="button" class="pf-shortcut" data-pf-nav="favorites">
+              <i class="fas fa-heart" aria-hidden="true"></i><span>المفضلة</span>
+            </button>
+            <button type="button" class="pf-shortcut pf-shortcut--student" data-pf-nav="lessons">
+              <i class="fas fa-book-open" aria-hidden="true"></i><span>الدروس</span>
+            </button>
+            <button type="button" class="pf-shortcut pf-shortcut--student" data-pf-nav="exams">
+              <i class="fas fa-clipboard-check" aria-hidden="true"></i><span>الامتحانات</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- قوالب الهياكل -->
+  <template id="pf-tpl-skel-lines">
+    <div class="pf-skel-group" aria-hidden="true">
+      <div class="pf-skel pf-skel--line skeleton"></div>
+      <div class="pf-skel pf-skel--line pf-skel--short skeleton"></div>
+      <div class="pf-skel pf-skel--bar skeleton"></div>
+    </div>
+  </template>
+
+  <template id="pf-tpl-skel-tiles">
+    <div class="pf-skel-group pf-skel-group--tiles" aria-hidden="true">
+      <div class="pf-skel pf-skel--tile skeleton"></div>
+      <div class="pf-skel pf-skel--tile skeleton"></div>
+      <div class="pf-skel pf-skel--tile skeleton"></div>
+      <div class="pf-skel pf-skel--tile skeleton"></div>
+    </div>
+  </template>
+
+  <template id="pf-tpl-skel-list">
+    <div class="pf-skel-group" aria-hidden="true">
+      <div class="pf-skel pf-skel--row skeleton"></div>
+      <div class="pf-skel pf-skel--row skeleton"></div>
+      <div class="pf-skel pf-skel--row skeleton"></div>
+    </div>
+  </template>
+
+  <template id="pf-tpl-skel-chart">
+    <div class="pf-skel-group" aria-hidden="true">
+      <div class="pf-skel pf-skel--chart skeleton"></div>
+      <div class="pf-skel pf-skel--line pf-skel--short skeleton"></div>
+    </div>
+  </template>
+</div>

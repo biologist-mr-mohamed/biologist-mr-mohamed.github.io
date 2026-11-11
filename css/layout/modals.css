@@ -1,0 +1,1201 @@
+/* نظام النوافذ والإشعارات المتكامل - v5.0.0 */
+
+/* ==== 1. منع تمرير الصفحة ==== */
+
+.modals-body-locked {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* ==== 2. الخلفية الضبابية ==== */
+
+.modals-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--modals-backdrop-bg, rgba(0, 0, 0, 0.55));
+  backdrop-filter: var(--modals-backdrop-blur, blur(4px));
+  -webkit-backdrop-filter: var(--modals-backdrop-blur, blur(4px));
+  z-index: 8999;
+  opacity: 0;
+  transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.modals-backdrop--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ==== 3. طبقة تمركز النوافذ ==== */
+
+.modals-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--modals-z-modal, 9000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: var(--space-4, 1rem);
+  padding-top: max(var(--space-4, 1rem), env(safe-area-inset-top));
+  padding-bottom: max(var(--space-4, 1rem), env(safe-area-inset-bottom));
+}
+
+.modals-layer .modals-dialog,
+.modals-layer .modals-bottomsheet {
+  pointer-events: auto;
+}
+
+/* ==== 4. النوافذ العامة ==== */
+
+/* ==== 5. العنصر الأساسي ==== */
+/* overflow ظاهر على الحوار لأن الجسم هو الذي يتمرر */
+
+.modals-dialog {
+  position: relative;
+  background: var(--surface-light, #ffffff);
+  border-radius: var(--modals-radius, 16px);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.18),
+    0 8px 20px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: scale(0.94) translateY(16px);
+  transition:
+    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.3s cubic-bezier(0.34, 1.3, 0.64, 1);
+  direction: rtl;
+  overflow: visible;
+  margin: auto;
+  will-change: transform, opacity;
+}
+
+/* ==== 6. حالات الظهور والإخفاء ==== */
+
+.modals-dialog--visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.modals-dialog--hiding {
+  opacity: 0;
+  transform: scale(0.94) translateY(12px);
+  transition:
+    opacity 0.22s cubic-bezier(0.4, 0, 1, 1),
+    transform 0.22s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ==== 7. مودال مكدَّس خلف مودال آخر ==== */
+
+.modals-dialog--stacked-behind {
+  transform: scale(0.94) translateY(-10px);
+  opacity: 0.55;
+  filter: blur(1.5px);
+  pointer-events: none;
+  transition:
+    opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    filter 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==== 8. أحجام النوافذ ==== */
+
+.modals-dialog--sm { max-width: 400px; }
+.modals-dialog--md { max-width: 520px; }
+.modals-dialog--lg { max-width: 680px; }
+.modals-dialog--xl { max-width: 860px; }
+
+.modals-dialog--fullscreen {
+  max-width: min(95vw, 900px);
+  max-height: 95dvh;
+  border-radius: var(--border-radius-lg, 16px);
+}
+
+@media (max-width: 520px) {
+  .modals-dialog--sm,
+  .modals-dialog--md,
+  .modals-dialog--lg,
+  .modals-dialog--xl {
+    max-width: calc(100vw - 2 * var(--space-4, 1rem));
+    max-height: 88dvh;
+    border-radius: var(--border-radius-lg, 16px);
+  }
+}
+
+/* ==== 9. رأس النافذة ==== */
+
+.modals-dialog__header {
+  padding: var(--space-5, 1.25rem) var(--space-5, 1.25rem) var(--space-4, 1rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 0.75rem);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-color-light, rgba(0,0,0,0.08));
+  border-radius: var(--modals-radius, 16px) var(--modals-radius, 16px) 0 0;
+  overflow: hidden;
+}
+
+.modals-dialog__header--no-border {
+  border-bottom-color: transparent;
+  padding-bottom: var(--space-2, 0.5rem);
+}
+
+.modals-dialog__title {
+  font-size: var(--font-size-xl, 1.125rem);
+  font-weight: 700;
+  color: var(--text-primary-light);
+  margin: 0;
+  line-height: 1.3;
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* ==== 10. زر إغلاق النافذة ==== */
+
+.modals-dialog__close-x {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary-light);
+  font-size: 1rem;
+  width: var(--modals-min-touch, 44px);
+  height: var(--modals-min-touch, 44px);
+  min-width: var(--modals-min-touch, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md, 8px);
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.modals-dialog__close-x:hover {
+  background: var(--hover-light, rgba(102, 126, 234, 0.1));
+  color: var(--text-primary-light);
+}
+
+.modals-dialog__close-x:focus-visible {
+  outline: 2px solid var(--primary, #667eea);
+  outline-offset: 2px;
+}
+
+/* ==== 11. جسم النافذة ==== */
+/* التمرير على الجسم لا على .modals-dialog لإصلاح iOS */
+
+.modals-dialog__body {
+  padding: var(--space-5, 1.25rem);
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  color: var(--text-primary-light);
+  font-size: var(--font-size-base, 1rem);
+  line-height: 1.65;
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  overscroll-behavior: contain;
+}
+
+.modals-dialog__body--scrollable {
+  max-height: 52dvh;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color-light) transparent;
+}
+
+.modals-dialog__body--scrollable::-webkit-scrollbar {
+  width: 5px;
+}
+
+.modals-dialog__body--scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modals-dialog__body--scrollable::-webkit-scrollbar-thumb {
+  background: var(--border-color-light);
+  border-radius: var(--border-radius-full, 9999px);
+}
+
+.modals-dialog__body--scrollable::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary-light);
+}
+
+/* ==== 12. رسالة النافذة ==== */
+
+.modals-dialog__message {
+  margin: 0;
+  color: var(--text-secondary-light);
+  font-size: var(--font-size-sm, 0.9375rem);
+  line-height: 1.6;
+}
+
+/* ==== 13. أيقونة النوع ==== */
+
+.modals-dialog__icon-wrap {
+  text-align: center;
+  padding: var(--space-5, 1.25rem) var(--space-5, 1.25rem) 0;
+  flex-shrink: 0;
+}
+
+.modals-dialog__type-icon {
+  font-size: 2.75rem;
+  line-height: 1;
+}
+
+.modals-dialog__type-icon--success { color: var(--success, #4CAF50); }
+.modals-dialog__type-icon--info    { color: var(--info, #2196F3);    }
+.modals-dialog__type-icon--warning { color: var(--warning, #FFC107); }
+.modals-dialog__type-icon--error   { color: var(--error, #F44336);   }
+
+/* ==== 14. تذييل النافذة ==== */
+
+.modals-dialog__footer {
+  padding: var(--space-4, 1rem) var(--space-5, 1.25rem) var(--space-5, 1.25rem);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3, 0.75rem);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-color-light, rgba(0,0,0,0.08));
+  border-radius: 0 0 var(--modals-radius, 16px) var(--modals-radius, 16px);
+  overflow: hidden;
+}
+
+/* ==== 15. أنواع النوافذ الخاصة ==== */
+
+/* ==== 16. Confirm ==== */
+
+.modals-confirm .modals-dialog__footer {
+  justify-content: center;
+}
+
+.modals-confirm--danger .modals-btn--confirm {
+  background: var(--error, #F44336);
+  color: #ffffff;
+}
+
+.modals-confirm--danger .modals-btn--confirm:hover {
+  background: var(--error-light, #E57373);
+}
+
+/* ==== 17. Alert ==== */
+
+.modals-alert .modals-dialog__header {
+  border-bottom-color: transparent;
+  padding-bottom: 0;
+}
+
+.modals-alert .modals-dialog__footer {
+  justify-content: center;
+  border-top-color: transparent;
+  padding-top: 0;
+}
+
+/* ==== 18. Prompt ==== */
+
+.modals-prompt .modals-field {
+  margin-top: var(--space-3, 0.75rem);
+}
+
+.modals-prompt .modals-input {
+  width: 100%;
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border: 1.5px solid var(--border-color-light);
+  border-radius: var(--border-radius-md, 8px);
+  font-size: var(--font-size-base, 1rem);
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  color: var(--text-primary-light);
+  background: var(--surface-light, #ffffff);
+  direction: rtl;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  appearance: none;
+  box-sizing: border-box;
+}
+
+.modals-prompt .modals-input::placeholder {
+  color: var(--text-tertiary-light);
+}
+
+.modals-prompt .modals-input:focus {
+  border-color: var(--primary, #667eea);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 102, 126, 234), 0.15);
+}
+
+.modals-prompt .modals-input[aria-invalid="true"] {
+  border-color: var(--error, #F44336);
+  box-shadow: 0 0 0 3px rgba(var(--error-rgb, 244, 67, 54), 0.12);
+}
+
+.modals-field__error {
+  display: block;
+  margin-top: var(--space-2, 0.5rem);
+  font-size: var(--font-size-xs, 0.8125rem);
+  color: var(--error, #F44336);
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  min-height: 1.2em;
+}
+
+/* ==== 19. Info ==== */
+
+.modals-info .modals-dialog__body {
+  padding-bottom: var(--space-3, 0.75rem);
+}
+
+.modals-info .modals-dialog__footer {
+  justify-content: center;
+}
+
+/* ==== 20. Custom ==== */
+
+.modals-custom .modals-dialog__body > p:last-child {
+  margin-bottom: 0;
+}
+
+/* ==== 21. نافذة التحميل ==== */
+
+.modals-loading {
+  position: fixed;
+  inset: 0;
+  z-index: var(--modals-z-loading, 9800);
+  background: var(--modals-backdrop-bg, rgba(0, 0, 0, 0.55));
+  backdrop-filter: var(--modals-backdrop-blur, blur(4px));
+  -webkit-backdrop-filter: var(--modals-backdrop-blur, blur(4px));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity;
+}
+
+.modals-loading--visible {
+  opacity: 1;
+}
+
+.modals-loading--hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modals-loading__card {
+  background: var(--surface-light, #ffffff);
+  border-radius: var(--modals-radius, 16px);
+  padding: var(--space-8, 2rem) var(--space-10, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6, 1.5rem);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.18),
+    0 8px 20px rgba(0, 0, 0, 0.12);
+  direction: rtl;
+  min-width: 180px;
+  max-width: 320px;
+  width: 90%;
+  animation: modals-card-appear 0.35s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+
+/* ==== 22. الدوار ==== */
+
+.modals-loading__spinner {
+  width: 48px;
+  height: 48px;
+  position: relative;
+}
+
+.modals-loading__spinner-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 4px solid var(--border-color-light, rgba(0,0,0,0.1));
+  border-top-color: var(--primary, #667eea);
+  animation: modals-spin 0.8s linear infinite;
+  will-change: transform;
+}
+
+.modals-loading__spinner-ring::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-bottom-color: rgba(var(--primary-rgb, 102, 126, 234), 0.3);
+  animation: modals-spin 1.4s linear infinite reverse;
+}
+
+/* ==== 23. رسالة التحميل ==== */
+
+.modals-loading__message {
+  margin: 0;
+  font-size: var(--font-size-base, 1rem);
+  color: var(--text-primary-light);
+  font-weight: 500;
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ==== 24. معاينة الصورة ==== */
+
+.modals-imgpreview {
+  position: fixed;
+  inset: 0;
+  z-index: var(--modals-z-loading, 9800);
+  background: rgba(0, 0, 0, 0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: zoom-out;
+  will-change: opacity;
+}
+
+.modals-imgpreview--visible {
+  opacity: 1;
+}
+
+.modals-imgpreview--hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ==== 25. زر إغلاق معاينة الصورة ==== */
+
+.modals-imgpreview__close {
+  position: absolute;
+  top: max(var(--space-5, 1.25rem), env(safe-area-inset-top));
+  inset-inline-end: max(var(--space-5, 1.25rem), env(safe-area-inset-right));
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.125rem;
+  width: var(--modals-min-touch, 44px);
+  height: var(--modals-min-touch, 44px);
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s, transform 0.18s;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modals-imgpreview__close:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.08);
+}
+
+.modals-imgpreview__close:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+/* ==== 26. حاوية الصورة ==== */
+
+.modals-imgpreview__container {
+  max-width: 92vw;
+  max-height: 92dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  position: relative;
+}
+
+.modals-imgpreview__img {
+  max-width: 100%;
+  max-height: 92dvh;
+  object-fit: contain;
+  border-radius: var(--border-radius-sm, 4px);
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  -webkit-user-drag: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  animation: modals-img-appear 0.32s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+
+/* ==== 27. حالات تحميل الصورة ==== */
+
+.modals-imgpreview__loader {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.8);
+  animation: modals-spin 0.8s linear infinite;
+}
+
+.modals-imgpreview__error {
+  color: var(--error-light, #E57373);
+  font-size: var(--font-size-base, 1rem);
+  text-align: center;
+  padding: var(--space-4, 1rem);
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+}
+
+/* ==== 28. القائمة السفلية ==== */
+
+.modals-bottomsheet {
+  position: fixed;
+  bottom: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  z-index: var(--modals-z-modal, 9000);
+  background: var(--surface-light, #ffffff);
+  border-radius: 24px 24px 0 0;
+  padding: var(--space-2, 0.5rem) 0 max(var(--space-4, 1rem), env(safe-area-inset-bottom));
+  max-height: 80dvh;
+  display: flex;
+  flex-direction: column;
+  direction: rtl;
+  box-shadow:
+    0 -8px 40px rgba(0, 0, 0, 0.18),
+    0 -2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(100%);
+  transition: transform 0.38s cubic-bezier(0.34, 1.2, 0.64, 1);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.modals-bottomsheet--visible {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.modals-bottomsheet--hiding {
+  transform: translateY(100%);
+  transition: transform 0.26s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ==== 29. مقبض السحب ==== */
+
+.modals-bottomsheet__handle {
+  width: 44px;
+  height: 5px;
+  background: var(--border-color-light, rgba(0,0,0,0.15));
+  border-radius: var(--border-radius-full, 9999px);
+  margin: var(--space-2, 0.5rem) auto var(--space-3, 0.75rem);
+  flex-shrink: 0;
+  cursor: grab;
+  touch-action: none;
+  transition: background 0.15s;
+}
+
+.modals-bottomsheet__handle:hover {
+  background: var(--text-tertiary-light);
+}
+
+/* ==== 30. عنوان القائمة السفلية ==== */
+
+.modals-bottomsheet__title {
+  font-size: var(--font-size-sm, 0.9375rem);
+  font-weight: 600;
+  color: var(--text-secondary-light);
+  text-align: center;
+  margin: 0 0 var(--space-2, 0.5rem);
+  padding: 0 var(--space-4, 1rem);
+  flex-shrink: 0;
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  letter-spacing: 0.01em;
+}
+
+/* ==== 31. قائمة العناصر ==== */
+
+.modals-bottomsheet__list {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  overscroll-behavior: contain;
+}
+
+/* ==== 32. عنصر في القائمة ==== */
+
+.modals-bottomsheet__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.875rem);
+  width: 100%;
+  padding: 0.875rem var(--space-5, 1.25rem);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: right;
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  transition: background 0.14s;
+  min-height: var(--modals-min-touch, 44px);
+  color: inherit;
+}
+
+.modals-bottomsheet__item:hover,
+.modals-bottomsheet__item:focus-visible {
+  background: var(--hover-light, rgba(102, 126, 234, 0.08));
+  outline: none;
+}
+
+.modals-bottomsheet__item:focus-visible {
+  outline: 2px solid var(--primary, #667eea);
+  outline-offset: -2px;
+}
+
+/* ==== 33. أيقونة العنصر ==== */
+
+.modals-bottomsheet__item-icon {
+  font-size: 1.25rem;
+  color: var(--primary, #667eea);
+  width: 1.75rem;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ==== 34. نص العنصر ==== */
+
+.modals-bottomsheet__item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+}
+
+.modals-bottomsheet__item-label {
+  font-size: var(--font-size-base, 1rem);
+  font-weight: 500;
+  color: var(--text-primary-light);
+  line-height: 1.3;
+}
+
+.modals-bottomsheet__item-desc {
+  font-size: var(--font-size-xs, 0.8125rem);
+  color: var(--text-secondary-light);
+  line-height: 1.3;
+}
+
+/* ==== 35. زر الإلغاء ==== */
+
+.modals-bottomsheet__cancel {
+  margin: var(--space-3, 0.75rem) var(--space-4, 1rem) 0;
+  padding: 0.875rem;
+  background: var(--surface-hover-light, rgba(102, 126, 234, 0.05));
+  border: 1.5px solid var(--border-color-light, rgba(0,0,0,0.08));
+  border-radius: var(--border-radius-lg, 16px);
+  font-size: var(--font-size-base, 1rem);
+  font-weight: 600;
+  color: var(--error, #F44336);
+  cursor: pointer;
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  min-height: var(--modals-min-touch, 44px);
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+
+.modals-bottomsheet__cancel:hover {
+  background: rgba(var(--error-rgb, 244, 67, 54), 0.08);
+  border-color: rgba(var(--error-rgb, 244, 67, 54), 0.25);
+}
+
+.modals-bottomsheet__cancel:focus-visible {
+  outline: 2px solid var(--error, #F44336);
+  outline-offset: 2px;
+}
+
+/* ==== 36. أزرار النوافذ الموحدة ==== */
+
+.modals-btn {
+  min-height: var(--modals-min-touch, 44px);
+  min-width: 90px;
+  padding: var(--space-2, 0.5rem) var(--space-5, 1.25rem);
+  border: none;
+  border-radius: var(--border-radius-md, 8px);
+  font-size: var(--font-size-sm, 0.9375rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    opacity 0.15s,
+    transform 0.12s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 0.5rem);
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+}
+
+.modals-btn:active {
+  transform: scale(0.96);
+}
+
+.modals-btn:focus-visible {
+  outline: 2px solid var(--primary, #667eea);
+  outline-offset: 2px;
+}
+
+/* ==== 37. أنواع الأزرار ==== */
+
+.modals-btn--primary {
+  background: linear-gradient(
+    135deg,
+    var(--primary, #667eea),
+    var(--secondary, #764ba2)
+  );
+  color: var(--on-primary, #ffffff);
+  box-shadow: 0 2px 8px rgba(var(--primary-rgb, 102, 126, 234), 0.35);
+}
+
+.modals-btn--primary:hover {
+  opacity: 0.92;
+  box-shadow: 0 4px 14px rgba(var(--primary-rgb, 102, 126, 234), 0.45);
+}
+
+.modals-btn--secondary {
+  background: var(--surface-hover-light, rgba(102, 126, 234, 0.05));
+  color: var(--text-primary-light);
+  border: 1.5px solid var(--border-color-light, rgba(0,0,0,0.1));
+}
+
+.modals-btn--secondary:hover {
+  background: var(--hover-light, rgba(102, 126, 234, 0.1));
+  border-color: rgba(var(--primary-rgb, 102, 126, 234), 0.2);
+}
+
+.modals-btn--danger {
+  background: var(--error, #F44336);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(var(--error-rgb, 244, 67, 54), 0.3);
+}
+
+.modals-btn--danger:hover {
+  background: var(--error-light, #E57373);
+}
+
+.modals-btn--warning {
+  background: var(--warning, #FFC107);
+  color: #1a1a1a;
+  box-shadow: 0 2px 8px rgba(var(--warning-rgb, 255, 193, 7), 0.3);
+}
+
+.modals-btn--warning:hover {
+  opacity: 0.9;
+}
+
+.modals-btn--success {
+  background: var(--success, #4CAF50);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(var(--success-rgb, 76, 175, 80), 0.3);
+}
+
+.modals-btn--success:hover {
+  opacity: 0.9;
+}
+
+/* ==== 38. الوضع الليلي ==== */
+/* القيم هنا فقط ما لا ينعكس تلقائيًا من متغيرات الثيم */
+
+[data-theme="dark"] .modals-toast,
+[data-theme="dark"] .modals-dialog,
+[data-theme="dark"] .modals-loading__card,
+[data-theme="dark"] .modals-bottomsheet {
+  background: var(--surface-light, #1e1e1e);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .modals-dialog__header,
+[data-theme="dark"] .modals-dialog__footer {
+  border-color: var(--border-color-light, rgba(255,255,255,0.1));
+}
+
+[data-theme="dark"] .modals-prompt .modals-input {
+  background: var(--background-light, #121212);
+  border-color: var(--border-color-light, rgba(255,255,255,0.15));
+  color: var(--text-primary-light, #ffffff);
+}
+
+[data-theme="dark"] .modals-prompt .modals-input:focus {
+  border-color: var(--primary, #667eea);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 102, 126, 234), 0.2);
+}
+
+[data-theme="dark"] .modals-bottomsheet__handle {
+  background: var(--border-color-light, rgba(255,255,255,0.15));
+}
+
+[data-theme="dark"] .modals-bottomsheet__cancel {
+  background: rgba(var(--error-rgb, 244, 67, 54), 0.12);
+  border-color: rgba(var(--error-rgb, 244, 67, 54), 0.2);
+}
+
+[data-theme="dark"] .modals-bottomsheet__cancel:hover {
+  background: rgba(var(--error-rgb, 244, 67, 54), 0.22);
+}
+
+[data-theme="dark"] .modals-btn--secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-color-light, rgba(255,255,255,0.1));
+  color: var(--text-primary-light, #ffffff);
+}
+
+[data-theme="dark"] .modals-btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .modals-loading__spinner-ring {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary, #667eea);
+}
+
+[data-theme="dark"] .modals-dialog__body--scrollable::-webkit-scrollbar-thumb {
+  background: var(--border-color-light, rgba(255,255,255,0.15));
+}
+
+/* ==== 39. الأجهزة اللمسية ==== */
+
+@media (hover: none) and (pointer: coarse) {
+  .modals-btn,
+  .modals-imgpreview__close {
+    min-width: 52px;
+    min-height: 52px;
+  }
+
+  .modals-toast__close,
+  .modals-dialog__close-x,
+  .modals-bottomsheet__item,
+  .modals-bottomsheet__cancel {
+    min-height: 52px;
+  }
+
+  .modals-dialog {
+    max-height: 92dvh;
+  }
+
+  .modals-btn:hover,
+  .modals-bottomsheet__item:hover {
+    background: initial;
+  }
+  .modals-btn--primary:hover { background: linear-gradient(135deg, var(--primary, #667eea), var(--secondary, #764ba2)); }
+  .modals-btn--danger:hover   { background: var(--error, #F44336); }
+  .modals-btn--success:hover  { background: var(--success, #4CAF50); }
+}
+
+/* ==== 40. الشاشات الصغيرة جدًا ==== */
+
+@media (max-width: 480px) {
+  .modals-dialog__header {
+    padding: var(--space-4, 1rem) var(--space-4, 1rem) var(--space-3, 0.75rem);
+  }
+
+  .modals-dialog__body {
+    padding: var(--space-4, 1rem);
+  }
+
+  .modals-dialog__footer {
+    padding: var(--space-3, 0.75rem) var(--space-4, 1rem) var(--space-4, 1rem);
+    gap: var(--space-2, 0.5rem);
+  }
+
+  .modals-dialog__footer {
+    flex-direction: column-reverse;
+  }
+
+  .modals-btn {
+    width: 100%;
+  }
+
+  .modals-dialog__icon-wrap {
+    padding-top: var(--space-4, 1rem);
+    padding-bottom: var(--space-2, 0.5rem);
+  }
+
+  .modals-dialog__type-icon {
+    font-size: 2.25rem;
+  }
+
+  .modals-loading__card {
+    padding: var(--space-6, 1.5rem) var(--space-8, 2rem);
+    min-width: auto;
+    width: 88%;
+    max-width: 300px;
+  }
+
+  .modals-bottomsheet {
+    border-radius: 20px 20px 0 0;
+  }
+
+  .modals-bottomsheet__item {
+    padding: 0.875rem var(--space-4, 1rem);
+  }
+
+  .modals-imgpreview__close {
+    top: max(var(--space-3, 0.75rem), env(safe-area-inset-top));
+    inset-inline-end: max(var(--space-3, 0.75rem), env(safe-area-inset-right));
+  }
+}
+
+/* ==== 41. الشاشات الكبيرة ==== */
+
+@media (min-width: 1024px) {
+  .modals-dialog--lg {
+    max-width: 720px;
+  }
+
+  .modals-dialog--xl {
+    max-width: 960px;
+  }
+
+  .modals-dialog--fullscreen {
+    max-width: min(95vw, 1100px);
+  }
+}
+
+/* ==== 42. دعم المساحة الآمنة ==== */
+
+@supports (padding: max(0px)) {
+  .modals-bottomsheet {
+    padding-bottom: max(var(--space-4, 1rem), env(safe-area-inset-bottom));
+  }
+
+  #modals-toast-container {
+    top: max(
+      calc(var(--navbar-height, 64px) + var(--space-3, 12px)),
+      env(safe-area-inset-top)
+    );
+    inset-inline-end: max(var(--space-4, 1rem), env(safe-area-inset-right));
+  }
+
+  @media (max-width: 767.98px) {
+    #modals-toast-container {
+      inset-inline-end: max(var(--space-3, 0.75rem), env(safe-area-inset-right));
+      inset-inline-start: max(var(--space-3, 0.75rem), env(safe-area-inset-left));
+    }
+  }
+}
+
+/* ==== 43. تقليل الحركة ==== */
+
+@media (prefers-reduced-motion: reduce) {
+  .modals-backdrop,
+  .modals-dialog,
+  .modals-toast,
+  .modals-loading,
+  .modals-imgpreview,
+  .modals-bottomsheet,
+  .modals-loading__card,
+  .modals-dialog--stacked-behind {
+    transition: opacity 0.01ms !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .modals-dialog--stacked-behind {
+    filter: none !important;
+  }
+
+  .modals-loading__spinner-ring,
+  .modals-loading__spinner-ring::after {
+    animation-duration: 1.5s !important;
+  }
+
+  .modals-toast__progress {
+    animation: none !important;
+  }
+}
+
+/* ==== 44. حالة تعطيل أزرار النوافذ ==== */
+
+.modals-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==== 45. محدد الصورة الشخصية ==== */
+
+.avatar-picker__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  margin-block-end: var(--space-4, 1rem);
+  text-align: center;
+}
+
+.avatar-picker__preview-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-inline-size: 100%;
+}
+
+.avatar-picker__job-name {
+  min-block-size: 1.65em;
+  margin: 0;
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: 800;
+  color: var(--text-primary-light);
+}
+
+.avatar-picker__hint {
+  margin: 0;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--text-secondary-light);
+}
+
+.avatar-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5.25rem, 1fr));
+  gap: var(--space-2, 0.5rem);
+}
+
+.avatar-picker__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1, 0.25rem);
+  min-inline-size: 0;
+  padding: var(--space-2, 0.5rem);
+  background-color: var(--background-light);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-lg, 16px);
+  color: var(--text-primary-light);
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color var(--duration-fast, 0.2s) var(--transition-ease, ease),
+    background-color var(--duration-fast, 0.2s) var(--transition-ease, ease);
+}
+
+.avatar-picker__item:focus-visible {
+  outline: 2px solid var(--primary, #667eea);
+  outline-offset: 2px;
+}
+
+.avatar-picker__item--selected {
+  border-color: var(--primary, #667eea);
+  background-color: rgba(var(--primary-rgb, 102, 126, 234), 0.1);
+}
+
+.avatar-picker__thumb {
+  inline-size: 100%;
+  max-inline-size: 4.5rem;
+  aspect-ratio: 1;
+  background-color: var(--surface-light);
+  background-repeat: no-repeat;
+  border: 1px solid var(--border-color-light);
+  border-radius: 50%;
+  transition: opacity var(--duration-base, 0.3s) ease-out;
+}
+
+.avatar-picker__grid:not(.is-ready) .avatar-picker__thumb {
+  opacity: 0.35;
+  animation: avatar-picker-pulse 1.2s ease-in-out infinite;
+}
+
+.avatar-picker__label {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.avatar-picker__check {
+  position: absolute;
+  inset-block-start: 6px;
+  inset-inline-end: 6px;
+  display: grid;
+  place-items: center;
+  inline-size: 20px;
+  block-size: 20px;
+  border-radius: 50%;
+  background-color: var(--primary, #667eea);
+  color: var(--on-primary, #fff);
+  font-size: 0.65rem;
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity var(--duration-fast, 0.2s) var(--transition-ease, ease),
+    transform var(--duration-fast, 0.2s) var(--ease-spring, ease);
+}
+
+.avatar-picker__item--selected .avatar-picker__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.avatar-picker__reset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2, 0.5rem);
+  inline-size: 100%;
+  min-block-size: var(--modals-min-touch, 44px);
+  margin-block-start: var(--space-3, 0.75rem);
+  padding: var(--space-2, 0.5rem) var(--space-4, 1rem);
+  background: transparent;
+  border: 1px dashed var(--border-color-light);
+  border-radius: var(--border-radius-md, 8px);
+  color: var(--text-secondary-light);
+  font-family: var(--font-family-arabic, 'Cairo', sans-serif);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color var(--duration-fast, 0.2s) var(--transition-ease, ease),
+    color var(--duration-fast, 0.2s) var(--transition-ease, ease);
+}
+
+.avatar-picker__reset:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.avatar-picker__reset:focus-visible {
+  outline: 2px solid var(--primary, #667eea);
+  outline-offset: 2px;
+}
+
+.avatar-picker--saving .avatar-picker__grid,
+.avatar-picker--saving .avatar-picker__reset {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+@media (min-width: 576px) {
+  .avatar-picker__grid { grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr)); }
+  .avatar-picker__thumb { max-inline-size: 5rem; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .avatar-picker__item:hover:not(.avatar-picker__item--selected) { border-color: rgba(var(--primary-rgb, 102, 126, 234), 0.5); }
+  .avatar-picker__reset:hover:not(:disabled) { border-color: var(--primary, #667eea); color: var(--primary, #667eea); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-picker__item,
+  .avatar-picker__thumb,
+  .avatar-picker__check,
+  .avatar-picker__reset { transition: none !important; }
+
+  .avatar-picker__grid:not(.is-ready) .avatar-picker__thumb { animation: none !important; }
+}

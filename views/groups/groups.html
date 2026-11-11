@@ -1,0 +1,112 @@
+<!-- ==== صفحة قائمة المجموعات ==== -->
+<div class="page-content groups-page" data-page="groups">
+  <h1 class="visually-hidden">المجموعات - منصة بيولوجست</h1>
+
+  <!-- ==== التنقل التفصيلي ==== -->
+  <nav class="breadcrumb-nav" aria-label="مسار التنقل">
+    <ol class="breadcrumb-list">
+      <li class="breadcrumb-item"><a href="/" class="breadcrumb-link" data-nav-target="home" aria-label="الرئيسية"><i class="fas fa-home" aria-hidden="true"></i></a></li>
+      <li class="breadcrumb-item active" aria-current="page">المجموعات</li>
+    </ol>
+  </nav>
+
+  <!-- ==== هيدر الصفحة ==== -->
+  <header class="groups-header">
+    <div class="header-title">
+      <h2 class="page-title">
+        <i class="fas fa-users title-icon" aria-hidden="true"></i>
+        <span>مجموعاتي</span>
+      </h2>
+      <p class="page-subtitle" id="groups-subtitle">المجموعات التي تنتمي إليها</p>
+    </div>
+    <button type="button" class="btn btn-primary create-group-btn" id="create-group-btn" hidden>
+      <i class="fas fa-plus-circle" aria-hidden="true"></i>
+      <span>مجموعة جديدة</span>
+    </button>
+  </header>
+
+  <!-- ==== البحث داخل المجموعات ==== -->
+  <div class="groups-toolbar" id="groups-toolbar" hidden>
+    <label class="grp-search" for="groups-search">
+      <i class="fas fa-search" aria-hidden="true"></i>
+      <input type="search" id="groups-search" class="grp-search-input" placeholder="ابحث في مجموعاتك..." autocomplete="off">
+    </label>
+    <span class="groups-count" id="groups-count" aria-live="polite"></span>
+  </div>
+
+  <!-- ==== حالة التحميل ==== -->
+  <div class="groups-grid" id="groups-skeleton" aria-busy="true" aria-label="جاري تحميل المجموعات">
+    <div class="group-card grp-skeleton-card"><div class="grp-skeleton grp-skeleton--title"></div><div class="grp-skeleton grp-skeleton--line"></div><div class="grp-skeleton grp-skeleton--line grp-skeleton--short"></div></div>
+    <div class="group-card grp-skeleton-card"><div class="grp-skeleton grp-skeleton--title"></div><div class="grp-skeleton grp-skeleton--line"></div><div class="grp-skeleton grp-skeleton--line grp-skeleton--short"></div></div>
+    <div class="group-card grp-skeleton-card"><div class="grp-skeleton grp-skeleton--title"></div><div class="grp-skeleton grp-skeleton--line"></div><div class="grp-skeleton grp-skeleton--line grp-skeleton--short"></div></div>
+  </div>
+
+  <!-- ==== شبكة المجموعات ==== -->
+  <div class="groups-grid" id="groups-grid" role="list" hidden></div>
+
+  <!-- ==== لا نتائج للبحث ==== -->
+  <div class="groups-empty" id="groups-no-results" hidden>
+    <div class="empty-icon" aria-hidden="true"><i class="fas fa-search"></i></div>
+    <h3>لا توجد نتائج مطابقة</h3>
+    <p>جرّب كلمة بحث مختلفة.</p>
+  </div>
+
+  <!-- ==== حالة عدم وجود مجموعات ==== -->
+  <div class="groups-empty" id="groups-empty" hidden>
+    <div class="empty-icon" aria-hidden="true"><i class="fas fa-users-slash"></i></div>
+    <h3>لا توجد مجموعات</h3>
+    <p id="groups-empty-message">لم تنضم إلى أي مجموعة بعد.</p>
+    <button type="button" class="btn btn-primary" id="empty-create-btn" hidden>
+      <i class="fas fa-plus-circle" aria-hidden="true"></i>
+      <span>إنشاء أول مجموعة</span>
+    </button>
+  </div>
+
+  <!-- ==== حالة الخطأ ==== -->
+  <div class="groups-empty groups-error" id="groups-error" role="alert" hidden>
+    <div class="empty-icon" aria-hidden="true"><i class="fas fa-exclamation-triangle"></i></div>
+    <h3>تعذر تحميل المجموعات</h3>
+    <p>تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.</p>
+    <button type="button" class="btn btn-outline" id="groups-retry-btn">
+      <i class="fas fa-redo" aria-hidden="true"></i>
+      <span>إعادة المحاولة</span>
+    </button>
+  </div>
+
+  <!-- ==== نافذة إنشاء مجموعة ==== -->
+  <div class="grp-modal" id="group-modal" role="dialog" aria-modal="true" aria-labelledby="group-modal-title" hidden>
+    <div class="grp-modal__content">
+      <div class="grp-modal__header">
+        <h3 id="group-modal-title">إنشاء مجموعة جديدة</h3>
+        <button type="button" class="grp-modal__close" data-modal-close aria-label="إغلاق"><i class="fas fa-times" aria-hidden="true"></i></button>
+      </div>
+      <form id="group-form" class="grp-modal__form" novalidate>
+        <div class="grp-modal__body">
+          <div class="form-group">
+            <label for="group-name-input">اسم المجموعة <span class="required" aria-hidden="true">*</span></label>
+            <input type="text" id="group-name-input" class="form-control" maxlength="60" placeholder="مثال: مجموعة التفوق في الأحياء" autocomplete="off" required data-autofocus>
+            <div class="grp-field-meta"><span class="grp-field-error" id="group-name-error" role="alert" hidden></span><span class="grp-counter" id="group-name-counter">0/60</span></div>
+          </div>
+          <div class="form-group">
+            <label for="group-description-input">وصف المجموعة (اختياري)</label>
+            <textarea id="group-description-input" class="form-control" rows="2" maxlength="200" placeholder="وصف مختصر للمجموعة"></textarea>
+            <div class="grp-field-meta"><span class="grp-counter" id="group-description-counter">0/200</span></div>
+          </div>
+          <div class="form-group">
+            <label for="member-search">إضافة أعضاء (اسم، اسم مستخدم، أو رقم هاتف)</label>
+            <input type="search" id="member-search" class="form-control" placeholder="ابحث عن مستخدم..." autocomplete="off" role="combobox" aria-expanded="false" aria-controls="member-suggestions" aria-autocomplete="list">
+            <div id="member-suggestions" class="suggestions-list" role="listbox" aria-label="نتائج البحث" hidden></div>
+            <div class="grp-members-meta"><span id="selected-members-label">لم تتم إضافة أعضاء بعد</span></div>
+            <div id="selected-members" class="selected-members"></div>
+          </div>
+        </div>
+        <div class="grp-modal__footer">
+          <button type="button" class="btn btn-secondary" data-modal-close>إلغاء</button>
+          <button type="submit" class="btn btn-primary" id="save-group-btn">
+            <span class="grp-btn-label">إنشاء المجموعة</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

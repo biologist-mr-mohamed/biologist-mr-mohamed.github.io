@@ -1,0 +1,62 @@
+<!-- ==== صفحة الدروس المحفوظة - الإصدار 5.0.0 ==== -->
+<div class="page-content saved-page" data-page="saved">
+
+  <!-- ==== التنقل التفصيلي (Breadcrumb) ==== -->
+  <nav class="saved-breadcrumb" aria-label="مسار التنقل">
+    <ol class="saved-breadcrumb-list">
+      <li class="saved-breadcrumb-item">
+        <a href="/" class="saved-breadcrumb-link" data-nav-target="home" aria-label="الرئيسية">
+          <i class="fas fa-home" aria-hidden="true"></i>
+        </a>
+      </li>
+      <li class="saved-breadcrumb-item active" aria-current="page">المحفوظات</li>
+    </ol>
+  </nav>
+
+  <!-- ==== هيدر الصفحة ==== -->
+  <header class="saved-header">
+    <div class="saved-header-content">
+      <div class="saved-header-title">
+        <h1 class="saved-page-title">
+          <i class="fas fa-bookmark saved-title-icon" aria-hidden="true"></i>
+          <span>الدروس المحفوظة</span>
+        </h1>
+        <p class="saved-page-subtitle" id="saved-subtitle">دروسك المفضلة في مكان واحد</p>
+      </div>
+
+      <div class="saved-search-wrapper" role="search">
+        <i class="fas fa-search saved-search-icon" aria-hidden="true"></i>
+        <input type="search" id="saved-search-input" class="saved-search-input" name="saved-search"
+               placeholder="ابحث في المحفوظات..." aria-label="بحث في الدروس المحفوظة"
+               autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="search" enterkeyhint="search">
+        <button type="button" class="saved-clear-search" id="saved-clear-search" aria-label="مسح البحث" hidden>
+          <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==== شريط الترتيب والعدّاد ==== -->
+  <section class="saved-toolbar" id="saved-toolbar" aria-label="ترتيب المحفوظات" hidden>
+    <div class="saved-sort" role="group" aria-label="ترتيب الدروس">
+      <button type="button" class="saved-sort-chip active" data-sort="recent" aria-pressed="true">الأحدث حفظاً</button>
+      <button type="button" class="saved-sort-chip" data-sort="oldest" aria-pressed="false">الأقدم حفظاً</button>
+      <button type="button" class="saved-sort-chip" data-sort="title" aria-pressed="false">أبجدياً</button>
+    </div>
+    <span class="saved-count" id="saved-count" aria-live="polite">0 درس</span>
+  </section>
+
+  <!-- ==== شبكة الدروس المحفوظة ==== -->
+  <div class="saved-grid" id="saved-grid" aria-busy="false"></div>
+
+  <!-- ==== حالة عدم وجود محفوظات / بحث بلا نتائج / خطأ / زائر ==== -->
+  <div class="saved-empty" id="saved-empty" hidden>
+    <div class="saved-empty-icon"><i class="fas fa-bookmark" id="saved-empty-icon" aria-hidden="true"></i></div>
+    <h2 class="saved-empty-title" id="saved-empty-title">لا توجد دروس محفوظة</h2>
+    <p class="saved-empty-text" id="saved-empty-text">اضغط على أيقونة الحفظ في أي درس لتجده هنا لاحقاً.</p>
+    <button type="button" class="saved-empty-btn" id="saved-empty-btn">
+      <i class="fas fa-book-open" aria-hidden="true"></i>
+      <span>تصفح الدروس</span>
+    </button>
+  </div>
+</div>
