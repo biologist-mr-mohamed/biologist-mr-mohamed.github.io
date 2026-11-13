@@ -43,7 +43,7 @@
   --challenge-bg: rgba(255, 152, 0, 0.1);
   --challenge-border: rgba(255, 152, 0, 0.3);
 
-  --on-primary: #14100a;
+  --on-primary: #ffffff;
   --level-badge-text: var(--on-primary);
   --level-badge-bg: var(--primary);
   --xp-start: #FFD700;
@@ -56,7 +56,7 @@
   --primary-dark: #ff9800;
   --primary-light: #ffcc80;
   --primary-rgb: 255, 183, 77;
-  --on-primary: #1a0a00;
+  --on-primary: #ffffff;
 
   --secondary: #ffa726;
   --secondary-light: #ffb74d;

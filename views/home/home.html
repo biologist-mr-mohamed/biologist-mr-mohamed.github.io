@@ -61,7 +61,7 @@
         <div class="welcome-image">
           <div class="floating-image-container">
             <img
-              src="assets/images/biologist4.png"
+              src="/assets/images/biologist4.png"
               alt="الأستاذ محمد إبراهيم يشرح الأحياء أمام السبورة"
               class="floating-image"
               width="800"
@@ -119,7 +119,7 @@
         <!-- ==== 5. بطاقة استكمال التعلم ==== -->
         <div class="continue-learning-card" id="home-continue-learning" aria-live="polite">
           <div class="clc-loading">
-            <div class="placeholder-spinner"><div class="spinner-circle"></div></div>
+            <div class="placeholder-spinner"><div class="bio-loader bio-loader--auto hp-loader--md" role="status" aria-label="جاري تجهيز درسك التالي"></div></div>
             <p>جاري تجهيز درسك التالي...</p>
           </div>
         </div>
@@ -170,68 +170,87 @@
   <!-- ==== 8. لوحة طاقم العمل ==== -->
   <section class="staff-panel-section reveal" data-role-gate="staff" aria-labelledby="staff-panel-title">
     <div class="container">
-      <div class="section-header section-header--start">
-        <h2 id="staff-panel-title" class="section-title">
-          <i class="fas fa-gauge-high section-icon" aria-hidden="true"></i>
-          لوحة سريعة
-        </h2>
-        <p class="section-subtitle">نظرة سريعة على نشاط المنصة قبل الانتقال للوحة التحكم الكاملة</p>
-      </div>
+      <div class="staff-panel home-panel">
+        <div class="staff-panel-head">
+          <div class="staff-panel-heading">
+            <h2 id="staff-panel-title" class="staff-panel-title">
+              <span class="staff-panel-title-icon" aria-hidden="true"><i class="fas fa-gauge-high"></i></span>
+              لوحة سريعة
+            </h2>
+            <p class="staff-panel-subtitle">نظرة سريعة على نشاط المنصة</p>
+          </div>
+          <button class="btn btn-primary staff-panel-cta" data-action="goto-dashboard" type="button">
+            <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            <span>لوحة التحكم الكاملة</span>
+          </button>
+        </div>
 
-      <!-- ==== 9. مؤشرات الأداء ==== -->
-      <div class="staff-kpi-grid" aria-label="مؤشرات المنصة">
+        <!-- ==== 9. مؤشرات الأداء ==== -->
+        <div class="staff-kpi-grid" aria-label="مؤشرات المنصة">
         <div class="staff-kpi-card staff-kpi-card--students">
-          <i class="fas fa-users staff-kpi-icon" aria-hidden="true"></i>
-          <div class="staff-kpi-value" data-staff-stat="students">—</div>
-          <div class="staff-kpi-label">الطلاب</div>
+          <span class="staff-kpi-icon" aria-hidden="true"><i class="fas fa-users"></i></span>
+          <div class="staff-kpi-body">
+            <div class="staff-kpi-value" data-staff-stat="students">—</div>
+            <div class="staff-kpi-label">الطلاب</div>
+          </div>
         </div>
         <div class="staff-kpi-card staff-kpi-card--lessons">
-          <i class="fas fa-book-open staff-kpi-icon" aria-hidden="true"></i>
-          <div class="staff-kpi-value" data-staff-stat="lessons">—</div>
-          <div class="staff-kpi-label">الدروس</div>
+          <span class="staff-kpi-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span>
+          <div class="staff-kpi-body">
+            <div class="staff-kpi-value" data-staff-stat="lessons">—</div>
+            <div class="staff-kpi-label">الدروس</div>
+          </div>
         </div>
         <div class="staff-kpi-card staff-kpi-card--exams">
-          <i class="fas fa-file-pen staff-kpi-icon" aria-hidden="true"></i>
-          <div class="staff-kpi-value" data-staff-stat="exams">—</div>
-          <div class="staff-kpi-label">الامتحانات</div>
+          <span class="staff-kpi-icon" aria-hidden="true"><i class="fas fa-file-pen"></i></span>
+          <div class="staff-kpi-body">
+            <div class="staff-kpi-value" data-staff-stat="exams">—</div>
+            <div class="staff-kpi-label">الامتحانات</div>
+          </div>
         </div>
         <div class="staff-kpi-card staff-kpi-card--comments">
-          <i class="fas fa-comments staff-kpi-icon" aria-hidden="true"></i>
-          <div class="staff-kpi-value" data-staff-stat="comments">—</div>
-          <div class="staff-kpi-label">التعليقات</div>
+          <span class="staff-kpi-icon" aria-hidden="true"><i class="fas fa-comments"></i></span>
+          <div class="staff-kpi-body">
+            <div class="staff-kpi-value" data-staff-stat="comments">—</div>
+            <div class="staff-kpi-label">التعليقات</div>
+          </div>
         </div>
         <!-- ==== 10. الشكاوى (المعلم فقط) ==== -->
         <div class="staff-kpi-card staff-kpi-card--alert" data-role-gate="teacher">
-          <i class="fas fa-triangle-exclamation staff-kpi-icon" aria-hidden="true"></i>
-          <div class="staff-kpi-value" data-staff-stat="pendingComplaints">—</div>
-          <div class="staff-kpi-label">شكاوى قيد المراجعة</div>
+          <span class="staff-kpi-icon" aria-hidden="true"><i class="fas fa-triangle-exclamation"></i></span>
+          <div class="staff-kpi-body">
+            <div class="staff-kpi-value" data-staff-stat="pendingComplaints">—</div>
+            <div class="staff-kpi-label">شكاوى قيد المراجعة</div>
+          </div>
         </div>
         <!-- ==== 11. المشرفون (المعلم فقط) ==== -->
         <div class="staff-kpi-card staff-kpi-card--moderators" data-role-gate="teacher">
-          <i class="fas fa-user-shield staff-kpi-icon" aria-hidden="true"></i>
-          <div class="staff-kpi-value" data-staff-stat="moderators">—</div>
-          <div class="staff-kpi-label">المشرفون (من 5)</div>
+          <span class="staff-kpi-icon" aria-hidden="true"><i class="fas fa-user-shield"></i></span>
+          <div class="staff-kpi-body">
+            <div class="staff-kpi-value" data-staff-stat="moderators">—</div>
+            <div class="staff-kpi-label">المشرفون (من 5)</div>
+          </div>
         </div>
-      </div>
+        </div>
 
-      <!-- ==== 12. اختصارات سريعة ==== -->
-      <div class="quick-actions quick-actions--staff" aria-label="اختصارات سريعة">
-        <button class="quick-action-card" data-action="goto-dashboard" type="button">
-          <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-gauge-high"></i></span>
-          <span class="quick-action-label">لوحة التحكم الكاملة</span>
-        </button>
+        <!-- ==== 12. اختصارات سريعة ==== -->
+        <div class="quick-actions quick-actions--staff" aria-label="اختصارات سريعة">
         <button class="quick-action-card" data-action="explore-lessons" type="button">
           <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-book-open"></i></span>
           <span class="quick-action-label">إدارة الدروس</span>
+          <i class="fas fa-chevron-left quick-action-chevron" aria-hidden="true"></i>
         </button>
         <button class="quick-action-card" data-action="explore-exams" type="button">
           <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-file-pen"></i></span>
           <span class="quick-action-label">إدارة الامتحانات</span>
+          <i class="fas fa-chevron-left quick-action-chevron" aria-hidden="true"></i>
         </button>
         <button class="quick-action-card" data-action="goto-groups" type="button">
           <span class="quick-action-icon" aria-hidden="true"><i class="fas fa-people-group"></i></span>
           <span class="quick-action-label">المجموعات</span>
+          <i class="fas fa-chevron-left quick-action-chevron" aria-hidden="true"></i>
         </button>
+        </div>
       </div>
     </div>
   </section>
@@ -373,7 +392,7 @@
           >
             <div class="carousel-slide active">
               <img
-                src="assets/images/biologist3.png"
+                src="/assets/images/biologist3.png"
                 alt="شرح مادة الأحياء داخل الفصل الدراسي"
                 loading="lazy"
                 decoding="async"
@@ -382,7 +401,7 @@
 
             <div class="carousel-slide">
               <img
-                src="assets/images/biologist4.png"
+                src="/assets/images/biologist4.png"
                 alt="الأستاذ أثناء شرح درس أحياء"
                 loading="lazy"
                 decoding="async"
@@ -391,7 +410,7 @@
 
             <div class="carousel-slide">
               <img
-                src="assets/images/biologist2.png"
+                src="/assets/images/biologist2.png"
                 alt="تفاعل الطلاب مع شرح مادة الأحياء"
                 loading="lazy"
                 decoding="async"
@@ -476,7 +495,7 @@
       <!-- يُملأ بواسطة buildTestimonialsUI في home.js -->
       <div class="testimonials-container" role="region" aria-label="آراء الطلاب">
         <div class="testimonials-loading">
-          <div class="spinner"></div>
+          <div class="bio-loader bio-loader--auto hp-loader--sm" role="status" aria-label="جاري تحميل الآراء"></div>
           <p>جاري تحميل الآراء...</p>
         </div>
       </div>

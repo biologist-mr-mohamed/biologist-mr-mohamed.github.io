@@ -42,7 +42,7 @@
   --challenge-bg: rgba(76, 175, 80, 0.1);
   --challenge-border: rgba(76, 175, 80, 0.3);
 
-  --on-primary: #14100a;
+  --on-primary: #ffffff;
 }
 
 [data-theme="dark"] {
@@ -83,6 +83,6 @@
   --challenge-bg: rgba(129, 199, 132, 0.15);
   --challenge-border: rgba(129, 199, 132, 0.4);
 
-  --on-primary: #14100a;
+  --on-primary: #ffffff;
   --level-badge-text: var(--on-primary);
 }

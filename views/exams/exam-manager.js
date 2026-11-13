@@ -6,6 +6,8 @@ import {
     updateExam,
     deleteExam,
     getExamFullData,
+    getExamByLessonId,
+    getLessonById,
     moveExam,
     getUnits
 } from '../../js/core/api.js';
@@ -46,6 +48,7 @@ const INITIAL_STATE = () => ({
         exam_scope: 'unit',
         unit_id: null,
         lesson_id: null,
+        lesson_title: '',
         duration: EXAM_DEFAULTS.duration,
         questionsCount: EXAM_DEFAULTS.questionsCount,
         is_challenge: false,
@@ -95,18 +98,82 @@ function escapeHtml(str) {
     })[c]);
 }
 
+// ==== 4.1 أنماط النوافذ خارج صفحة الامتحانات ====
+// المودال قد يُفتح من صفحة الدرس حيث لا يُحمَّل exams.css، فنحمّله مؤقتاً ونزيله عند مغادرة الصفحة
+
+const EXAM_STYLES_HREF = '/views/exams/exams.css';
+
+function ensureExamStyles() {
+    const route = window.router?.getCurrentRoute?.().name;
+    if (route === 'exams' || route === 'exam-view') return Promise.resolve();
+    if (document.querySelector('link[data-exam-manager-style]')) return Promise.resolve();
+
+    return new Promise((resolve) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = EXAM_STYLES_HREF;
+        link.setAttribute('data-exam-manager-style', '1');
+        link.onload = () => resolve();
+        link.onerror = () => resolve();
+        setTimeout(resolve, 1500);
+        document.head.appendChild(link);
+
+        const off = EventBus.on('pageChanged', () => {
+            link.remove();
+            if (typeof off === 'function') off();
+        });
+    });
+}
+
+// عنوان الدرس المرتبط للعرض فقط
+async function resolveLessonTitle(lessonId) {
+    try {
+        const lesson = await getLessonById(lessonId);
+        return lesson?.title || '';
+    } catch (_) {
+        return '';
+    }
+}
+
 // ==== 5. دوال النوافذ الرئيسية ====
 
-async function openAddExamModal() {
+// context اختياري: { lesson_id, lesson_title, title, stage, grade, semester, unit_id } لإنشاء امتحان مرتبط بدرس
+async function openAddExamModal(context = null) {
     if (!checkPermission()) {
         showToast('ليس لديك صلاحية لإضافة امتحان', 'error');
         return;
     }
+    const ctx = (context && typeof context === 'object' && context.lesson_id) ? context : null;
     if (!acquireModalGuard()) return;
 
     try {
+        await ensureExamStyles();
+
+        // الدرس الواحد له امتحان واحد فقط
+        if (ctx) {
+            const existing = await getExamByLessonId(ctx.lesson_id).catch(() => null);
+            if (existing?.id) {
+                releaseModalGuard();
+                showToast('هذا الدرس له امتحان بالفعل، سيتم فتحه للتعديل', 'info');
+                return openEditExamModal(existing.id);
+            }
+        }
+
         state = INITIAL_STATE();
         state.isEditMode = false;
+
+        if (ctx) {
+            Object.assign(state.examMeta, {
+                lesson_id: ctx.lesson_id,
+                lesson_title: ctx.lesson_title || '',
+                title: ctx.title || '',
+                stage: ctx.stage || '',
+                grade: ctx.grade || '',
+                semester: ctx.semester || '',
+                unit_id: ctx.unit_id ?? null,
+                exam_scope: 'unit'
+            });
+        }
 
         state.availableUnits = await fetchUnitsForSelect(
             state.examMeta.stage,
@@ -164,6 +231,8 @@ async function openEditExamModal(examId) {
     state.isEditMode = true;
     state.currentExamId = examId;
 
+    await ensureExamStyles();
+
     let examData;
     try {
         examData = await getExamFullData(examId);
@@ -194,6 +263,10 @@ async function openEditExamModal(examId) {
         cover_image_url: examData.meta.cover_image_url || ''
     };
     state.questions = examData.questions || [];
+
+    if (state.examMeta.lesson_id) {
+        state.examMeta.lesson_title = await resolveLessonTitle(state.examMeta.lesson_id);
+    }
 
     state.availableUnits = await fetchUnitsForSelect(
         state.examMeta.stage,
@@ -258,6 +331,7 @@ function confirmDeleteExam(examId) {
 
 function openMoveExamModal(examId) {
     if (!checkPermission()) return;
+    ensureExamStyles();
 
     window.modals.showModal({
         title: 'تحريك الامتحان',
@@ -360,7 +434,8 @@ function openPreviewModal() {
                     EventBus.emit('exam:created', { examId: newId });
                 }
                 window.modals.closeAllModals();
-                if (window.router) window.router.navigateTo('exams');
+                // الامتحان المرتبط بدرس يبقى المستخدم في مكانه (صفحة الدرس أو قائمته)
+                if (window.router && !state.examMeta.lesson_id) window.router.navigateTo('exams');
                 return true;
             } catch (error) {
                 console.error('فشل حفظ الامتحان:', error);
@@ -376,6 +451,21 @@ function openPreviewModal() {
 function buildExamFormHTML(units = [], isEdit = false) {
     const meta = state.examMeta;
     const isComprehensive = meta.exam_scope === 'comprehensive';
+    const linked = !!meta.lesson_id;
+    const linkedUnitName = units.find(u => u.id == meta.unit_id)?.name;
+    // امتحان الدرس يرث المرحلة والصف والفصل والوحدة من الدرس نفسه ولا يُعدَّل هنا
+    const linkedInfoHtml = `
+            <div class="exam-lesson-link" role="note">
+                <div class="exam-lesson-link-head"><i class="fas fa-link" aria-hidden="true"></i> امتحان مرتبط بدرس</div>
+                <p class="exam-lesson-link-title">${escapeHtml(meta.lesson_title || 'درس غير متاح')}</p>
+                <div class="exam-lesson-link-tags">
+                    <span class="badge">${escapeHtml(meta.stage)}</span>
+                    <span class="badge">الصف ${escapeHtml(String(meta.grade))}</span>
+                    <span class="badge">الفصل ${escapeHtml(meta.semester)}</span>
+                    ${linkedUnitName ? `<span class="badge">${escapeHtml(linkedUnitName)}</span>` : ''}
+                </div>
+                <p class="form-hint">المرحلة والصف والفصل والوحدة تُؤخذ من الدرس تلقائياً.</p>
+            </div>`;
     const unitOptions = units.map(u =>
         `<option value="${u.id}" ${meta.unit_id == u.id ? 'selected' : ''}>${escapeHtml(u.name)}</option>`
     ).join('');
@@ -401,6 +491,7 @@ function buildExamFormHTML(units = [], isEdit = false) {
                 </div>
             </div>
 
+            ${linked ? linkedInfoHtml : `
             <div class="form-row three-cols">
                 <div class="form-group">
                     <label for="exam-stage">المرحلة <span class="required" aria-label="مطلوب">*</span></label>
@@ -453,6 +544,7 @@ function buildExamFormHTML(units = [], isEdit = false) {
                     <p class="form-hint" id="exam-units-hint">${unitsHintText}</p>
                 </div>
             </div>
+            `}
 
             <div class="form-row two-cols">
                 <div class="form-group">
@@ -590,7 +682,9 @@ function buildPreviewHTML() {
     const unitName = !isComprehensive
         ? state.availableUnits.find(u => u.id == meta.unit_id)?.name
         : null;
-    const scopeBadge = isComprehensive
+    const scopeBadge = meta.lesson_id
+        ? ''
+        : isComprehensive
         ? '<span class="badge comprehensive"><i class="fas fa-globe" aria-hidden="true"></i> امتحان شامل</span>'
         : `<span class="badge unit-scope"><i class="fas fa-layer-group" aria-hidden="true"></i> وحدة: ${escapeHtml(unitName || 'غير محددة')}</span>`;
 
@@ -603,7 +697,7 @@ function buildPreviewHTML() {
                 <div class="preview-badges">
                     ${scopeBadge}
                     ${meta.is_challenge ? '<span class="badge challenge"><i class="fas fa-trophy" aria-hidden="true"></i> امتحان المتفوقين</span>' : ''}
-                    ${meta.lesson_id ? '<span class="badge lesson-linked"><i class="fas fa-link" aria-hidden="true"></i> مرتبط بدرس</span>' : ''}
+                    ${meta.lesson_id ? `<span class="badge lesson-linked"><i class="fas fa-link" aria-hidden="true"></i> مرتبط بالدرس: ${escapeHtml(meta.lesson_title || '')}</span>` : ''}
                 </div>
                 ${meta.cover_image_url ? `<img src="${escapeHtml(meta.cover_image_url)}" alt="غلاف الامتحان" class="preview-cover-img">` : ''}
             </div>
@@ -871,7 +965,8 @@ function buildExamPayload() {
         duration: state.examMeta.duration,
         description: state.examMeta.description,
         is_challenge: state.examMeta.is_challenge,
-        cover_image_url: state.examMeta.cover_image_url
+        cover_image_url: state.examMeta.cover_image_url,
+        ...(state.examMeta.lesson_id ? { type: 'lesson_exam' } : {})
     };
 }
 
@@ -906,14 +1001,20 @@ function collectFormData(container) {
     const examScope = formData.get('exam_scope') === 'comprehensive' ? 'comprehensive' : 'unit';
     const unitIdRaw = formData.get('unit_id');
 
-    state.examMeta = {
-        ...state.examMeta,
-        title: (formData.get('title') || '').trim(),
+    // امتحان الدرس يحتفظ بنطاقه من الدرس ولا يقرأه من النموذج
+    const linked = !!state.examMeta.lesson_id;
+    const scopeFields = linked ? {} : {
         stage: formData.get('stage') || '',
         grade: formData.get('grade') ? parseInt(formData.get('grade')) : '',
         semester: formData.get('semester') || '',
         exam_scope: examScope,
-        unit_id: (examScope === 'unit' && unitIdRaw) ? parseInt(unitIdRaw) : null,
+        unit_id: (examScope === 'unit' && unitIdRaw) ? parseInt(unitIdRaw) : null
+    };
+
+    state.examMeta = {
+        ...state.examMeta,
+        title: (formData.get('title') || '').trim(),
+        ...scopeFields,
         duration: parseInt(formData.get('duration')) || EXAM_DEFAULTS.duration,
         questionsCount: parseInt(formData.get('questionsCount')) || EXAM_DEFAULTS.questionsCount,
         is_challenge: formData.get('is_challenge') === 'on',
@@ -963,7 +1064,8 @@ function validateExamMeta() {
     const meta = state.examMeta;
     const baseValid = meta.title.trim() !== '' && meta.stage !== '' && meta.grade !== '' && meta.semester !== '';
     if (!baseValid) return false;
-    if (meta.exam_scope === 'unit' && !meta.unit_id) return false;
+    // الدرس قد يكون بلا وحدة فلا نشترطها لامتحان الدرس
+    if (!meta.lesson_id && meta.exam_scope === 'unit' && !meta.unit_id) return false;
     return true;
 }
 

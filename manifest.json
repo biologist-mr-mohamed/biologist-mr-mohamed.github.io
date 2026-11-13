@@ -10,16 +10,35 @@
   "lang": "ar",
   "dir": "rtl",
   "theme_color": "#2196f3",
-  "background_color": "#f0f8ff",
+  "background_color": "#f8f9fa",
   "categories": [
     "education",
     "science"
   ],
+  "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/assets/images/biologist1.png",
-      "sizes": "1649x1649",
+      "src": "/assets/images/biologist1-192.png",
+      "sizes": "192x192",
       "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/biologist1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/images/biologist1.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/images/biologist1.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any"
     }
   ],
@@ -31,8 +50,8 @@
       "url": "/lessons",
       "icons": [
         {
-          "src": "/assets/images/biologist1.png",
-          "sizes": "1649x1649",
+          "src": "/assets/images/shortcuts/lessons.png",
+          "sizes": "192x192",
           "type": "image/png"
         }
       ]
@@ -44,8 +63,8 @@
       "url": "/exams",
       "icons": [
         {
-          "src": "/assets/images/biologist1.png",
-          "sizes": "1649x1649",
+          "src": "/assets/images/shortcuts/exams.png",
+          "sizes": "192x192",
           "type": "image/png"
         }
       ]
@@ -57,8 +76,8 @@
       "url": "/groups",
       "icons": [
         {
-          "src": "/assets/images/biologist1.png",
-          "sizes": "1649x1649",
+          "src": "/assets/images/shortcuts/groups.png",
+          "sizes": "192x192",
           "type": "image/png"
         }
       ]
@@ -70,8 +89,8 @@
       "url": "/profile",
       "icons": [
         {
-          "src": "/assets/images/biologist1.png",
-          "sizes": "1649x1649",
+          "src": "/assets/images/shortcuts/profile.png",
+          "sizes": "192x192",
           "type": "image/png"
         }
       ]

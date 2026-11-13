@@ -4,80 +4,79 @@
 import { getCurrentUser } from '../core/session.js';
 import { EventBus }        from '../core/event-bus.js';
 import { toggleTheme, getCurrentTheme } from '../core/theme.js';
-import { createAvatarElement, updateAvatarElement, shouldShowVerificationBadge, getFrameClass } from '../utils/avatar.js';
+import { createAvatarElement, updateAvatarElement } from '../utils/avatar.js';
 import { startLogoAnimation, stopLogoAnimation } from './logo-animation.js';
 
 // ==== 2. الثوابت والمحددات ====
 
-const SELECTORS = {
-  navbarTop:           '#navbar-top',
-  onlineIndicator:     '#navbar-online-indicator',
-  themeToggle:         '.theme-toggle',
-  searchBtn:           '#global-search-btn',
-  notificationBtn:     '#notification-btn',
-  notificationBadge:   '#notification-badge',
-  avatarContainer:     '#user-avatar-container',
-  userAvatar:          '#user-avatar',
-  avatarFrame:         '#avatar-frame',
-  verificationBadge:   '#user-verification-badge',
-  dynamicLogo:         '#navbar-dynamic-logo',
+// شرط وضع الكمبيوتر مكرر في variables.css و navbar.css و drawer.css و drawer.js — لا يُغيَّر منفردًا
+const DESKTOP_QUERY = '(min-width: 992px) and (hover: hover) and (pointer: fine)';
+const MOBILE_QUERY  = '(max-width: 767.98px)';
 
-  bottomNav:           '#bottom-navigation',
-  bottomNavBtns:       '.bottom-nav-btn[data-nav-target]',
+const SCROLL_THRESHOLD_PX      = 10;
+const SCROLL_HIDE_AFTER_PX     = 50;
+const DRAWER_WAIT_INTERVAL_MS  = 100;
+const DRAWER_WAIT_MAX_ATTEMPTS = 20;
+
+const SELECTORS = {
+  navbarTop:         '#navbar-top',
+  themeToggle:       '.theme-toggle',
+  searchBtn:         '#global-search-btn',
+  notificationBtn:   '#notification-btn',
+  notificationBadge: '#notification-badge',
+  avatarContainer:   '#user-avatar-container',
+  avatarMount:       '#user-avatar-mount',
+  userName:          '#navbar-user-name',
+  dynamicLogo:       '#navbar-dynamic-logo',
+  bottomNav:         '#bottom-navigation',
+  menuBtn:           '#open-drawer-btn',
+  navLinks:          '#navbar-primary [data-nav-target], #bottom-navigation [data-nav-target]'
 };
 
+// اسم المسار → القسم الذي يُفعَّل في روابط التنقل
 const PAGE_TO_NAV_MAP = {
-  home:       'home',
-  lessons:    'lessons',
-  exams:      'exams',
+  home:          'home',
+  lessons:       'lessons',
+  'lesson-view': 'lessons',
+  exams:         'exams',
+  'exam-view':   'exams',
+  groups:        'groups',
+  'group-view':  'groups'
 };
 
 // ==== 3. حالة الـ Navbar ====
 let navbarState = {
-  isInitialized:     false,
-  currentPage:       'home',
-  isOnline:          navigator.onLine,
+  isInitialized:      false,
+  currentPage:        'home',
+  isOnline:           navigator.onLine,
   notificationsCount: 0,
-  currentUser:       null,
+  currentUser:        null,
+  streak:             0,
+  layoutMode:         '',
+  isMobile:           false,
+  lastScrollY:        0,
+  isBottomNavHidden:  false,
   eventUnsubscribers: [],
-  _domListeners:     [],
-  isMobile:          window.innerWidth < 768,
-  lastScrollY:       window.scrollY,
-  _scrollState: {
-    lastY:     0,
-    ticking:   false,
-    rafId:     null,
-    isHidden:  false
-  }
+  _domListeners:      []
 };
 
 // ==== 4. مرجع عناصر DOM ====
 let $el = {
   navbarTop:         null,
-  onlineIndicator:   null,
   themeToggle:       null,
   searchBtn:         null,
   notificationBtn:   null,
   notificationBadge: null,
   avatarContainer:   null,
-  verificationBadge: null,
+  avatarMount:       null,
+  userName:          null,
   bottomNav:         null,
-  bottomNavBtns:     [],
-  dynamicLogo:       null,
+  menuBtn:           null,
+  navLinks:          [],
+  dynamicLogo:       null
 };
 
 // ==== 5. دوال مساعدة داخلية ====
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
 
 function updateBodyMeta(user) {
   if (user) {
@@ -96,35 +95,48 @@ function getTimeGreeting() {
   return 'مساء النور 🌙';
 }
 
+// نص خام (آمن للاستخدام في textContent و setAttribute بدون escape)
 function buildUserTitle(user) {
   if (!user) return '';
-  const nameRaw  = user.full_name || user.username || 'مستخدم';
-  const name     = escapeHtml(nameRaw.split(' ')[0]);
+  const nameRaw = String(user.full_name || user.username || 'مستخدم').trim();
+  const name    = nameRaw.split(/\s+/)[0];
   if (user.user_type === 'teacher')   return `أستاذ ${name}`;
   if (user.user_type === 'moderator') return `المشرف ${name}`;
   return name;
 }
 
+function canUseSearch(user) {
+  return user?.user_type === 'teacher' || user?.user_type === 'moderator';
+}
+
+// يقبل اسم المسار كنص أو كائن {name, params} (ما يرجعه router.getCurrentRoute)
+function routeNameOf(value) {
+  if (typeof value === 'string' && value) return value;
+  return value?.name || value?.page || value?.route || 'home';
+}
+
 // ==== 6. بناء الواجهة ====
 
 function bindDomRefs() {
-  $el.navbarTop         = document.querySelector(SELECTORS.navbarTop);
-  $el.onlineIndicator   = document.querySelector(SELECTORS.onlineIndicator);
-  $el.themeToggle       = document.querySelector(SELECTORS.themeToggle);
-  $el.searchBtn         = document.querySelector(SELECTORS.searchBtn);
-  $el.notificationBtn   = document.querySelector(SELECTORS.notificationBtn);
-  $el.notificationBadge = document.querySelector(SELECTORS.notificationBadge);
-  $el.avatarContainer   = document.querySelector(SELECTORS.avatarContainer);
-  $el.verificationBadge = document.querySelector(SELECTORS.verificationBadge);
-  $el.dynamicLogo       = document.querySelector(SELECTORS.dynamicLogo);
-  $el.bottomNav         = document.querySelector(SELECTORS.bottomNav);
-  $el.bottomNavBtns     = Array.from(
-    document.querySelectorAll(SELECTORS.bottomNavBtns)
-  );
+  const $ = (selector) => document.querySelector(selector);
+
+  $el.navbarTop         = $(SELECTORS.navbarTop);
+  $el.themeToggle       = $(SELECTORS.themeToggle);
+  $el.searchBtn         = $(SELECTORS.searchBtn);
+  $el.notificationBtn   = $(SELECTORS.notificationBtn);
+  $el.notificationBadge = $(SELECTORS.notificationBadge);
+  $el.avatarContainer   = $(SELECTORS.avatarContainer);
+  $el.avatarMount       = $(SELECTORS.avatarMount);
+  $el.userName          = $(SELECTORS.userName);
+  $el.dynamicLogo       = $(SELECTORS.dynamicLogo);
+  $el.bottomNav         = $(SELECTORS.bottomNav);
+  $el.menuBtn           = $(SELECTORS.menuBtn);
+  $el.navLinks          = Array.from(document.querySelectorAll(SELECTORS.navLinks));
 }
 
 function updateNavbarUI(user) {
   navbarState.currentUser = user;
+  navbarState.streak      = Number(user?.streak) || 0;
   updateBodyMeta(user);
 
   if (user) {
@@ -136,88 +148,92 @@ function updateNavbarUI(user) {
 
 function _applyLoggedInState(user) {
   updateUserAvatarAndFrame(user);
-
-  const isVerified = user.user_type === 'teacher' || user.user_type === 'moderator';
-  if ($el.verificationBadge) {
-    $el.verificationBadge.style.display = isVerified ? 'flex' : 'none';
-    $el.verificationBadge.setAttribute('title',
-      isVerified ? `حساب ${user.user_type === 'teacher' ? 'معلم' : 'مشرف'} موثّق` : ''
-    );
-  }
+  updateUserName(user);
 
   if ($el.searchBtn) {
-    const canSearch = user.user_type === 'teacher' || user.user_type === 'moderator';
-    $el.searchBtn.style.display = canSearch ? 'flex' : 'none';
+    $el.searchBtn.style.display = canUseSearch(user) ? 'flex' : 'none';
   }
 
-  if ($el.avatarContainer) {
-    const greeting = getTimeGreeting();
-    const title    = buildUserTitle(user);
-    const streak   = user.streak ? ` 🔥 ${user.streak}` : '';
-    $el.avatarContainer.setAttribute('aria-label', `${greeting} ${title}${streak} – فتح القائمة`);
-  }
+  refreshAvatarLabel();
 }
 
 function _applyGuestState() {
   resetAvatarToDefault();
+  updateUserName(null);
 
-  if ($el.verificationBadge) $el.verificationBadge.style.display = 'none';
-  if ($el.searchBtn)         $el.searchBtn.style.display         = 'none';
+  if ($el.searchBtn) $el.searchBtn.style.display = 'none';
 
-  if ($el.avatarContainer) {
-    $el.avatarContainer.setAttribute('aria-label', 'فتح القائمة – الضيف');
+  refreshAvatarLabel();
+}
+
+function refreshAvatarLabel() {
+  const container = $el.avatarContainer;
+  if (!container) return;
+
+  const user = navbarState.currentUser;
+  if (!user) {
+    container.setAttribute('aria-label', 'فتح القائمة – الضيف');
+    return;
   }
+
+  const streak = navbarState.streak > 0 ? ` 🔥 ${navbarState.streak}` : '';
+  container.setAttribute('aria-label', `${getTimeGreeting()} ${buildUserTitle(user)}${streak} – فتح القائمة`);
+}
+
+function updateUserName(user) {
+  const el = $el.userName;
+  if (!el) return;
+
+  const title = user ? buildUserTitle(user) : '';
+  el.textContent = title;
+  el.hidden = !title;
 }
 
 // ==== 7. نظام الأفاتار والإطار ====
 
+function getAvatarHost() {
+  return $el.avatarMount || $el.avatarContainer;
+}
+
 function updateUserAvatarAndFrame(user) {
-  const container = $el.avatarContainer;
-  if (!container) return;
+  const host = getAvatarHost();
+  if (!host) return;
 
   if (!user) {
     resetAvatarToDefault();
     return;
   }
 
-  let avatarElement = container.querySelector('.avatar-wrapper');
+  let avatarElement = host.querySelector('.avatar-wrapper');
   if (!avatarElement) {
+    // الأفاتار غير تفاعلي: الحاوية نفسها هي الزر (تجنّب عناصر تفاعلية متداخلة)
     avatarElement = createAvatarElement(user, 'sm', {
       showFrame: true,
       showBadge: false,
-      clickable: true,
-      onClick: () => window.drawer?.open()
+      clickable: false
     });
-    container.innerHTML = '';
-    container.appendChild(avatarElement);
+    host.replaceChildren(avatarElement);
   } else {
     updateAvatarElement(avatarElement, user);
-  }
-
-  if ($el.verificationBadge) {
-    $el.verificationBadge.style.display = shouldShowVerificationBadge(user) ? 'flex' : 'none';
   }
 }
 
 function resetAvatarToDefault() {
-  const container = $el.avatarContainer;
-  if (!container) return;
+  const host = getAvatarHost();
+  if (!host) return;
 
   const guestAvatar = createAvatarElement(null, 'sm', {
     showFrame: true,
     showBadge: false,
     clickable: false
   });
-  container.innerHTML = '';
-  container.appendChild(guestAvatar);
-
-  if ($el.verificationBadge) $el.verificationBadge.style.display = 'none';
+  host.replaceChildren(guestAvatar);
 }
 
 // ==== 8. إدارة عداد الإشعارات ====
 
 function setNotificationsCount(count) {
-  const num = Math.max(0, parseInt(count) || 0);
+  const num = Math.max(0, parseInt(count, 10) || 0);
   navbarState.notificationsCount = num;
 
   if (!$el.notificationBadge) return;
@@ -251,21 +267,22 @@ function setNotificationsCount(count) {
 // ==== 9. مزامنة الصفحة النشطة ====
 
 function updateCurrentPage(page) {
-  navbarState.currentPage = page;
-  updateActiveNavButton(page);
+  const routeName = routeNameOf(page);
+  navbarState.currentPage = routeName;
+  updateActiveNavButton(routeName);
 }
 
 function updateActiveNavButton(page) {
-  if (!$el.bottomNavBtns.length) return;
+  if (!$el.navLinks.length) return;
 
-  const activeTarget = PAGE_TO_NAV_MAP[page] || null;
+  const activeTarget = PAGE_TO_NAV_MAP[routeNameOf(page)] || null;
 
-  $el.bottomNavBtns.forEach(btn => {
-    const target   = btn.dataset.navTarget;
-    const isActive = activeTarget && target === activeTarget;
+  $el.navLinks.forEach(link => {
+    const isActive = Boolean(activeTarget) && link.dataset.navTarget === activeTarget;
 
-    btn.classList.toggle('active', isActive);
-    btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    link.classList.toggle('active', isActive);
+    if (isActive) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
   });
 }
 
@@ -277,12 +294,13 @@ let _offlineHandler = null;
 function startOnlineStatusMonitoring() {
   stopOnlineStatusMonitoring();
 
-  _onlineHandler = () => _handleConnectionChange(true);
+  _onlineHandler  = () => _handleConnectionChange(true);
   _offlineHandler = () => _handleConnectionChange(false);
 
   window.addEventListener('online',  _onlineHandler);
   window.addEventListener('offline', _offlineHandler);
 
+  navbarState.isOnline = navigator.onLine;
   _applyConnectionStatus(navigator.onLine);
 }
 
@@ -299,24 +317,71 @@ function _handleConnectionChange(isOnline) {
   EventBus.emit('navbar:connectionChanged', { online: isOnline });
 }
 
+// حالة الانقطاع تظهر كخط تحذير أسفل الشريط (CSS) — لا نغيّر title زر الإشعارات
 function _applyConnectionStatus(isOnline) {
   const navbar = $el.navbarTop;
   if (!navbar) return;
 
   navbar.classList.toggle('navbar--offline', !isOnline);
   navbar.classList.toggle('navbar--online',   isOnline);
-
-  if ($el.notificationBtn) {
-    $el.notificationBtn.title = isOnline
-      ? 'متصل بالإنترنت'
-      : 'غير متصل – تعمل بوضع Offline';
-  }
+  navbar.dataset.connection = isOnline ? 'online' : 'offline';
 }
 
-// ==== 11. إخفاء الشريط السفلي عند التمرير ====
+// ==== 11. وضع العرض (كمبيوتر / موبايل) ====
 
-let scrollHandlerRef = null;
-let resizeObserver   = null;
+let desktopMedia        = null;
+let desktopMediaHandler = null;
+
+function applyLayoutMode(notify) {
+  const mode    = desktopMedia?.matches ? 'desktop' : 'mobile';
+  const changed = mode !== navbarState.layoutMode;
+
+  navbarState.layoutMode = mode;
+  document.documentElement.dataset.layout = mode;
+
+  if (changed && notify) {
+    EventBus.emit('layout:mode-changed', { mode, isDesktop: mode === 'desktop' });
+  }
+  if (changed && mode === 'desktop') _showBottomNav();
+}
+
+function initializeLayoutMode() {
+  destroyLayoutMode();
+
+  desktopMedia = window.matchMedia(DESKTOP_QUERY);
+  desktopMediaHandler = () => applyLayoutMode(true);
+  desktopMedia.addEventListener('change', desktopMediaHandler);
+
+  navbarState.layoutMode = '';
+  applyLayoutMode(false);
+}
+
+function destroyLayoutMode() {
+  if (desktopMedia && desktopMediaHandler) {
+    desktopMedia.removeEventListener('change', desktopMediaHandler);
+  }
+  desktopMedia = null;
+  desktopMediaHandler = null;
+}
+
+// ==== 12. إخفاء الشريط السفلي عند التمرير (الهاتف فقط) ====
+
+let scrollHandlerRef   = null;
+let mobileMedia        = null;
+let mobileMediaHandler = null;
+
+function applyMobileState() {
+  navbarState.isMobile = Boolean(mobileMedia?.matches);
+
+  window.removeEventListener('scroll', scrollHandlerRef);
+
+  if (navbarState.isMobile) {
+    navbarState.lastScrollY = window.scrollY;
+    window.addEventListener('scroll', scrollHandlerRef, { passive: true });
+  } else {
+    _showBottomNav();
+  }
+}
 
 function initializeAutoHideBottomNav() {
   destroyAutoHideBottomNav();
@@ -324,142 +389,158 @@ function initializeAutoHideBottomNav() {
   if (!$el.bottomNav) return;
 
   scrollHandlerRef = () => {
-    if (!navbarState.isMobile) return;
+    if (!navbarState.isMobile || !$el.bottomNav) return;
+
     const currentScrollY = window.scrollY;
-    const bottomNav      = $el.bottomNav;
-    if (!bottomNav) return;
+    if (Math.abs(currentScrollY - navbarState.lastScrollY) < SCROLL_THRESHOLD_PX) return;
 
-    const THRESHOLD = 10;
-    if (Math.abs(currentScrollY - navbarState.lastScrollY) < THRESHOLD) return;
-
-    if (currentScrollY > navbarState.lastScrollY && currentScrollY > 50) {
-      bottomNav.classList.add('hide');
-      navbarState._scrollState.isHidden = true;
+    if (currentScrollY > navbarState.lastScrollY && currentScrollY > SCROLL_HIDE_AFTER_PX) {
+      _hideBottomNav();
     } else if (currentScrollY < navbarState.lastScrollY) {
-      bottomNav.classList.remove('hide');
-      navbarState._scrollState.isHidden = false;
+      _showBottomNav();
     }
     navbarState.lastScrollY = currentScrollY;
   };
 
-  const checkIsMobile = () => {
-    navbarState.isMobile = window.innerWidth < 768;
+  mobileMedia = window.matchMedia(MOBILE_QUERY);
+  mobileMediaHandler = applyMobileState;
+  mobileMedia.addEventListener('change', mobileMediaHandler);
 
-    if (!navbarState.isMobile) {
-      $el.bottomNav?.classList.remove('hide');
-      navbarState._scrollState.isHidden = false;
-      window.removeEventListener('scroll', scrollHandlerRef);
-    } else {
-      navbarState.lastScrollY = window.scrollY;
-      window.removeEventListener('scroll', scrollHandlerRef);
-      window.addEventListener('scroll', scrollHandlerRef, { passive: true });
-    }
-  };
-
-  if (window.ResizeObserver) {
-    resizeObserver = new ResizeObserver(checkIsMobile);
-    resizeObserver.observe(document.body);
-  } else {
-    window.addEventListener('resize', checkIsMobile);
-    _trackListener(window, 'resize', checkIsMobile);
-  }
-
-  checkIsMobile();
+  applyMobileState();
 }
 
 function destroyAutoHideBottomNav() {
   if (scrollHandlerRef) {
     window.removeEventListener('scroll', scrollHandlerRef);
-    scrollHandlerRef = null;
   }
-  if (resizeObserver) {
-    resizeObserver.disconnect();
-    resizeObserver = null;
+  if (mobileMedia && mobileMediaHandler) {
+    mobileMedia.removeEventListener('change', mobileMediaHandler);
   }
-  navbarState._scrollState.isHidden = false;
+  scrollHandlerRef   = null;
+  mobileMedia        = null;
+  mobileMediaHandler = null;
+  _showBottomNav();
 }
 
 function _hideBottomNav() {
-  if (!$el.bottomNav || navbarState._scrollState.isHidden) return;
+  if (!$el.bottomNav || navbarState.isBottomNavHidden) return;
   $el.bottomNav.classList.add('hide');
-  navbarState._scrollState.isHidden = true;
+  navbarState.isBottomNavHidden = true;
 }
 
 function _showBottomNav() {
-  if (!$el.bottomNav || !navbarState._scrollState.isHidden) return;
+  if (!$el.bottomNav || !navbarState.isBottomNavHidden) return;
   $el.bottomNav.classList.remove('hide');
-  navbarState._scrollState.isHidden = false;
+  navbarState.isBottomNavHidden = false;
 }
 
-// ==== 12. ربط الأحداث ====
+// ==== 13. فتح القائمة الجانبية ====
 
-function bindEvents() {
-  if ($el.avatarContainer) {
-    const openDrawer = (e) => {
-      if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
-      e.preventDefault();
-      if (window.drawer?.open) window.drawer.open();
-    };
-    $el.avatarContainer.addEventListener('click',   openDrawer);
-    $el.avatarContainer.addEventListener('keydown', openDrawer);
-    _trackListener($el.avatarContainer, 'click',   openDrawer);
-    _trackListener($el.avatarContainer, 'keydown', openDrawer);
-  }
+let drawerWaitTimer = null;
 
-  $el.bottomNavBtns.forEach(btn => {
-    const handler = (e) => {
-      e.preventDefault();
-      const target = btn.dataset.navTarget;
-      const action = btn.dataset.action;
+function clearDrawerWait() {
+  if (drawerWaitTimer) clearInterval(drawerWaitTimer);
+  drawerWaitTimer = null;
+}
 
-if (action === 'open-sidebar' || btn.id === 'open-drawer-btn') {
+// drawer.js يُحمَّل بعد الشريط أحيانًا: ننتظره بحد أقصى ثانيتين
+function openDrawerWhenReady() {
   if (window.drawer?.open) {
     window.drawer.open();
-  } else {
-    if (window.modals?.toast) {
-      window.modals.toast('جاري تحميل القائمة الجانبية...', 'info');
+    return;
+  }
+
+  if (window.modals?.toast) {
+    window.modals.toast('جاري تحميل القائمة الجانبية...', 'info');
+  }
+
+  clearDrawerWait();
+  let attempts = 0;
+  drawerWaitTimer = setInterval(() => {
+    attempts++;
+    if (window.drawer?.open) {
+      clearDrawerWait();
+      window.drawer.open();
+    } else if (attempts >= DRAWER_WAIT_MAX_ATTEMPTS) {
+      clearDrawerWait();
+      console.warn('[Navbar] تعذّر فتح القائمة الجانبية — لم يتم تحميل drawer.js في الوقت المناسب');
     }
-    let attempts = 0;
-    const maxAttempts = 20;
-    const waitForDrawer = setInterval(() => {
-      attempts++;
-      if (window.drawer?.open) {
-        clearInterval(waitForDrawer);
-        window.drawer.open();
-      } else if (attempts >= maxAttempts) {
-        clearInterval(waitForDrawer);
-        console.warn('[Navbar] تعذّر فتح القائمة الجانبية — لم يتم تحميل drawer.js في الوقت المناسب');
-      }
-    }, 100);
-  }
-  return;
+  }, DRAWER_WAIT_INTERVAL_MS);
 }
 
-      if (target && window.router?.navigateTo) {
-        window.router.navigateTo(target);
-      }
-    };
-    btn.addEventListener('click', handler);
-    _trackListener(btn, 'click', handler);
-  });
+function toggleDrawerMenu() {
+  if (window.drawer?.toggle) window.drawer.toggle();
+  else openDrawerWhenReady();
+}
 
-  if ($el.searchBtn) {
-    const openSearch = () => {
-      if (window.searchAPI?.open) window.searchAPI.open();
-    };
-    $el.searchBtn.addEventListener('click', openSearch);
-    _trackListener($el.searchBtn, 'click', openSearch);
+function closeDrawerIfOpen() {
+  if (window.drawer?.isOpen?.()) window.drawer.close();
+}
+
+// ==== 14. ربط الأحداث ====
+
+function _trackListener(el, type, fn) {
+  navbarState._domListeners.push({ el, type, fn });
+}
+
+function _bind(el, type, fn) {
+  if (!el) return;
+  el.addEventListener(type, fn);
+  _trackListener(el, type, fn);
+}
+
+function onAvatarActivate(event) {
+  if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') return;
+  event.preventDefault();
+  toggleDrawerMenu();
+}
+
+// زر القائمة السفلي: drawer.js يربطه بنفسه، وهذا المعالج احتياطي لو لم يكن جاهزًا بعد
+function onMenuButtonClick() {
+  if (window.drawer?.initialized) return;
+  openDrawerWhenReady();
+}
+
+function onSearchClick() {
+  closeDrawerIfOpen();
+  if (window.searchAPI?.open) window.searchAPI.open();
+}
+
+function onThemeToggleClick() {
+  const newTheme = toggleTheme();
+  _updateThemeToggleIcon(newTheme);
+  closeDrawerIfOpen();
+}
+
+// Ctrl/⌘ + K أو "/" لفتح البحث (للمعلم والمشرف فقط)
+function onGlobalKeydown(event) {
+  if (event.isComposing || event.altKey) return;
+  if (!canUseSearch(navbarState.currentUser) || !window.searchAPI?.open) return;
+
+  const isCtrlK = (event.ctrlKey || event.metaKey) && event.code === 'KeyK';
+  const isSlash = event.code === 'Slash' && !event.ctrlKey && !event.metaKey && !event.shiftKey;
+  if (!isCtrlK && !isSlash) return;
+
+  if (isSlash) {
+    const target = event.target;
+    const tag = target?.tagName;
+    if (target?.isContentEditable || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
   }
 
-  if ($el.themeToggle) {
-  const toggleThemeHandler = () => {
-    const newTheme = toggleTheme();
-    _updateThemeToggleIcon(newTheme);
-    if (window.drawer?.isOpen?.()) window.drawer.close();
-  };
-  $el.themeToggle.addEventListener('click', toggleThemeHandler);
-  _trackListener($el.themeToggle, 'click', toggleThemeHandler);
+  event.preventDefault();
+  closeDrawerIfOpen();
+  window.searchAPI.open();
 }
+
+function bindEvents() {
+  // التنقل بين الصفحات يتولاه معالج النقر العام في الراوتر (data-nav-target)
+  _bind($el.avatarContainer, 'click',   onAvatarActivate);
+  _bind($el.avatarContainer, 'keydown', onAvatarActivate);
+  _bind($el.menuBtn,         'click',   onMenuButtonClick);
+  _bind($el.searchBtn,       'click',   onSearchClick);
+  _bind($el.notificationBtn, 'click',   closeDrawerIfOpen);
+  _bind($el.themeToggle,     'click',   onThemeToggleClick);
+  _bind(document,            'keydown', onGlobalKeydown);
 }
 
 function subscribeToGlobalEvents() {
@@ -468,32 +549,33 @@ function subscribeToGlobalEvents() {
     updateNavbarUI(user);
   };
 
+  // profileUpdated قد يخص مستخدمًا آخر (معلم يعدّل ملف طالب) — نتجاهله
   const onProfileUpdated = (data) => {
-    const user = data?.user || getCurrentUser();
-    if (user) {
-      updateUserAvatarAndFrame(user);
-      navbarState.currentUser = user;
-    }
+    const current = getCurrentUser();
+    if (!current) return;
+
+    const updated = data?.user;
+    if (updated && String(updated.id) !== String(current.id)) return;
+
+    const user = updated || current;
+    navbarState.currentUser = user;
+    updateUserAvatarAndFrame(user);
+    updateUserName(user);
+    refreshAvatarLabel();
   };
 
   const onStreakUpdated = (data) => {
-    if (!navbarState.currentUser) return;
-    const streak = data?.streak || 0;
-    navbarState.currentUser.streak = streak;
+    const current = navbarState.currentUser;
+    if (!current) return;
+    if (data?.userId && current.id && String(data.userId) !== String(current.id)) return;
 
-    if ($el.avatarContainer && navbarState.currentUser) {
-      const greeting = getTimeGreeting();
-      const title    = buildUserTitle(navbarState.currentUser);
-      const streakTxt = streak >= 5 ? ` 🔥 ${streak}` : '';
-      $el.avatarContainer.setAttribute('aria-label',
-        `${greeting} ${title}${streakTxt} – فتح القائمة`
-      );
-    }
+    navbarState.streak = Number(data?.streak) || 0;
+    refreshAvatarLabel();
   };
 
   const onRouterNavigated = (data) => {
-    const page = data?.page || data?.route || 'home';
-    updateCurrentPage(page);
+    updateCurrentPage(data?.page || data?.route || 'home');
+    _showBottomNav();
   };
 
   const onNotificationsUpdated = (data) => {
@@ -507,7 +589,7 @@ function subscribeToGlobalEvents() {
     _updateThemeToggleIcon(theme);
   };
 
-  const unsubs = [
+  navbarState.eventUnsubscribers = [
     EventBus.on('userStateChanged',           onUserStateChanged),
     EventBus.on('profileUpdated',             onProfileUpdated),
     EventBus.on('avatarUpdated',              onProfileUpdated),
@@ -515,16 +597,12 @@ function subscribeToGlobalEvents() {
     EventBus.on('pageChanged',                onRouterNavigated),
     EventBus.on('notifications:countChanged', onNotificationsUpdated),
     EventBus.on('newNotification',            onNotificationsUpdated),
-    EventBus.on('theme:toggled',              onThemeChanged),
+    EventBus.on('theme:toggled',              onThemeChanged)
   ];
 
   const docUserStateHandler = (e) => onUserStateChanged(e.detail);
   document.addEventListener('userStateChanged', docUserStateHandler);
-
-  navbarState.eventUnsubscribers = unsubs;
-  navbarState._domListeners.push({
-    el: document, type: 'userStateChanged', fn: docUserStateHandler
-  });
+  _trackListener(document, 'userStateChanged', docUserStateHandler);
 }
 
 function unbindEvents() {
@@ -541,10 +619,6 @@ function unbindEvents() {
   navbarState._domListeners = [];
 }
 
-function _trackListener(el, type, fn) {
-  navbarState._domListeners.push({ el, type, fn });
-}
-
 function _updateThemeToggleIcon(theme) {
   if (!$el.themeToggle) return;
   const isDark = theme === 'dark';
@@ -553,7 +627,7 @@ function _updateThemeToggleIcon(theme) {
   $el.themeToggle.setAttribute('title',      isDark ? 'الوضع النهاري'       : 'الوضع الليلي');
 }
 
-// ==== 13. دورة الحياة ====
+// ==== 15. دورة الحياة ====
 
 async function initializeNavbar() {
   if (navbarState.isInitialized) {
@@ -565,6 +639,8 @@ async function initializeNavbar() {
 
   try {
     bindDomRefs();
+
+    initializeLayoutMode();
 
     const user = getCurrentUser();
 
@@ -580,11 +656,9 @@ async function initializeNavbar() {
 
     subscribeToGlobalEvents();
 
-    const currentRoute = window.router?.getCurrentRoute?.() || 'home';
-    updateCurrentPage(currentRoute);
+    updateCurrentPage(window.router?.getCurrentRoute?.() || 'home');
 
-    const currentTheme = getCurrentTheme();
-_updateThemeToggleIcon(currentTheme);
+    _updateThemeToggleIcon(getCurrentTheme());
 
     navbarState.isInitialized = true;
 
@@ -606,6 +680,10 @@ function destroyNavbar() {
 
   destroyAutoHideBottomNav();
 
+  destroyLayoutMode();
+
+  clearDrawerWait();
+
   stopLogoAnimation();
 
   unbindEvents();
@@ -619,7 +697,7 @@ async function reinitializeNavbar() {
   await initializeNavbar();
 }
 
-// ==== 14. بوابات التحكم الخارجي ====
+// ==== 16. بوابات التحكم الخارجي ====
 
 function updateAfterLogin(userData) {
   updateNavbarUI(userData);
@@ -634,17 +712,18 @@ function updateAfterLogout() {
 
 function getState() {
   return {
-    isInitialized:     navbarState.isInitialized,
-    currentPage:       navbarState.currentPage,
-    isOnline:          navbarState.isOnline,
+    isInitialized:      navbarState.isInitialized,
+    currentPage:        navbarState.currentPage,
+    isOnline:           navbarState.isOnline,
+    layoutMode:         navbarState.layoutMode,
     notificationsCount: navbarState.notificationsCount,
-    currentUser:       navbarState.currentUser
+    currentUser:        navbarState.currentUser
       ? { id: navbarState.currentUser.id, user_type: navbarState.currentUser.user_type }
       : null
   };
 }
 
-// ==== 15. الواجهة العامة ====
+// ==== 17. الواجهة العامة ====
 
 const _publicAPI = {
   initialize:           initializeNavbar,
@@ -659,6 +738,7 @@ const _publicAPI = {
   updateAfterLogin,
   updateAfterLogout,
   getState,
+  isDesktopMode:        () => navbarState.layoutMode === 'desktop',
   startOnlineStatusMonitoring,
   stopOnlineStatusMonitoring,
   initializeAutoHideBottomNav,
@@ -667,7 +747,7 @@ const _publicAPI = {
 
 window.navbar = _publicAPI;
 
-// ==== 16. التصدير ====
+// ==== 18. التصدير ====
 export {
   initializeNavbar,
   destroyNavbar,

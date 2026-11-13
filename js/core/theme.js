@@ -419,15 +419,16 @@ function applyColorThemeToDOM() {
 }
 
 function updateThemeToggleButtons() {
-  const toggleButtons = document.querySelectorAll('.theme-toggle, .theme-toggle-sidebar');
-  toggleButtons.forEach(button => {
-    button.setAttribute('aria-pressed', $themeState.current === THEME_CONSTANTS.DARK);
-    const textSpan = button.querySelector('span');
-    if (textSpan) {
-      textSpan.textContent = $themeState.current === THEME_CONSTANTS.DARK 
-        ? 'الوضع النهاري' 
-        : 'الوضع الليلي';
-    }
+  const isDark = $themeState.current === THEME_CONSTANTS.DARK;
+
+  // زر الشريط العلوي: زر عادي → aria-pressed
+  document.querySelectorAll('.theme-toggle').forEach(button => {
+    button.setAttribute('aria-pressed', String(isDark));
+  });
+
+  // مفتاح القائمة الجانبية: role="switch" → aria-checked، والنص ثابت "الوضع الليلي"
+  document.querySelectorAll('.theme-toggle-sidebar').forEach(button => {
+    button.setAttribute('aria-checked', String(isDark));
   });
 }
 

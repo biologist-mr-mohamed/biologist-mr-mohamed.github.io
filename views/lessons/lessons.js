@@ -4,7 +4,6 @@ import { getCurrentUser, isTeacher, isModerator, updateSessionUser } from '../..
 import {
     getAllLessons,
     getLessonById,
-    toggleLessonLike,
     getUserProgress,
     getUnits,
     updateUserProgress,
@@ -91,7 +90,6 @@ const INITIAL_STATE = () => ({
     pendingReload: false,
     visibilityHandler: null,
     isCompleting: false,
-    isLiking: false,
     recommendedLessons: [],
     renderedCardIds: new Set(),
     elements: {},
@@ -117,17 +115,6 @@ function getCreatedMs(value) {
     const ms = value instanceof Date ? value.getTime() : typeof value === 'number' ? value : Date.parse(value);
     return Number.isFinite(ms) ? ms : 0;
 }
-
-function showElement(el, display = '') {
-    if (!el) return;
-    el.removeAttribute('data-ui-initial');
-    el.style.display = display;
-}
-
-function isElementHidden(el) {
-    return el.style.display === 'none' || (el.hasAttribute('data-ui-initial') && !el.style.display);
-}
-
 const isStudentUser = (user) => user?.user_type === 'student';
 const normalizeStage = (stage) => STAGE_ALIASES[stage] || stage || '';
 
@@ -285,6 +272,7 @@ async function _cleanup() {
     state.eventUnsubscribers.forEach(fn => fn());
 
     document.querySelectorAll('.lesson-confetti').forEach(el => el.remove());
+    document.body.classList.remove('lesson-focus-mode');
 
     state = INITIAL_STATE();
 }
@@ -332,15 +320,14 @@ function cacheElements(container) {
             semesterBadge: container.querySelector('#lesson-semester-badge'),
             unitBadge: container.querySelector('#lesson-unit-badge'),
             durationEl: container.querySelector('#lesson-duration'),
-            likesCountEl: container.querySelector('#likes-count'),
             videoContainer: container.querySelector('#video-container'),
             pdfContainer: container.querySelector('#pdf-container'),
             pdfBtn: container.querySelector('[data-action="download-pdf"]'),
-            likeBtn: container.querySelector('#lesson-like-btn'),
             startBtn: container.querySelector('[data-action="start-lesson"]'),
             completeBtn: container.querySelector('[data-action="complete-lesson"]'),
             favoriteBtn: container.querySelector('[data-action="toggle-favorite"]'),
             editLessonBtn: container.querySelector('[data-action="edit-lesson"]'),
+            manageExamBtn: container.querySelector('[data-action="manage-exam"]'),
             deleteLessonBtn: container.querySelector('[data-action="delete-lesson"]'),
             examBtnContainer: container.querySelector('#exam-btn-container'),
             examCardContainer: container.querySelector('#exam-card-container'),
@@ -439,6 +426,9 @@ function setupUIForView() {
     }
     if (state.elements.deleteLessonBtn) {
         state.elements.deleteLessonBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    }
+    if (state.elements.manageExamBtn) {
+        state.elements.manageExamBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     }
     if (state.elements.pdfBtn) {
         state.elements.pdfBtn.style.display = 'none';
@@ -1091,7 +1081,7 @@ function updateClearFiltersButton() {
 
 function updateStatsSummary() {
     if (!state.elements.statsSummary ||
-        isElementHidden(state.elements.statsSummary)) return;
+        state.elements.statsSummary.style.display === 'none') return;
     if (state.currentUser?.user_type !== 'student') return;
 
     const lessons = state.lessons;
@@ -1501,8 +1491,6 @@ function renderLessonView() {
     }
     if (state.elements.durationEl)
         state.elements.durationEl.textContent = lesson.duration || 0;
-    if (state.elements.likesCountEl)
-        state.elements.likesCountEl.textContent = lesson.likes || 0;
 
     renderVideoSection(lesson);
     renderPdfSection(lesson);
@@ -1523,7 +1511,6 @@ function renderLessonView() {
         }
     }
 
-    updateLikeButtonState();
     updateFavoriteButtonState();
 
     if (state.watchProgress > 0) {
@@ -1603,6 +1590,13 @@ function renderExamCard() {
         if (durationEl) durationEl.textContent = state.examData.duration || 10;
         if (questionsEl) questionsEl.textContent = state.examData.questions_count || 0;
     }
+    const manageLabel = state.elements.manageExamBtn?.querySelector('.manage-exam-label');
+    if (manageLabel) manageLabel.textContent = state.examData ? 'إدارة الامتحان' : 'إضافة امتحان';
+
+    // البطاقة تظهر فقط عند وجود امتحان متاح وبعد إكمال الدرس (أو للمعلم)
+    if (card && state.elements.resultsSection?.style.display === 'block') {
+        card.style.display = isExamAvailable() ? 'block' : 'none';
+    }
     renderExamButton();
 }
 
@@ -1615,7 +1609,10 @@ function renderExamButton() {
     const holder = state.elements.examBtnContainer;
     if (!holder) return;
     holder.innerHTML = '';
-    if (!isExamAvailable()) return;
+    const section = holder.closest('.lesson-exam-section');
+    const available = isExamAvailable();
+    if (section) section.hidden = !available;
+    if (!available) return;
 
     const unlocked = isStaffUser(state.currentUser) || state.watchProgress >= 100;
     const btn = document.createElement('button');
@@ -1627,6 +1624,15 @@ function renderExamButton() {
         : '<i class="fas fa-lock" aria-hidden="true"></i> أكمل الدرس لفتح الامتحان';
     if (unlocked) btn.addEventListener('click', startExam);
     holder.appendChild(btn);
+
+    const hint = section?.querySelector('#lesson-exam-hint');
+    if (hint) {
+        const q = state.examData?.questions_count || 0;
+        const d = state.examData?.duration || 10;
+        hint.textContent = unlocked
+            ? `${q} سؤال · ${d} دقيقة`
+            : 'أكمل مشاهدة الدرس لتتمكن من دخول الامتحان.';
+    }
 }
 
 function extractYouTubeId(url) {
@@ -1634,21 +1640,6 @@ function extractYouTubeId(url) {
     const regExp = /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([^#&?]{11})/;
     const match = url.match(regExp);
     return match ? match[1] : null;
-}
-
-function hasLikedLesson() {
-    const userId = state.currentUser?.id;
-    if (userId === undefined || userId === null) return false;
-    return (state.lessonData?.liked_by || []).some(id => String(id) === String(userId));
-}
-
-function updateLikeButtonState() {
-    if (!state.elements.likeBtn || !state.lessonData) return;
-    const liked = hasLikedLesson();
-    state.elements.likeBtn.classList.toggle('active', liked);
-    const icon = state.elements.likeBtn.querySelector('i');
-    if (icon) icon.className = liked ? 'fas fa-heart' : 'far fa-heart';
-    state.elements.likeBtn.setAttribute('aria-pressed', String(liked));
 }
 
 function updateFavoriteButtonState() {
@@ -1683,9 +1674,6 @@ function bindViewEvents() {
     if (state.elements.completeBtn) {
         state.elements.completeBtn.addEventListener('click', completeLesson);
     }
-    if (state.elements.likeBtn) {
-        state.elements.likeBtn.addEventListener('click', toggleLessonLikeHandler);
-    }
     if (state.elements.favoriteBtn) {
         state.elements.favoriteBtn.addEventListener('click', toggleFavoriteInView);
     }
@@ -1699,6 +1687,9 @@ function bindViewEvents() {
     }
     if (state.elements.startExamBtn) {
         state.elements.startExamBtn.addEventListener('click', startExam);
+    }
+    if (state.elements.manageExamBtn) {
+        state.elements.manageExamBtn.addEventListener('click', manageLessonExam);
     }
     if (state.elements.backToLessonsBtn) {
         state.elements.backToLessonsBtn.addEventListener('click', () => {
@@ -1721,7 +1712,54 @@ function bindViewEvents() {
     const unsubUpdated = EventBus.on('lesson:updated', ({ lessonId } = {}) => {
         if (String(lessonId) === String(state.lessonId)) refreshLessonView();
     });
-    state.eventUnsubscribers.push(unsubDeleted, unsubUpdated);
+    // أي تغيير في امتحان هذا الدرس ينعكس فوراً على بطاقة الامتحان وأزراره
+    const onExamChange = ({ lessonId } = {}) => {
+        if (lessonId !== undefined && String(lessonId) !== String(state.lessonId)) return;
+        refreshExamData();
+    };
+    const unsubExamCreated = EventBus.on('exam:created', onExamChange);
+    const unsubExamUpdated = EventBus.on('exam:updated', onExamChange);
+    const unsubExamDeleted = EventBus.on('exam:deleted', onExamChange);
+    state.eventUnsubscribers.push(unsubDeleted, unsubUpdated, unsubExamCreated, unsubExamUpdated, unsubExamDeleted);
+}
+
+async function refreshExamData() {
+    if (!state.lessonId) return;
+    const lessonId = state.lessonId;
+    try {
+        const exam = await getExamByLessonId(lessonId);
+        if (state.lessonId !== lessonId) return;
+        state.examData = exam || null;
+    } catch (_) {
+        if (state.lessonId !== lessonId) return;
+        state.examData = null;
+    }
+    renderExamCard();
+}
+
+// إضافة امتحان للدرس أو تعديل الموجود (للمعلم والمشرف فقط)
+async function manageLessonExam() {
+    if (!isStaffUser(state.currentUser) || !state.lessonData) return;
+    try {
+        const manager = window.examManager || await import('../exams/exam-manager.js');
+        if (state.examData?.id) {
+            await manager.openEditExamModal(state.examData.id);
+        } else {
+            const lesson = state.lessonData;
+            await manager.openAddExamModal({
+                lesson_id: lesson.id,
+                lesson_title: lesson.title,
+                title: `امتحان درس: ${lesson.title}`,
+                stage: lesson.stage,
+                grade: lesson.grade,
+                semester: lesson.semester,
+                unit_id: lesson.unit_id || null
+            });
+        }
+    } catch (error) {
+        console.error('❌ [lessons] تعذر فتح نافذة الامتحان:', error);
+        showToast('تعذر فتح نافذة الامتحان', 'error');
+    }
 }
 
 function isCompletionLocked() {
@@ -1805,6 +1843,8 @@ function startLesson() {
         state.elements.introSection.style.display = 'none';
     if (state.elements.screenSection)
         state.elements.screenSection.style.display = 'block';
+    // وضع التركيز: إخفاء كل ما عدا الدرس والنافبار العلوي أثناء المشاهدة
+    document.body.classList.add('lesson-focus-mode');
     scrollToSection(state.elements.screenSection);
 
     state.watchStartTime = Date.now();
@@ -1854,6 +1894,7 @@ async function completeLesson() {
             state.elements.screenSection.style.display = 'none';
         if (state.elements.resultsSection)
             state.elements.resultsSection.style.display = 'block';
+        document.body.classList.remove('lesson-focus-mode');
 
         if (state.elements.timeSpent) {
             const min = Math.floor(state.totalTimeSpent / 60);
@@ -1888,37 +1929,6 @@ async function completeLesson() {
         renderExamButton();
     } finally {
         state.isCompleting = false;
-    }
-}
-
-async function toggleLessonLikeHandler() {
-    if (!state.currentUser) {
-        showToast('يرجى تسجيل الدخول', 'warning');
-        return;
-    }
-    if (!state.lessonData || state.isLiking) return;
-    state.isLiking = true;
-
-    try {
-        const wasLiked = hasLikedLesson();
-        await toggleLessonLike(state.lessonId, state.currentUser.id);
-
-        if (wasLiked) {
-            state.lessonData.likes = Math.max(0, (state.lessonData.likes || 1) - 1);
-            state.lessonData.liked_by = (state.lessonData.liked_by || [])
-                .filter(id => String(id) !== String(state.currentUser.id));
-        } else {
-            state.lessonData.likes = (state.lessonData.likes || 0) + 1;
-            state.lessonData.liked_by = [...(state.lessonData.liked_by || []), state.currentUser.id];
-        }
-
-        if (state.elements.likesCountEl)
-            state.elements.likesCountEl.textContent = state.lessonData.likes;
-        updateLikeButtonState();
-    } catch (_) {
-        showToast('فشل تحديث الإعجاب', 'error');
-    } finally {
-        state.isLiking = false;
     }
 }
 

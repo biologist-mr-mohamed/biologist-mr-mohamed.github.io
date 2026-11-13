@@ -4,6 +4,7 @@
 import { clearSession, getCurrentUser } from '../core/session.js';
 import { createAvatarElement } from '../utils/avatar.js';
 import { EventBus } from '../core/event-bus.js';
+import { toggleTheme } from '../core/theme.js';
 
 // ==== 2. الثوابت ====
 const DRAWER_CONSTANTS = Object.freeze({
@@ -18,11 +19,27 @@ const DRAWER_CONSTANTS = Object.freeze({
   FOCUS_DELAY_MS: 100,
   LOGOUT_NAVIGATE_DELAY_MS: 300,
   LOGOUT_TOAST_DELAY_MS: 400,
+  // نفس شرط وضع الكمبيوتر في variables.css و navbar.css و drawer.css و navbar.js — لا يُغيَّر منفردًا
+  DESKTOP_QUERY: '(min-width: 992px) and (hover: hover) and (pointer: fine)',
+  POPOVER_EDGE_GAP_PX: 8,
+  POPOVER_FALLBACK_WIDTH_PX: 360,
   PLATFORM_URL: 'https://biologist-mr-mohamed.netlify.app/'
 });
 
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const TRIGGER_SELECTOR = '[aria-controls="sidebar"]';
+
+// أسماء مسارات التفاصيل → القسم الذي تتبعه في القائمة
+const ROUTE_ALIASES = Object.freeze({
+  'lesson-view': 'lessons',
+  lesson: 'lessons',
+  'exam-view': 'exams',
+  exam: 'exams',
+  'group-view': 'groups',
+  group: 'groups'
+});
 
 const STREAK_LEVEL_CLASSES = ['streak--low', 'streak--medium', 'streak--high', 'streak--legend'];
 
@@ -47,6 +64,7 @@ const $drawerElements = {
   sidebar: null,
   overlay: null,
   openBtn: null,
+  avatarTrigger: null,
   closeBtn: null,
   avatarContainer: null,
   userName: null,
@@ -81,6 +99,9 @@ function createDragState() {
 const $drawerState = {
   isOpen: false,
   isInitialized: false,
+  mode: 'drawer',
+  desktopMedia: null,
+  opener: null,
   routeKey: '',
   edgeStartX: 0,
   eventUnsubscribers: [],
@@ -154,6 +175,94 @@ async function copyText(text, successMessage, fallbackLabel) {
   }
 }
 
+// ==== 5.1 وضع العرض: قائمة جانبية (موبايل/تابلت) أو قائمة منبثقة (كمبيوتر) ====
+function isPopoverMode() {
+  if (!$drawerState.desktopMedia) $drawerState.desktopMedia = window.matchMedia(DRAWER_CONSTANTS.DESKTOP_QUERY);
+  return $drawerState.desktopMedia.matches;
+}
+
+function updateTriggersExpanded(expanded) {
+  document.querySelectorAll(TRIGGER_SELECTOR).forEach(trigger => {
+    trigger.setAttribute('aria-expanded', String(expanded));
+  });
+}
+
+function closeSiblingPanels() {
+  if (window.searchAPI?.isOpen?.()) window.searchAPI.close?.();
+
+  const notifications = document.getElementById('notifications-panel');
+  if (notifications?.getAttribute('aria-hidden') === 'false') {
+    document.getElementById('notification-btn')?.click();
+  }
+}
+
+function positionPopover() {
+  const { sidebar, avatarTrigger } = $drawerElements;
+  if (!sidebar) return;
+
+  const rect = avatarTrigger?.getBoundingClientRect();
+  if (!rect || rect.width === 0) {
+    sidebar.style.removeProperty('--drawer-anchor-left');
+    return;
+  }
+
+  const gap = DRAWER_CONSTANTS.POPOVER_EDGE_GAP_PX;
+  const width = sidebar.offsetWidth || DRAWER_CONSTANTS.POPOVER_FALLBACK_WIDTH_PX;
+  const maxLeft = Math.max(gap, document.documentElement.clientWidth - width - gap);
+  const left = Math.min(Math.max(gap, rect.left), maxLeft);
+
+  sidebar.style.setProperty('--drawer-anchor-left', `${Math.round(left)}px`);
+}
+
+function getOpenerElement() {
+  const active = document.activeElement;
+  const { sidebar } = $drawerElements;
+  if (active instanceof HTMLElement && active !== document.body && !sidebar?.contains(active)) return active;
+  return null;
+}
+
+function restoreOpenerFocus() {
+  const fallback = isPopoverMode() ? $drawerElements.avatarTrigger : $drawerElements.openBtn;
+  const target = [$drawerState.opener, fallback]
+    .find(el => el && document.body.contains(el) && el.getClientRects().length > 0);
+  if (!target) return;
+
+  setTimeout(() => {
+    try { target.focus({ preventScroll: true }); } catch (_) { }
+  }, DRAWER_CONSTANTS.FOCUS_DELAY_MS);
+}
+
+function applyDrawerMode() {
+  const { sidebar } = $drawerElements;
+  const mode = isPopoverMode() ? 'popover' : 'drawer';
+  const changed = $drawerState.mode !== mode;
+  $drawerState.mode = mode;
+  if (!sidebar) return;
+
+  if (changed && $drawerState.isOpen) closeDrawer(true, { restoreFocus: false });
+
+  sidebar.dataset.drawerMode = mode;
+  sidebar.setAttribute('aria-modal', mode === 'popover' ? 'false' : 'true');
+}
+
+function handleDesktopModeChange() {
+  applyDrawerMode();
+}
+
+function handleViewportResize() {
+  if ($drawerState.isOpen && isPopoverMode()) positionPopover();
+}
+
+function handleSidebarFocusOut(event) {
+  if (!$drawerState.isOpen || !isPopoverMode()) return;
+
+  const next = event.relatedTarget;
+  if (!(next instanceof Element)) return;
+  if ($drawerElements.sidebar.contains(next) || next.closest(TRIGGER_SELECTOR)) return;
+
+  closeDrawer(true, { restoreFocus: false });
+}
+
 // ==== 6. الصلاحيات ====
 function updateRoleBasedElements(user) {
   const isTeacher = user?.user_type === 'teacher';
@@ -175,20 +284,24 @@ function normalizeRouteKey(value) {
   return String(value || '').toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g, '');
 }
 
+function toRouteKey(name) {
+  return normalizeRouteKey(ROUTE_ALIASES[name] || name);
+}
+
 function resolveRouteKey(payload) {
   const raw = payload?.route ?? payload?.page ?? payload?.name ?? payload?.to ?? payload?.path ?? payload;
   const candidate = typeof raw === 'string' ? raw : (raw?.name || raw?.path || '');
-  if (candidate) return normalizeRouteKey(candidate);
+  if (candidate) return toRouteKey(candidate);
 
   const current = window.router?.getCurrentRoute?.() ?? window.router?.currentRoute;
   const fromRouter = typeof current === 'string' ? current : (current?.name || current?.path || '');
-  if (fromRouter) return normalizeRouteKey(fromRouter);
+  if (fromRouter) return toRouteKey(fromRouter);
 
   const segments = [
     ...window.location.pathname.split('/'),
     ...window.location.hash.replace(/^#\/?/, '').split('/')
   ].filter(Boolean);
-  return normalizeRouteKey(segments[0] || 'home');
+  return toRouteKey(segments[0] || 'home');
 }
 
 function syncActiveLink(payload) {
@@ -204,7 +317,7 @@ function syncActiveLink(payload) {
 
   $drawerElements.sidebar.querySelectorAll('.sidebar-link[data-nav-target]').forEach(link => {
     const target = normalizeRouteKey(link.dataset.navTarget);
-    const isActive = Boolean(routeKey && target && routeKey.startsWith(target));
+    const isActive = Boolean(routeKey && target && routeKey === target);
     link.classList.toggle('active', isActive);
     if (isActive) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
@@ -219,6 +332,7 @@ function initDrawerElements() {
   el.sidebar = byId('sidebar');
   el.overlay = byId('sidebar-overlay');
   el.openBtn = byId('open-drawer-btn');
+  el.avatarTrigger = byId('user-avatar-container');
   el.closeBtn = byId('close-sidebar');
   el.avatarContainer = byId('sidebar-avatar-container');
   el.userName = byId('sidebar-user-name');
@@ -258,6 +372,14 @@ function openDrawer() {
   if (!sidebar || $drawerState.isOpen) return;
 
   try {
+    const popover = isPopoverMode();
+    $drawerState.opener = getOpenerElement();
+
+    if (popover) {
+      closeSiblingPanels();
+      positionPopover();
+    }
+
     sidebar.inert = false;
     sidebar.classList.add(DRAWER_CONSTANTS.OPEN_CLASS);
     sidebar.setAttribute('aria-hidden', 'false');
@@ -265,8 +387,9 @@ function openDrawer() {
     overlay?.classList.add(DRAWER_CONSTANTS.OVERLAY_VISIBLE_CLASS);
     overlay?.setAttribute('aria-hidden', 'false');
 
-    document.body.classList.add(DRAWER_CONSTANTS.OPEN_CLASS);
-    $drawerElements.openBtn?.setAttribute('aria-expanded', 'true');
+    // القائمة المنبثقة لا تقفل سكرول الصفحة
+    if (!popover) document.body.classList.add(DRAWER_CONSTANTS.OPEN_CLASS);
+    updateTriggersExpanded(true);
     $drawerState.isOpen = true;
 
     requestAnimationFrame(() => {
@@ -283,14 +406,17 @@ function openDrawer() {
     }, DRAWER_CONSTANTS.FOCUS_DELAY_MS);
 
     document.dispatchEvent(new CustomEvent('drawerOpened'));
+    EventBus.emit('drawer:opened', { mode: $drawerState.mode });
   } catch (error) {
     console.error('❌ خطأ في فتح القائمة:', error);
   }
 }
 
-function closeDrawer(force = false) {
-  const { sidebar, overlay, openBtn } = $drawerElements;
+function closeDrawer(force = false, { restoreFocus = true } = {}) {
+  const { sidebar, overlay } = $drawerElements;
   if (!sidebar || (!$drawerState.isOpen && !force)) return;
+
+  const wasOpen = $drawerState.isOpen;
 
   try {
     sidebar.classList.remove(DRAWER_CONSTANTS.OPEN_CLASS, DRAWER_CONSTANTS.DRAGGING_CLASS);
@@ -303,19 +429,19 @@ function closeDrawer(force = false) {
     overlay?.style.removeProperty('--overlay-progress');
 
     document.body.classList.remove(DRAWER_CONSTANTS.OPEN_CLASS);
-    openBtn?.setAttribute('aria-expanded', 'false');
+    updateTriggersExpanded(false);
 
     document.removeEventListener('keydown', handleDrawerKeydown);
 
     $drawerState.isOpen = false;
 
-    if (openBtn && document.body.contains(openBtn)) {
-      setTimeout(() => {
-        try { openBtn.focus({ preventScroll: true }); } catch (_) { }
-      }, DRAWER_CONSTANTS.FOCUS_DELAY_MS);
+    // الإغلاق القسري (من الراوتر بعد كل تنقل) لا يرجّع التركيز ولا يبعت أحداثًا إلا لو القائمة كانت مفتوحة فعلًا
+    if (wasOpen) {
+      if (restoreFocus) restoreOpenerFocus();
+      $drawerState.opener = null;
+      document.dispatchEvent(new CustomEvent('drawerClosed'));
+      EventBus.emit('drawer:closed', { mode: $drawerState.mode });
     }
-
-    document.dispatchEvent(new CustomEvent('drawerClosed'));
   } catch (error) {
     console.error('❌ خطأ في إغلاق القائمة:', error);
     $drawerState.isOpen = false;
@@ -338,7 +464,8 @@ function handleDrawerKeydown(event) {
     return;
   }
 
-  if (event.key !== 'Tab') return;
+  // القائمة المنبثقة غير مودال: لا فخ للتاب، والخروج منها بالتاب يقفلها (handleSidebarFocusOut)
+  if (event.key !== 'Tab' || isPopoverMode()) return;
 
   const focusable = getFocusableElements();
   if (!focusable.length) return;
@@ -370,7 +497,7 @@ function handleEdgeSwipeStart(event) {
 }
 
 function handleEdgeSwipeEnd(event) {
-  if (event.changedTouches.length !== 1 || $drawerState.isOpen) return;
+  if (event.changedTouches.length !== 1 || $drawerState.isOpen || isPopoverMode()) return;
 
   const startX = $drawerState.edgeStartX;
   const deltaX = event.changedTouches[0].clientX - startX;
@@ -380,7 +507,7 @@ function handleEdgeSwipeEnd(event) {
 }
 
 function handleTouchStart(event) {
-  if (!$drawerState.isOpen || event.touches.length !== 1) return;
+  if (!$drawerState.isOpen || isPopoverMode() || event.touches.length !== 1) return;
 
   const touch = event.touches[0];
   $drawerState.drag = {
@@ -488,7 +615,7 @@ async function handleLogout(event) {
     await clearSession();
     updateDrawerContent(null);
     window.navbar?.updateAfterLogout?.();
-    closeDrawer();
+    closeDrawer(false, { restoreFocus: false });
 
     setTimeout(() => window.router?.navigateTo?.('home'), DRAWER_CONSTANTS.LOGOUT_NAVIGATE_DELAY_MS);
     setTimeout(() => safeToast('تم تسجيل الخروج بنجاح', 'success'), DRAWER_CONSTANTS.LOGOUT_TOAST_DELAY_MS);
@@ -501,9 +628,8 @@ async function handleLogout(event) {
 // ==== 14. تبديل الثيم ====
 function handleSidebarThemeToggle(event) {
   event.stopPropagation();
-  if (typeof window.toggleTheme !== 'function') return;
 
-  const result = window.toggleTheme();
+  const result = toggleTheme();
   const theme = typeof result === 'string' ? result : getActiveTheme();
 
   syncThemeToggleState();
@@ -653,7 +779,7 @@ function showAddMenu() {
 
 function handleAddButtonClick(event) {
   event.stopPropagation();
-  closeDrawer(true);
+  closeDrawer(true, { restoreFocus: false });
   requestAnimationFrame(showAddMenu);
 }
 
@@ -845,7 +971,10 @@ function renderAvatar(user) {
     clickable: Boolean(user),
     showPulse: Boolean(user),
     showShimmer: true,
-    onClick: (userId) => window.router?.navigateTo?.('profile', { path: { id: userId } })
+    onClick: (userId) => {
+      closeDrawer(false, { restoreFocus: false });
+      window.router?.openProfile?.(userId);
+    }
   });
   avatarContainer.replaceChildren(avatar);
 }
@@ -929,24 +1058,24 @@ function bindDrawerEvents() {
   shareBtn?.addEventListener('click', handleSharePlatform);
   copyLinkBtn?.addEventListener('click', handleCopyCurrentLink);
 
+  // التنقل نفسه يتولاه معالج النقر العام في الراوتر (data-nav-target) — هنا نقفل القائمة فقط
   sidebar.addEventListener('click', (event) => {
     const link = event.target.closest('[data-nav-target]');
-    const target = link?.dataset.navTarget;
-    if (!target || !window.router?.navigateTo) return;
-
-    window.router.navigateTo(target);
-    closeDrawer();
+    if (!link || link.hasAttribute('disabled')) return;
+    closeDrawer(false, { restoreFocus: false });
   });
+
+  sidebar.addEventListener('focusout', handleSidebarFocusOut);
 }
 
 function bindEventBus() {
   const subscribe = (name, handler) => $drawerState.eventUnsubscribers.push(EventBus.on(name, handler));
 
   subscribe('pageChanged', (payload) => {
-    closeDrawer(true);
+    closeDrawer(true, { restoreFocus: false });
     syncActiveLink(payload);
   });
-  subscribe('navigationStart', () => closeDrawer(true));
+  subscribe('navigationStart', () => closeDrawer(true, { restoreFocus: false }));
   subscribe('theme:toggled', syncThemeToggleState);
   subscribe('userStateChanged', ({ action, user } = {}) => {
     if (action === 'login' || action === 'logout') updateDrawerContent(user || null);
@@ -979,6 +1108,10 @@ function initializeDrawer() {
 
     $drawerElements.sidebar.inert = true;
 
+    applyDrawerMode();
+    $drawerState.desktopMedia.addEventListener('change', handleDesktopModeChange);
+    window.addEventListener('resize', handleViewportResize);
+
     bindDrawerEvents();
     initSwipeGestures();
     bindEventBus();
@@ -994,6 +1127,7 @@ function initializeDrawer() {
       toggle: toggleDrawer,
       updateContent: updateDrawerContent,
       isOpen: () => $drawerState.isOpen,
+      mode: () => $drawerState.mode,
       initialized: true,
       refreshStats: () => updateDrawerContent(getCurrentUser()),
       sharePlatform: handleSharePlatform
@@ -1014,10 +1148,14 @@ function destroyDrawer() {
 
   removeSwipeGestures();
   document.removeEventListener('keydown', handleDrawerKeydown);
+  $drawerState.desktopMedia?.removeEventListener('change', handleDesktopModeChange);
+  window.removeEventListener('resize', handleViewportResize);
+  $drawerElements.sidebar?.removeEventListener('focusout', handleSidebarFocusOut);
 
   resetDragState();
   $drawerState.isInitialized = false;
   $drawerState.isOpen = false;
+  $drawerState.opener = null;
 }
 
 // ==== 20. التصدير ====

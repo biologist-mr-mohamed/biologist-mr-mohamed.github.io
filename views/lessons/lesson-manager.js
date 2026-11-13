@@ -11,7 +11,8 @@ import {
     createUnit,
     updateUnit,
     deleteUnit,
-    createExam
+    getExamByLessonId,
+    deleteExam
 } from '../../js/core/api.js';
 import { EventBus } from '../../js/core/event-bus.js';
 
@@ -35,6 +36,7 @@ const INITIAL_STATE = () => ({
     currentLessonId: null,
     isEditMode: false,
     createExamLinked: false,
+    availableUnits: [],
     lessonMeta: {
         title: '',
         stage: '',
@@ -77,10 +79,37 @@ function showToast(message, type = 'info') {
 }
 
 function escapeHtml(str) {
-    if (!str) return '';
+    if (str === null || str === undefined) return '';
     return String(str).replace(/[&<>"']/g, c => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     })[c]);
+}
+
+// ==== 4.1 أنماط النوافذ خارج صفحة الدروس ====
+// المودال قد يُفتح من صفحة لا يُحمَّل فيها lessons.css (مثل صفحة الامتحانات)، فنحمّله مؤقتاً ونزيله عند مغادرة الصفحة
+
+const LESSON_STYLES_HREF = '/views/lessons/lessons.css';
+
+function ensureLessonStyles() {
+    const route = window.router?.getCurrentRoute?.().name;
+    if (route === 'lessons' || route === 'lesson-view') return Promise.resolve();
+    if (document.querySelector('link[data-lesson-manager-style], link[href*="lessons.css"]')) return Promise.resolve();
+
+    return new Promise((resolve) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = LESSON_STYLES_HREF;
+        link.setAttribute('data-lesson-manager-style', '1');
+        link.onload = () => resolve();
+        link.onerror = () => resolve();
+        setTimeout(resolve, 1500);
+        document.head.appendChild(link);
+
+        const off = EventBus.on('pageChanged', () => {
+            link.remove();
+            if (typeof off === 'function') off();
+        });
+    });
 }
 
 // ==== 5. دوال النوافذ الرئيسية ====
@@ -93,6 +122,8 @@ async function openAddLessonModal(defaultContext = null) {
     if (!acquireModalGuard()) return;
 
     try {
+        await ensureLessonStyles();
+
         state = INITIAL_STATE();
         state.isEditMode = false;
 
@@ -106,55 +137,13 @@ async function openAddLessonModal(defaultContext = null) {
         if (defaultContext?.semester) state.lessonMeta.semester = defaultContext.semester;
         else if (user?.semester) state.lessonMeta.semester = user.semester;
 
-        const units = await fetchUnitsForSelect(
+        state.availableUnits = await fetchUnitsForSelect(
             state.lessonMeta.stage,
             state.lessonMeta.grade,
             state.lessonMeta.semester
         );
 
-        window.modals.showModal({
-            title: 'إضافة درس جديد',
-            html: buildLessonFormHTML(units, false),
-            size: 'large',
-            rtl: true,
-            buttons: [
-                { text: 'إلغاء', role: 'cancel', type: 'secondary' },
-                { text: 'معاينة ومراجعة', role: 'preview', type: 'outline' },
-                { text: 'حفظ الدرس', role: 'confirm', type: 'primary' }
-            ],
-            onOpen: (modalInstance) => {
-                releaseModalGuard();
-                bindFormEvents(modalInstance.element);
-            },
-            onClose: () => releaseModalGuard(),
-            onPreview: (modalInstance) => {
-                if (!collectFormData(modalInstance.element)) return false;
-                if (!validateLessonMeta()) {
-                    showToast('يرجى ملء الحقول المطلوبة: الاسم، المرحلة، الصف، الفصل، رابط الفيديو (ورابط PDF إن وُجد يجب أن يبدأ بـ https://)', 'warning');
-                    return false;
-                }
-                showPreviewModal();
-                return false;
-            },
-            onConfirm: async (modalInstance) => {
-                if (!collectFormData(modalInstance.element)) return false;
-                if (!validateLessonMeta()) {
-                    showToast('يرجى ملء الحقول المطلوبة: الاسم، المرحلة، الصف، الفصل، رابط الفيديو (ورابط PDF إن وُجد يجب أن يبدأ بـ https://)', 'warning');
-                    return false;
-                }
-                try {
-                    await fetchAndSetVideoDuration(modalInstance.element);
-                    const newId = await saveNewLesson();
-                    showToast('تم إنشاء الدرس بنجاح ✅', 'success');
-                    EventBus.emit('lesson:created', { lessonId: newId });
-                    return true;
-                } catch (error) {
-                    console.error('فشل حفظ الدرس:', error);
-                    showToast('فشل حفظ الدرس، حاول مجدداً', 'error');
-                    return false;
-                }
-            }
-        });
+        showLessonMetaModal();
     } catch (error) {
         releaseModalGuard();
         console.error('فشل فتح نافذة إضافة الدرس:', error);
@@ -162,15 +151,54 @@ async function openAddLessonModal(defaultContext = null) {
     }
 }
 
+// نافذة بيانات الدرس: تُستخدم للإضافة والتعديل وللرجوع من نافذة المعاينة
+function showLessonMetaModal() {
+    const modalContent = buildLessonFormHTML(state.availableUnits, state.isEditMode);
+
+    window.modals.showModal({
+        title: state.isEditMode && state.lessonMeta.title
+            ? `تعديل الدرس: ${state.lessonMeta.title}`
+            : (state.isEditMode ? 'تعديل الدرس' : 'إضافة درس جديد'),
+        html: modalContent,
+        size: 'large',
+        rtl: true,
+        buttons: [
+            { text: 'إلغاء', role: 'cancel', type: 'secondary' },
+            { text: 'التالي: معاينة ومراجعة', role: 'confirm', type: 'primary' }
+        ],
+        onOpen: (modalInstance) => {
+            releaseModalGuard();
+            bindFormEvents(modalInstance.element);
+            populateFormFields(modalInstance.element);
+        },
+        onClose: () => releaseModalGuard(),
+        onConfirm: async (modalInstance) => {
+            if (!collectFormData(modalInstance.element)) return false;
+            if (!validateLessonMeta()) {
+                showToast('يرجى ملء الحقول المطلوبة: الاسم، المرحلة، الصف، الفصل، رابط فيديو يوتيوب صحيح (ورابط PDF إن وُجد يجب أن يبدأ بـ https://)', 'warning');
+                return false;
+            }
+
+            await fetchAndSetVideoDuration(modalInstance.element);
+
+            modalInstance.close(null, () => openPreviewModal());
+            return false;
+        }
+    });
+}
+
 async function openEditLessonModal(lessonId) {
     if (!checkPermission()) {
         showToast('ليس لديك صلاحية لتعديل الدرس', 'error');
         return;
     }
-if (!acquireModalGuard()) return;
+    if (!acquireModalGuard()) return;
+
     state = INITIAL_STATE();
     state.isEditMode = true;
     state.currentLessonId = lessonId;
+
+    await ensureLessonStyles();
 
     let lessonData;
     try {
@@ -199,56 +227,13 @@ if (!acquireModalGuard()) return;
         duration: lessonData.duration || 0
     };
 
-    const units = await fetchUnitsForSelect(
+    state.availableUnits = await fetchUnitsForSelect(
         state.lessonMeta.stage,
         state.lessonMeta.grade,
         state.lessonMeta.semester
     );
 
-    window.modals.showModal({
-        title: `تعديل الدرس: ${escapeHtml(state.lessonMeta.title)}`,
-        html: buildLessonFormHTML(units, true),
-        size: 'large',
-        rtl: true,
-        buttons: [
-            { text: 'إلغاء', role: 'cancel', type: 'secondary' },
-            { text: 'معاينة', role: 'preview', type: 'outline' },
-            { text: 'حفظ التعديلات', role: 'confirm', type: 'primary' }
-        ],
-        onOpen: (modalInstance) => {
-            releaseModalGuard();
-            bindFormEvents(modalInstance.element);
-            populateFormFields(modalInstance.element);
-        },
-    onClose: () => releaseModalGuard(),
-        onPreview: (modalInstance) => {
-            if (!collectFormData(modalInstance.element)) return false;
-            if (!validateLessonMeta()) {
-                showToast('يرجى تصحيح الأخطاء قبل المعاينة', 'warning');
-                return false;
-            }
-            showPreviewModal();
-            return false;
-        },
-        onConfirm: async (modalInstance) => {
-            if (!collectFormData(modalInstance.element)) return false;
-            if (!validateLessonMeta()) {
-                showToast('يرجى تصحيح الأخطاء', 'warning');
-                return false;
-            }
-            try {
-                await fetchAndSetVideoDuration(modalInstance.element);
-                await updateLesson(state.currentLessonId, state.lessonMeta);
-                showToast('تم تحديث الدرس بنجاح ✅', 'success');
-                EventBus.emit('lesson:updated', { lessonId: state.currentLessonId });
-                return true;
-            } catch (error) {
-                console.error('فشل حفظ التعديلات:', error);
-                showToast('فشل حفظ التعديلات، حاول مجدداً', 'error');
-                return false;
-            }
-        }
-    });
+    showLessonMetaModal();
 }
 
 async function openAddUnitModal(defaultContext = null) {
@@ -257,6 +242,8 @@ async function openAddUnitModal(defaultContext = null) {
         return;
     }
     if (!acquireModalGuard()) return;
+
+    await ensureLessonStyles();
 
     window.modals.showModal({
         title: 'إضافة وحدة / باب جديد',
@@ -308,6 +295,8 @@ async function openEditUnitModal(unit) {
     }
     if (!unit?.id) return;
     if (!acquireModalGuard()) return;
+
+    await ensureLessonStyles();
 
     window.modals.showModal({
         title: 'تعديل الوحدة',
@@ -372,6 +361,7 @@ function confirmDeleteUnit(unit) {
 
 function openMoveLessonModal(lessonId) {
     if (!checkPermission()) return;
+    ensureLessonStyles();
 
     window.modals.showModal({
         title: 'تحريك الدرس',
@@ -427,7 +417,17 @@ function confirmDeleteLesson(lessonId) {
         onConfirm: async () => {
             try {
                 await deleteLesson(lessonId, true);
-                showToast('تم نقل الدرس إلى المهملات', 'success');
+                // الامتحان المرتبط ينتقل للمهملات مع الدرس حتى لا يبقى امتحان يتيم
+                try {
+                    const linked = await getExamByLessonId(lessonId);
+                    if (linked?.id) {
+                        await deleteExam(linked.id, true);
+                        EventBus.emit('exam:deleted', { examId: linked.id, lessonId });
+                    }
+                } catch (examError) {
+                    console.warn('تعذر نقل الامتحان المرتبط للمهملات:', examError);
+                }
+                showToast('تم نقل الدرس والامتحان المرتبط به إلى المهملات', 'success');
                 EventBus.emit('lesson:deleted', { lessonId });
             } catch (error) {
                 console.error('فشل حذف الدرس:', error);
@@ -437,17 +437,63 @@ function confirmDeleteLesson(lessonId) {
     });
 }
 
-// ==== 6. نافذة المعاينة قبل الحفظ ====
+// ==== 6. نافذة المعاينة والحفظ النهائي ====
 
-function showPreviewModal() {
+function openPreviewModal() {
+    window.modals.showModal({
+        title: 'مراجعة الدرس قبل الحفظ',
+        html: buildPreviewHTML(),
+        size: 'medium',
+        rtl: true,
+        buttons: [
+            { text: 'تعديل البيانات', role: 'secondary', type: 'outline', handler: () => showLessonMetaModal() },
+            { text: state.isEditMode ? 'حفظ التعديلات' : 'حفظ الدرس', role: 'confirm', type: 'primary' }
+        ],
+        onConfirm: async (modalInstance) => {
+            try {
+                const wantsExam = state.createExamLinked;
+                const examContext = { ...state.lessonMeta };
+                let lessonId;
+
+                if (state.isEditMode) {
+                    lessonId = state.currentLessonId;
+                    await updateLesson(lessonId, state.lessonMeta);
+                    showToast('تم تحديث الدرس بنجاح ✅', 'success');
+                    EventBus.emit('lesson:updated', { lessonId });
+                } else {
+                    lessonId = await saveNewLesson();
+                    showToast('تم إنشاء الدرس بنجاح ✅', 'success');
+                    EventBus.emit('lesson:created', { lessonId });
+                }
+
+                // الامتحان المرتبط يُفتح بعد إغلاق هذه النافذة تماماً (نفس تسلسل نظام الامتحانات)
+                if (wantsExam) {
+                    modalInstance.close(null, () => openLinkedExamEditor(lessonId, examContext));
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('فشل حفظ الدرس:', error);
+                showToast('فشل حفظ الدرس، حاول مجدداً', 'error');
+                return false;
+            }
+        }
+    });
+}
+
+function buildPreviewHTML() {
     const meta = state.lessonMeta;
     const videoId = extractYouTubeId(meta.video_url);
-    const previewHtml = `
+    const unitName = meta.unit_id
+        ? state.availableUnits.find(u => u.id == meta.unit_id)?.name
+        : null;
+
+    return `
         <div class="lesson-preview">
             <div class="preview-cover">
                 ${meta.cover_image_url
                     ? `<img src="${escapeHtml(meta.cover_image_url)}" alt="غلاف الدرس" class="preview-cover-img">`
-                    : `<div class="preview-cover-placeholder"><i class="fas fa-book-open"></i></div>`
+                    : `<div class="preview-cover-placeholder"><i class="fas fa-book-open" aria-hidden="true"></i></div>`
                 }
             </div>
             <div class="preview-info">
@@ -456,11 +502,12 @@ function showPreviewModal() {
                     <span class="badge">${escapeHtml(meta.stage)}</span>
                     <span class="badge">الصف ${escapeHtml(String(meta.grade))}</span>
                     <span class="badge">الفصل ${meta.semester === 'أول' ? 'الأول' : 'الثاني'}</span>
-                    ${meta.duration ? `<span class="badge"><i class="fas fa-clock"></i> ${meta.duration} دقيقة</span>` : ''}
+                    ${unitName ? `<span class="badge"><i class="fas fa-layer-group" aria-hidden="true"></i> ${escapeHtml(unitName)}</span>` : ''}
+                    ${meta.duration ? `<span class="badge"><i class="fas fa-clock" aria-hidden="true"></i> ${meta.duration} دقيقة</span>` : ''}
                 </div>
                 <div class="preview-links">
-                    ${meta.video_url ? `<span class="preview-link-badge has-video"><i class="fas fa-play-circle"></i> فيديو متاح</span>` : '<span class="preview-link-badge no-video"><i class="fas fa-times-circle"></i> لا يوجد فيديو</span>'}
-                    ${meta.pdf_url ? `<span class="preview-link-badge has-pdf"><i class="fas fa-file-pdf"></i> PDF متاح</span>` : ''}
+                    ${meta.video_url ? `<span class="preview-link-badge has-video"><i class="fas fa-play-circle" aria-hidden="true"></i> فيديو متاح</span>` : '<span class="preview-link-badge no-video"><i class="fas fa-times-circle" aria-hidden="true"></i> لا يوجد فيديو</span>'}
+                    ${meta.pdf_url ? `<span class="preview-link-badge has-pdf"><i class="fas fa-file-pdf" aria-hidden="true"></i> PDF متاح</span>` : ''}
                 </div>
                 ${videoId ? `
                     <div class="preview-video-thumb">
@@ -468,18 +515,10 @@ function showPreviewModal() {
                              alt="معاينة الفيديو" class="video-thumb-img" loading="lazy">
                     </div>` : ''}
                 ${state.createExamLinked
-                    ? `<div class="preview-exam-note"><i class="fas fa-pen-alt"></i> سيتم إنشاء امتحان مرتبط (10 دقائق، بدون أسئلة - قابل للتعديل لاحقاً)</div>`
+                    ? `<div class="preview-exam-note"><i class="fas fa-pen-alt" aria-hidden="true"></i> بعد حفظ الدرس ستُفتح نافذة إضافة الامتحان المرتبط (المرحلة والصف والفصل والوحدة تُؤخذ من الدرس)</div>`
                     : ''}
             </div>
         </div>`;
-
-    window.modals.showModal({
-        title: 'معاينة الدرس قبل الحفظ',
-        html: previewHtml,
-        size: 'medium',
-        rtl: true,
-        buttons: [{ text: 'إغلاق وإكمال التعديل', role: 'cancel', type: 'secondary' }]
-    });
 }
 
 // ==== 7. بناء نماذج HTML ====
@@ -490,7 +529,7 @@ function buildLessonFormHTML(units = [], isEdit = false) {
         `<option value="${u.id}" ${meta.unit_id == u.id ? 'selected' : ''}>${escapeHtml(u.name)}</option>`
     ).join('');
 
-    const examSectionHtml = !isEdit ? `
+    const examSectionHtml = `
         <div class="form-section">
             <h4 class="form-section-title">
                 <i class="fas fa-clipboard-list" aria-hidden="true"></i> إعدادات الامتحان
@@ -498,11 +537,13 @@ function buildLessonFormHTML(units = [], isEdit = false) {
             <div class="form-group form-check-group">
                 <label class="form-check-label" for="create-exam-checkbox">
                     <input type="checkbox" id="create-exam-checkbox" name="create_exam" value="1">
-                    <span>إنشاء امتحان مرتبط بالدرس تلقائياً</span>
+                    <span>${isEdit ? 'إضافة أو تعديل امتحان الدرس بعد الحفظ' : 'إنشاء امتحان مرتبط بالدرس تلقائياً'}</span>
                 </label>
-                <p class="form-hint">سيتم إنشاء امتحان بالإعدادات الافتراضية (10 دقائق، بدون أسئلة). يمكنك تعديل الأسئلة لاحقاً.</p>
+                <p class="form-hint">${isEdit
+                    ? 'بعد حفظ التعديلات ستُفتح نافذة امتحان الدرس (إضافة امتحان جديد، أو تعديل الموجود).'
+                    : 'بعد حفظ الدرس ستُفتح نافذة الامتحان مباشرةً لإضافة الأسئلة. يمكنك أيضاً إدارة الامتحان لاحقاً من صفحة الدرس.'}</p>
             </div>
-        </div>` : '';
+        </div>`;
 
     return `
         <form id="lesson-meta-form" class="lesson-form" novalidate>
@@ -835,6 +876,7 @@ const updateUnitsDropdown = async () => {
         unitSelect.innerHTML = '<option value="">اختر المرحلة والصف أولاً</option>';
         const hintEl = container.querySelector('#units-hint');
         if (hintEl) hintEl.textContent = 'اختر المرحلة والصف لعرض الوحدات المتاحة';
+        state.availableUnits = [];
         return;
     }
 
@@ -842,6 +884,7 @@ const updateUnitsDropdown = async () => {
     unitSelect.innerHTML = '<option value="">جاري التحميل...</option>';
     try {
         const units = await fetchUnitsForSelect(stage, grade, semester);
+        state.availableUnits = units;
         unitSelect.innerHTML = '<option value="">بدون وحدة</option>' +
             units.map(u => `<option value="${u.id}">${escapeHtml(u.name)}</option>`).join('');
 
@@ -917,6 +960,9 @@ function populateFormFields(container) {
     set('lm-cover-image', meta.cover_image_url);
     set('lm-duration', meta.duration);
 
+    const examBox = form.querySelector('#create-exam-checkbox');
+    if (examBox) examBox.checked = !!state.createExamLinked;
+
     const videoId = extractYouTubeId(meta.video_url);
     if (videoId) updateVideoThumbnailPreview(container, videoId);
 
@@ -947,32 +993,26 @@ function validateLessonMeta() {
 
 async function saveNewLesson() {
     const lessonData = { ...state.lessonMeta, type: 'lesson' };
-    const newId = await createLesson(lessonData);
+    return await createLesson(lessonData);
+}
 
-    if (state.createExamLinked) {
-        try {
-            await createExam({
-                lesson_id: newId,
-                title: `امتحان درس: ${state.lessonMeta.title}`,
-                stage: state.lessonMeta.stage,
-                grade: state.lessonMeta.grade,
-                semester: state.lessonMeta.semester,
-                unit_id: state.lessonMeta.unit_id,
-                duration: 10,
-                questions_count: 0,
-                is_challenge: false,
-                type: 'lesson_exam',
-                description: `امتحان تلقائي للدرس "${state.lessonMeta.title}"`,
-                questions: []
-            }, []);
-            showToast('تم إنشاء امتحان مرتبط بالدرس', 'info');
-        } catch (examError) {
-            console.error('فشل إنشاء الامتحان المرتبط:', examError);
-            showToast('تم إنشاء الدرس ولكن فشل إنشاء الامتحان المرتبط', 'warning');
-        }
+// يُستدعى بعد إغلاق نافذة المعاينة تماماً، وبيانات الدرس تُملأ تلقائياً
+async function openLinkedExamEditor(lessonId, meta) {
+    try {
+        const manager = window.examManager || await import('../exams/exam-manager.js');
+        await manager.openAddExamModal({
+            lesson_id: lessonId,
+            lesson_title: meta.title,
+            title: `امتحان درس: ${meta.title}`,
+            stage: meta.stage,
+            grade: meta.grade,
+            semester: meta.semester,
+            unit_id: meta.unit_id || null
+        });
+    } catch (error) {
+        console.error('فشل فتح نافذة الامتحان المرتبط:', error);
+        showToast('تم حفظ الدرس، ويمكنك إضافة الامتحان من صفحة الدرس', 'warning');
     }
-
-    return newId;
 }
 
 // ==== 13. دوال مساعدة ====

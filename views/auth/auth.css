@@ -272,18 +272,17 @@
   opacity: 0;
 }
 
-.input-wrapper.is-checking::after {
-  content: '';
+.input-wrapper {
+  position: relative;
+}
+
+/* مؤشر فحص الرقم يستخدم .bio-loader الموحد */
+.input-wrapper .auth-field-loader {
   position: absolute;
   top: 50%;
   inset-inline-end: var(--space-3);
-  width: 1rem;
-  height: 1rem;
-  margin-top: -0.5rem;
-  border: 2px solid var(--primary);
-  border-top-color: transparent;
-  border-radius: var(--border-radius-full);
-  animation: authSpin 0.7s linear infinite;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 /* ==== 5. التلميحات والأخطاء ==== */
@@ -454,10 +453,10 @@
   display: none;
 }
 
-.auth-btn .spinner {
+.auth-btn .bio-loader {
   position: relative;
   z-index: 1;
-  animation: authSpin 0.75s linear infinite;
+  flex-shrink: 0;
 }
 
 /* ==== 8. تذييل البطاقة ==== */
@@ -855,10 +854,6 @@
   0%, 100% { transform: translateX(0); }
   20%, 60% { transform: translateX(-4px); }
   40%, 80% { transform: translateX(4px); }
-}
-
-@keyframes authSpin {
-  to { transform: rotate(360deg); }
 }
 
 /* ==== 15. الشاشات الصغيرة ==== */

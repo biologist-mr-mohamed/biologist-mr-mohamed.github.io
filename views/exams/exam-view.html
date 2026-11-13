@@ -1,4 +1,4 @@
-<!-- صفحة أداء الامتحان - v5.0.0 -->
+<!-- صفحة أداء الامتحان - v5.2.0 -->
 <div class="page-content exam-view-page is-loading" data-page="exam-view">
 
   <!-- ==== 1. التنقل التفصيلي (Breadcrumb) ==== -->
@@ -11,9 +11,9 @@
   </nav>
 
   <!-- ==== 2. حالة التحميل ==== -->
-  <div class="loading-state" aria-live="polite" data-ui-initial="hidden">
+  <div class="loading-state" aria-live="polite" style="display: none;">
     <div class="loading-spinner">
-      <div class="bio-loader bio-loader--auto bio-loader--lg" role="status" aria-label="جاري تحميل الامتحان"></div>
+      <div class="bio-loader bio-loader--auto" role="status" aria-label="جاري تحميل الامتحان" style="--bio-size:72px"></div>
     </div>
     <p class="loading-text">جاري تحميل الامتحان...</p>
   </div>
@@ -27,7 +27,7 @@
           <span class="exam-tag exam-tag-secondary" id="exam-grade-badge">جاري التحميل...</span>
           <span class="exam-tag exam-tag-success" id="exam-semester-badge">جاري التحميل...</span>
           <span class="exam-tag exam-tag-info" id="exam-scope-badge">جاري التحميل...</span>
-          <span class="exam-tag exam-tag-warning" id="exam-challenge-badge" data-ui-initial="hidden"><i class="fas fa-trophy" aria-hidden="true"></i> امتحان المتفوقين</span>
+          <span class="exam-tag exam-tag-warning" id="exam-challenge-badge" style="display: none;"><i class="fas fa-trophy" aria-hidden="true"></i> امتحان المتفوقين</span>
         </div>
         <h1 class="exam-title" id="exam-title">جاري تحميل عنوان الامتحان...</h1>
         <p class="exam-description" id="exam-description">جاري تحميل وصف الامتحان...</p>
@@ -35,7 +35,7 @@
           <span class="exam-stat"><i class="fas fa-question-circle" aria-hidden="true"></i><strong id="exam-questions-count">0</strong><small>سؤال</small></span>
           <span class="exam-stat"><i class="fas fa-clock" aria-hidden="true"></i><strong id="exam-duration">0</strong><small>دقيقة</small></span>
           <span class="exam-stat"><i class="fas fa-chart-line" aria-hidden="true"></i><strong><span id="exam-pass-score">50</span>%</strong><small>درجة النجاح</small></span>
-          <span class="exam-stat" id="exam-best-stat" data-ui-initial="hidden"><i class="fas fa-medal" aria-hidden="true"></i><strong><span id="exam-best-score">0</span>%</strong><small>أفضل نتيجة</small></span>
+          <span class="exam-stat" id="exam-best-stat" style="display: none;"><i class="fas fa-medal" aria-hidden="true"></i><strong><span id="exam-best-score">0</span>%</strong><small>أفضل نتيجة</small></span>
         </div>
       </div>
 
@@ -50,7 +50,7 @@
       </div>
 
       <!-- ==== 4. بطاقة استئناف المحاولة ==== -->
-      <div class="exam-resume-card" id="exam-resume-card" data-ui-initial="hidden">
+      <div class="exam-resume-card" id="exam-resume-card" style="display: none;">
         <div class="exam-resume-info">
           <i class="fas fa-history" aria-hidden="true"></i>
           <p><b>لديك محاولة غير مكتملة</b><span class="exam-resume-time">الوقت المتبقي: <strong id="exam-resume-time">00:00</strong></span></p>
@@ -65,6 +65,7 @@
         <button type="button" class="btn btn-primary btn-large exam-start-btn" data-action="start-exam">
           <i class="fas fa-play" aria-hidden="true"></i> ابدأ الامتحان
         </button>
+        <button type="button" class="btn btn-outline" data-action="open-lesson" hidden><i class="fas fa-book-open" aria-hidden="true"></i> العودة للدرس</button>
         <button type="button" class="btn btn-outline" data-action="back-to-exams">
           <i class="fas fa-list" aria-hidden="true"></i> العودة للامتحانات
         </button>
@@ -73,7 +74,7 @@
   </section>
 
   <!-- ==== 5. شاشة الامتحان ==== -->
-  <section class="exam-screen-section" id="exam-screen-section" aria-labelledby="exam-screen-title" data-ui-initial="hidden">
+  <section class="exam-screen-section" id="exam-screen-section" style="display: none;" aria-labelledby="exam-screen-title">
     <h2 class="visually-hidden" id="exam-screen-title">أسئلة الامتحان</h2>
 
     <!-- ==== 6. بطاقة الحالة والتقدم ==== -->
@@ -98,7 +99,7 @@
           <span class="progress-bar-percentage" id="exam-progress-percentage">0%</span>
         </div>
         <div class="progress-bar-container" id="exam-progressbar" role="progressbar" aria-label="نسبة الأسئلة المجابة" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div class="progress-bar-fill" id="exam-progress-bar"></div>
+          <div class="progress-bar-fill" id="exam-progress-bar" style="width: 0%;"></div>
         </div>
       </div>
     </div>
@@ -137,7 +138,7 @@
       </div>
 
       <div class="question-body">
-        <div class="question-image-col" id="question-image-col" data-ui-initial="hidden">
+        <div class="question-image-col" id="question-image-col" style="display: none;">
           <button type="button" class="question-image-frame" id="question-image-frame" aria-label="تكبير صورة السؤال">
             <img id="question-image" src="" alt="صورة السؤال" decoding="async">
           </button>
@@ -178,7 +179,7 @@
   </section>
 
   <!-- ==== 11. شاشة النتائج ==== -->
-  <section class="exam-results-section" id="exam-results-section" aria-labelledby="results-title" data-ui-initial="hidden">
+  <section class="exam-results-section" id="exam-results-section" style="display: none;" aria-labelledby="results-title">
     <div class="results-card">
       <div class="results-header">
         <h2 class="section-title" id="results-title">نتيجة الامتحان</h2>
@@ -189,25 +190,26 @@
         </div>
         <div class="score-details">
           <span class="level-badge" id="level-badge"></span>
-          <div class="medal-display" id="medal-display" data-ui-initial="hidden">
+          <div class="medal-display" id="medal-display" style="display: none;">
             <span class="medal-badge"><i class="fas fa-medal" aria-hidden="true"></i> <span id="medal-name"></span></span>
           </div>
           <p>الإجابات الصحيحة: <strong id="result-correct">0</strong> • الخاطئة: <strong id="result-wrong">0</strong> • بدون إجابة: <strong id="result-skipped">0</strong></p>
           <p>الوقت المستغرق: <strong id="result-time">00:00</strong></p>
-          <p class="prev-best-note" id="prev-best-note" data-ui-initial="hidden"></p>
+          <p class="prev-best-note" id="prev-best-note" style="display: none;"></p>
         </div>
       </div>
       <div class="results-feedback" id="results-feedback" aria-live="polite"></div>
       <div class="results-actions">
         <button type="button" class="btn btn-primary" data-action="open-review"><i class="fas fa-search" aria-hidden="true"></i> مراجعة الإجابات</button>
         <button type="button" class="btn btn-outline" data-action="retry-exam"><i class="fas fa-redo" aria-hidden="true"></i> إعادة المحاولة</button>
+        <button type="button" class="btn btn-outline" data-action="open-lesson" hidden><i class="fas fa-book-open" aria-hidden="true"></i> العودة للدرس</button>
         <button type="button" class="btn btn-outline" data-action="back-to-exams"><i class="fas fa-list" aria-hidden="true"></i> العودة للامتحانات</button>
       </div>
     </div>
   </section>
 
   <!-- ==== 12. شاشة المراجعة ==== -->
-  <section class="exam-review-section" id="exam-review-section" aria-labelledby="review-title" data-ui-initial="hidden">
+  <section class="exam-review-section" id="exam-review-section" style="display: none;" aria-labelledby="review-title">
     <div class="review-header">
       <button type="button" class="btn btn-outline" data-action="back-to-results"><i class="fas fa-arrow-right" aria-hidden="true"></i> العودة للنتيجة</button>
     </div>

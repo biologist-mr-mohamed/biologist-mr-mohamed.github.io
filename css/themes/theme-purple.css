@@ -83,6 +83,6 @@
   --challenge-bg: rgba(206, 147, 216, 0.15);
   --challenge-border: rgba(206, 147, 216, 0.4);
 
-  --on-primary: #14100a;
+  --on-primary: #ffffff;
   --level-badge-text: var(--on-primary);
 }

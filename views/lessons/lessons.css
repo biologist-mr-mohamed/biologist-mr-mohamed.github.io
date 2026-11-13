@@ -2999,3 +2999,373 @@
     opacity: 0.55;
     cursor: not-allowed;
 }
+
+
+/* ==== وضع التركيز أثناء مشاهدة الدرس ==== */
+
+body.lesson-focus-mode .bottom-navigation,
+body.lesson-focus-mode .main-footer,
+body.lesson-focus-mode .directing-character,
+body.lesson-focus-mode .lesson-view-page .breadcrumb-nav,
+body.lesson-focus-mode .lesson-view-page .teacher-toolbar,
+body.lesson-focus-mode .lesson-view-page .recommendations-section {
+  display: none !important;
+}
+
+/* إلغاء المساحة المحجوزة للنافبار السفلي */
+body.lesson-focus-mode #main-content {
+  padding-bottom: 0;
+}
+
+body.lesson-focus-mode .lesson-view-page {
+  padding-block-end: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+}
+
+/* ==== قسم امتحان الدرس داخل شاشة الدرس (بعد ملف PDF) ==== */
+
+.lesson-exam-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid rgba(var(--primary-rgb), 0.2);
+  border-radius: var(--border-radius-lg);
+  background: rgba(var(--primary-rgb), 0.04);
+}
+
+.lesson-exam-section[hidden] { display: none; }
+
+.lesson-exam-section .content-subtitle { margin: 0; }
+
+.lesson-exam-hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary-light);
+}
+
+.lesson-exam-section .exam-btn-container,
+.lesson-exam-section .exam-btn-container .btn {
+  width: 100%;
+}
+
+.lesson-exam-section .exam-btn-container .btn {
+  justify-content: center;
+  min-height: 48px;
+}
+
+/* ==== شريط إجراءات المعلم: تنظيم على شاشات الهاتف ==== */
+
+@media (max-width: 640px) {
+  .teacher-toolbar {
+    flex-wrap: wrap;
+    padding: var(--space-3);
+    gap: var(--space-3);
+    overflow: hidden;
+  }
+
+  .teacher-toolbar .teacher-toolbar-title {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .teacher-toolbar .admin-actions {
+    flex: 1 1 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+    margin-inline-start: 0;
+    width: 100%;
+  }
+
+  .teacher-toolbar .admin-actions .btn {
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
+    min-width: 0;
+    min-height: 56px;
+    padding: var(--space-2) var(--space-1);
+    font-size: var(--font-size-xs);
+    line-height: 1.3;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .teacher-toolbar .admin-actions .btn i {
+    font-size: var(--font-size-base);
+    margin: 0;
+  }
+}
+
+/* ==== 48. نوافذ إدارة الدروس: تنسيق احترافي (مطابق لنوافذ الامتحانات) ==== */
+/* تُطبَّق فقط على النوافذ التي تحتوي نماذج الدروس والوحدات. الصقها في آخر lessons.css */
+
+/* ---- 48.1 الهيكل العام للنافذة ---- */
+
+.modals-dialog:has(.lesson-form, .unit-form, .lesson-preview, .move-lesson-container) .modals-dialog__header {
+  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.08), rgba(var(--secondary-rgb), 0.04));
+}
+
+.modals-dialog:has(.lesson-form, .unit-form, .lesson-preview, .move-lesson-container) .modals-dialog__body {
+  padding: var(--space-5) var(--space-6);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--primary-rgb), 0.35) transparent;
+}
+
+.modals-dialog:has(.lesson-form, .unit-form, .lesson-preview, .move-lesson-container) .modals-dialog__footer {
+  background-color: var(--surface-light);
+  gap: var(--space-3);
+}
+
+.modals-dialog:has(.lesson-form, .unit-form, .lesson-preview, .move-lesson-container) .modals-dialog__footer .modals-btn {
+  min-height: 46px;
+  padding-inline: var(--space-6);
+}
+
+/* ---- 48.2 نماذج الدرس والوحدة ---- */
+
+.lesson-form,
+.unit-form {
+  gap: var(--space-4);
+}
+
+:is(.lesson-form, .unit-form) .form-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+:is(.lesson-form, .unit-form) .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+:is(.lesson-form, .unit-form) label {
+  color: var(--text-primary-light);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+:is(.lesson-form, .unit-form) .required {
+  margin-inline-start: 2px;
+}
+
+/* الحقول: ارتفاع لمس مريح وخط 16px لمنع تكبير iOS التلقائي */
+:is(.lesson-form, .unit-form) :is(input:not([type="radio"]):not([type="checkbox"]), select, textarea) {
+  width: 100%;
+  min-height: 46px;
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px solid var(--border-color-light);
+  border-radius: var(--border-radius-md);
+  background-color: var(--background-light);
+  color: var(--text-primary-light);
+  font-family: var(--font-family-arabic);
+  font-size: 1rem;
+  line-height: 1.5;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+:is(.lesson-form, .unit-form) :is(input, select, textarea)::placeholder {
+  color: var(--text-tertiary-light);
+  opacity: 1;
+}
+
+:is(.lesson-form, .unit-form) :is(input:not([type="radio"]):not([type="checkbox"]), select, textarea):hover {
+  border-color: rgba(var(--primary-rgb), 0.45);
+}
+
+:is(.lesson-form, .unit-form) :is(input:not([type="radio"]):not([type="checkbox"]), select, textarea):focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: var(--surface-light);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.18);
+}
+
+:is(.lesson-form, .unit-form) :is(input, select, textarea):disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* الأرقام والروابط: اتجاه LTR مع محاذاة يمين */
+:is(.lesson-form, .unit-form) :is(input[type="number"], input[type="url"]) {
+  direction: ltr;
+  text-align: right;
+}
+
+:is(.lesson-form, .unit-form) input[type="url"]::placeholder {
+  text-align: right;
+}
+
+/* القوائم المنسدلة: سهم مخصص على اليسار */
+:is(.lesson-form, .unit-form) select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-inline: var(--space-4) 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 14px center;
+  cursor: pointer;
+}
+
+:is(.lesson-form, .unit-form) .form-hint {
+  margin: 0;
+  color: var(--text-secondary-light);
+  font-size: var(--font-size-xs);
+  line-height: 1.7;
+}
+
+:is(.lesson-form, .unit-form) .form-hint-warning {
+  color: var(--warning);
+}
+
+/* شبكة الأعمدة: عمود على الهاتف، وأعمدة متعددة عند اتساع النافذة */
+@media (min-width: 440px) {
+  :is(.lesson-form, .unit-form) .form-row.two-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 560px) {
+  :is(.lesson-form, .unit-form) .form-row.three-cols { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* عناوين الأقسام */
+.lesson-form .form-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: 0;
+  padding-bottom: var(--space-5);
+}
+
+.lesson-form .form-section-title {
+  margin-bottom: 0;
+}
+
+/* حقل الرابط مع زر الجلب */
+.lesson-form .input-with-action .btn {
+  min-height: 46px;
+  min-width: 46px;
+  flex-shrink: 0;
+}
+
+/* خانة إنشاء الامتحان المرتبط */
+.lesson-form .form-check-group {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.lesson-form .form-check-label {
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px dashed rgba(var(--primary-rgb), 0.5);
+  border-radius: var(--border-radius-lg);
+  background-color: rgba(var(--primary-rgb), 0.06);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.lesson-form .form-check-label input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+
+/* ---- 48.3 نافذة المعاينة ---- */
+
+.lesson-preview .preview-cover {
+  border: 1px solid var(--lessons-border);
+}
+
+.lesson-preview .preview-info {
+  padding: var(--space-4);
+  border: 1px solid var(--lessons-border);
+  border-radius: var(--border-radius-xl);
+  background: linear-gradient(145deg, rgba(var(--primary-rgb), 0.07), rgba(var(--secondary-rgb), 0.04));
+}
+
+.lesson-preview .preview-title {
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.lesson-preview .preview-badges .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* PDF المتاح يظهر بلون النجاح (كان يرث لون الخطأ) */
+.lesson-preview .preview-link-badge.has-pdf {
+  background-color: rgba(var(--success-rgb), 0.12);
+  color: var(--success);
+}
+
+/* ---- 48.4 نافذة التحريك ---- */
+
+.move-lesson-container .move-actions .btn {
+  min-height: 46px;
+}
+
+/* ---- 48.5 الوضع الليلي ---- */
+
+[data-theme="dark"] :is(.lesson-form, .unit-form) :is(input:not([type="radio"]):not([type="checkbox"]), select, textarea) {
+  background-color: var(--background-dark);
+  border-color: var(--border-color-dark);
+  color: var(--text-primary-dark);
+}
+
+[data-theme="dark"] :is(.lesson-form, .unit-form) :is(input:not([type="radio"]):not([type="checkbox"]), select, textarea):focus {
+  background-color: var(--surface-dark);
+}
+
+[data-theme="dark"] :is(.lesson-form, .unit-form) label,
+[data-theme="dark"] .lesson-preview .preview-title {
+  color: var(--text-primary-dark);
+}
+
+[data-theme="dark"] :is(.lesson-form, .unit-form) .form-hint {
+  color: var(--text-secondary-dark);
+}
+
+[data-theme="dark"] .lesson-form .form-section-title {
+  color: var(--accent);
+}
+
+/* ---- 48.6 الهاتف: تذييل أفقي يوفّر مساحة للمحتوى ---- */
+
+@media (max-width: 480px) {
+  .modals-dialog:has(.lesson-form, .unit-form, .lesson-preview, .move-lesson-container) .modals-dialog__body {
+    padding: var(--space-4);
+  }
+
+  .modals-dialog:has(.lesson-form, .unit-form, .lesson-preview, .move-lesson-container) .modals-dialog__title {
+    font-size: var(--font-size-lg);
+  }
+
+  .modals-dialog:has(.lesson-form, .unit-form, .lesson-preview, .move-lesson-container) .modals-dialog__footer {
+    flex-direction: row-reverse;
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+  }
+
+  .modals-dialog:has(.lesson-form, .unit-form, .lesson-preview, .move-lesson-container) .modals-dialog__footer .modals-btn {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    padding-inline: var(--space-2);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.lesson-form, .unit-form) :is(input, select, textarea) {
+    transition: none !important;
+  }
+}

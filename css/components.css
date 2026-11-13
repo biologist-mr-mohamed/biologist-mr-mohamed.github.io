@@ -114,6 +114,12 @@
   min-height: 36px;
 }
 
+@media (pointer: coarse) {
+  .btn-sm {
+    min-height: var(--modals-min-touch, 44px);
+  }
+}
+
 .btn-large {
   padding: calc(var(--btn-padding-y) * 1.5) calc(var(--btn-padding-x) * 1.5);
   font-size: var(--font-size-lg);
@@ -907,6 +913,7 @@
 
 /* أحجام مؤشر التحميل */
 .bio-loader--sm { --bio-size: 28px; }
+.bio-loader--md { --bio-size: 44px; }
 .bio-loader--lg { --bio-size: 72px; }
 
 /* داخل الأزرار: أحادي اللون بلون النص ليظهر فوق أي خلفية */
@@ -1069,8 +1076,15 @@
   flex-shrink: 0;
 }
 
-.search-result-item:hover .result-actions {
+.search-result-item:hover .result-actions,
+.search-result-item:focus-within .result-actions {
   opacity: 1;
+}
+
+@media (hover: none) {
+  .result-actions {
+    opacity: 1;
+  }
 }
 
 .result-view-btn {

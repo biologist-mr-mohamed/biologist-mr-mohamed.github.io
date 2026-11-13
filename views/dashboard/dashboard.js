@@ -199,9 +199,13 @@ function setBusy(button, busy, busyText) {
       BUSY_STORE.set(button, Array.from(button.childNodes));
       button.replaceChildren(document.createTextNode(busyText));
     }
+    if (!button.querySelector(':scope > .db-btn-loader')) {
+      button.prepend(el('span', { className: 'bio-loader bio-loader--auto db-btn-loader', attrs: { 'aria-hidden': 'true' } }));
+    }
   } else {
     button.disabled = false;
     button.removeAttribute('aria-busy');
+    button.querySelector(':scope > .db-btn-loader')?.remove();
     const saved = BUSY_STORE.get(button);
     if (saved) {
       button.replaceChildren(...saved);
@@ -1242,7 +1246,10 @@ function openSemesterModal() {
   openModal({
     title: 'التحكم بالفصل الدراسي الظاهر للطلاب',
     onOpen: async (instance, host) => {
-      host.replaceChildren(el('p', { className: 'db-note', text: 'جاري التحميل...' }));
+      host.replaceChildren(el('div', { className: 'db-loading' }, [
+        el('span', { className: 'bio-loader bio-loader--auto', attrs: { 'aria-hidden': 'true', style: '--bio-size:48px' } }),
+        el('p', { className: 'db-note', text: 'جاري التحميل...' })
+      ]));
       const settings = await getSemesterSettings(true);
 
       const rows = DB.STAGES.flatMap((stage) => [1, 2, 3]

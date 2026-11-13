@@ -2059,7 +2059,164 @@ select.pf-input option {
   }
 }
 
-/* ==== 45. شاشات واسعة ==== */
+/* ==== 45. شاشات الكمبيوتر ==== */
+@media (min-width: 992px) {
+  .pf-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .pf-col {
+    display: contents;
+  }
+
+  .pf-grid .pf-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pf-grid .pf-card__body {
+    flex: 1 1 auto;
+  }
+
+  #pf-staff       { order: 0;  grid-column: span 12; }
+  #pf-level       { order: 1;  grid-column: span 4; }
+  #pf-stats       { order: 2;  grid-column: span 8; }
+  #pf-streak      { order: 3;  grid-column: span 4; }
+  #pf-medals      { order: 4;  grid-column: span 8; }
+  #pf-journey     { order: 5;  grid-column: span 5; align-self: start; }
+  #pf-performance { order: 6;  grid-column: span 7; align-self: start; }
+  #pf-activity    { order: 7;  grid-column: span 12; }
+  #pf-platform    { order: 8;  grid-column: span 4; }
+  #pf-account     { order: 9;  grid-column: span 6; }
+  #pf-shortcuts   { order: 10; grid-column: span 6; align-self: start; }
+
+  .pf-grid:not(:has(#pf-streak:not([hidden]))) #pf-medals,
+  .pf-grid:not(:has(#pf-journey:not([hidden]))) #pf-performance,
+  .pf-grid:not(:has(#pf-performance:not([hidden]))) #pf-journey {
+    grid-column: span 12;
+  }
+
+  .pf-grid:has(#pf-platform:not([hidden])) #pf-account,
+  .pf-grid:has(#pf-platform:not([hidden])) #pf-shortcuts {
+    grid-column: span 4;
+  }
+
+  .pf-grid:not(:has(#pf-shortcuts:not([hidden]))):not(:has(#pf-platform:not([hidden]))) #pf-account {
+    grid-column: span 12;
+  }
+
+  #pf-level .pf-card__body,
+  #pf-stats .pf-card__body,
+  #pf-streak .pf-card__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  #pf-medals [data-pf-body]:has(> .pf-medals__counts) {
+    display: grid;
+    grid-template-columns: minmax(150px, 200px) minmax(0, 1fr);
+    column-gap: var(--space-5);
+    align-items: start;
+  }
+
+  #pf-medals .pf-medals__counts {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    grid-template-columns: 1fr;
+    margin-block-end: 0;
+  }
+
+  #pf-medals .pf-medal-count {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  #pf-medals .pf-medals__grid {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  #pf-medals .pf-btn {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  #pf-activity [data-pf-body]:has(> .pf-feed) {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: var(--space-8);
+    align-items: start;
+  }
+
+  #pf-activity .pf-heat {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+
+  #pf-activity .pf-subtitle {
+    grid-column: 2;
+    grid-row: 1;
+    margin-block-start: 0;
+  }
+
+  #pf-activity .pf-feed {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  #pf-activity .pf-more {
+    grid-column: 2;
+    grid-row: 3;
+  }
+
+  .pf-info__row {
+    flex-wrap: wrap;
+  }
+
+  .pf-info__value {
+    flex: 1 1 auto;
+    overflow-wrap: break-word;
+  }
+
+  .pf-grid:not(:has(#pf-shortcuts:not([hidden]))):not(:has(#pf-platform:not([hidden]))) .pf-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-3);
+  }
+
+  .pf-grid:not(:has(#pf-shortcuts:not([hidden]))):not(:has(#pf-platform:not([hidden]))) .pf-info__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: var(--space-3);
+    border-radius: var(--pf-radius-md);
+    background: var(--pf-surface-2);
+  }
+
+  .pf-grid:not(:has(#pf-shortcuts:not([hidden]))):not(:has(#pf-platform:not([hidden]))) .pf-info__row + .pf-info__row {
+    border-block-start: 0;
+  }
+
+  .pf-grid:not(:has(#pf-shortcuts:not([hidden]))):not(:has(#pf-platform:not([hidden]))) .pf-info__value {
+    text-align: start;
+  }
+
+  .pf-shortcuts {
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  }
+
+  #pf-platform .pf-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    height: 100%;
+  }
+}
+
+/* ==== 46. شاشات واسعة ==== */
 @media (min-width: 1200px) {
   .pf-root {
     --pf-avatar: 160px;
@@ -2068,12 +2225,11 @@ select.pf-input option {
   }
 
   .pf-grid {
-    grid-template-columns: minmax(0, 1fr) 380px;
     gap: var(--space-5);
   }
 }
 
-/* ==== 46. تقليل الحركة ==== */
+/* ==== 47. تقليل الحركة ==== */
 @media (prefers-reduced-motion: reduce) {
   .pf-card,
   .pf-medal,
@@ -2084,7 +2240,7 @@ select.pf-input option {
   }
 }
 
-/* ==== 47. الطباعة ==== */
+/* ==== 48. الطباعة ==== */
 @media print {
   .pf-cover-actions,
   .pf-identity__actions,

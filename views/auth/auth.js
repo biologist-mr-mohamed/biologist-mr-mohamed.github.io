@@ -250,6 +250,11 @@ async function checkPhoneAvailability(state, phone) {
   const seq = ++state.phoneCheckSeq;
   const wrapper = state.container?.querySelector('#register-phone')?.closest('.input-wrapper');
   wrapper?.classList.add('is-checking');
+  if (wrapper && !wrapper.querySelector('.auth-field-loader')) {
+    const loader = createBioLoader(18, 'جاري فحص رقم الهاتف');
+    loader.classList.add('auth-field-loader');
+    wrapper.appendChild(loader);
+  }
 
   try {
     const exists = await checkPhoneExists(phone);
@@ -261,6 +266,7 @@ async function checkPhoneAvailability(state, phone) {
   } finally {
     if (seq === state.phoneCheckSeq) {
       wrapper?.classList.remove('is-checking');
+      wrapper?.querySelector('.auth-field-loader')?.remove();
     }
   }
 }
@@ -268,6 +274,16 @@ async function checkPhoneAvailability(state, phone) {
 // ==== 8. حالة التحميل للزر ====
 
 const submitLabels = new WeakMap();
+
+// مؤشر التحميل الموحد للمنصة (.bio-loader من components.css)
+function createBioLoader(size, label) {
+  const loader = document.createElement('span');
+  loader.className = 'bio-loader bio-loader--auto';
+  loader.setAttribute('role', 'status');
+  loader.setAttribute('aria-label', label);
+  loader.style.setProperty('--bio-size', `${size}px`);
+  return loader;
+}
 
 function setSubmitting(state, form, isLoading) {
   state.isSubmitting = isLoading;
@@ -286,18 +302,15 @@ function setSubmitting(state, form, isLoading) {
     btn.disabled = true;
     btn.setAttribute('data-loading', '');
     btn.setAttribute('aria-busy', 'true');
-    if (!btn.querySelector('.spinner')) {
-      const spinner = document.createElement('span');
-      spinner.className = 'spinner';
-      spinner.setAttribute('aria-hidden', 'true');
-      btn.prepend(spinner);
+    if (!btn.querySelector('.bio-loader')) {
+      btn.prepend(createBioLoader(24, 'جاري التحميل'));
     }
     return;
   }
 
   btn.removeAttribute('data-loading');
   btn.removeAttribute('aria-busy');
-  btn.querySelector('.spinner')?.remove();
+  btn.querySelector('.bio-loader')?.remove();
   if (textEl && submitLabels.has(btn)) {
     textEl.textContent = submitLabels.get(btn);
     submitLabels.delete(btn);

@@ -678,9 +678,9 @@ components.forEach(comp => window.__componentMap.set(comp.name, comp));
   );
   if (failed.length) {
     console.warn(`[Main] فشل تحميل ${failed.length} مكون ثانوي، سيتم إعادة المحاولة عند الحاجة`);
-    failed.forEach((_, idx) => {
-      const failedComp = otherComponents[idx];
-      if (failedComp) AppStore.set(`component_${failedComp.name}_failed`, true);
+    otherResults.forEach((result, idx) => {
+      const isFailed = result.status === 'rejected' || result.value === false;
+      if (isFailed) AppStore.set(`component_${otherComponents[idx].name}_failed`, true);
     });
   }
 
@@ -809,6 +809,12 @@ async function applyUserThemeOnLogin(user) {
 }
 
 // ==== 20. معلومات المستخدم في Sidebar ====
+function setVisible(el, visible) {
+  if (!el) return;
+  el.hidden = !visible;
+  el.removeAttribute('style');
+}
+
 function updateSidebarUserInfo(user) {
   if (!user) return;
 
@@ -826,59 +832,31 @@ function updateSidebarUserInfo(user) {
     roleEl.textContent = roleMap[user.user_type] || 'طالب';
   }
 
-  if (streakContainer && isStudent(user)) {
-    streakContainer.removeAttribute('style');
-    streakContainer.classList.remove('hidden');
-    if (streakCount) streakCount.textContent = user.streak || 0;
-  }
+  if (streakCount) streakCount.textContent = user.streak || 0;
+  setVisible(streakContainer, isStudent(user));
 
-  const teacherOnlyEls = document.querySelectorAll('.teacher-only');
-  const moderatorOnlyEls = document.querySelectorAll('.moderator-only');
-  const teacherOrSupervisorEls = document.querySelectorAll('.teacher-or-supervisor-only');
+  document.querySelectorAll('.teacher-only').forEach(el => setVisible(el, isTeacher(user)));
+  document.querySelectorAll('.moderator-only').forEach(el => setVisible(el, isModerator(user)));
+  document.querySelectorAll('.teacher-or-supervisor-only').forEach(el =>
+    setVisible(el, isTeacher(user) || isModerator(user))
+  );
 
-  teacherOnlyEls.forEach(el => {
-    if (isTeacher(user)) el.removeAttribute('style');
-    else el.setAttribute('style', 'display:none');
-  });
-  moderatorOnlyEls.forEach(el => {
-    if (isModerator(user)) el.removeAttribute('style');
-    else el.setAttribute('style', 'display:none');
-  });
-  teacherOrSupervisorEls.forEach(el => {
-    if (isTeacher(user) || isModerator(user)) el.removeAttribute('style');
-    else el.setAttribute('style', 'display:none');
-  });
-
-  const guestContent = document.querySelector('.sidebar-guest');
   const loggedContent = document.querySelector('.sidebar-logged');
-  if (guestContent) guestContent.setAttribute('style', 'display:none');
-  if (loggedContent) {
-    loggedContent.removeAttribute('aria-hidden');
-    loggedContent.removeAttribute('style');
-  }
+  setVisible(document.querySelector('.sidebar-guest'), false);
+  setVisible(loggedContent, true);
+  if (loggedContent) loggedContent.removeAttribute('aria-hidden');
 
-  const modNotifTab = document.querySelector('.moderator-only-tab');
-  const teacherNotifTab = document.querySelector('.teacher-only-tab');
-  if (modNotifTab) {
-    if (isModerator(user)) modNotifTab.removeAttribute('style');
-    else modNotifTab.setAttribute('style', 'display:none');
-  }
-  if (teacherNotifTab) {
-    if (isTeacher(user)) teacherNotifTab.removeAttribute('style');
-    else teacherNotifTab.setAttribute('style', 'display:none');
-  }
+  setVisible(document.querySelector('.moderator-only-tab'), isModerator(user));
+  setVisible(document.querySelector('.teacher-only-tab'), isTeacher(user));
 }
 
 function updateSidebarGuestMode() {
   document.body.setAttribute('data-auth', 'guest');
   document.body.setAttribute('data-role', '');
-  const guestContent = document.querySelector('.sidebar-guest');
   const loggedContent = document.querySelector('.sidebar-logged');
-  if (guestContent) guestContent.removeAttribute('style');
-  if (loggedContent) {
-    loggedContent.setAttribute('aria-hidden', 'true');
-    loggedContent.setAttribute('style', 'display:none');
-  }
+  setVisible(document.querySelector('.sidebar-guest'), true);
+  setVisible(loggedContent, false);
+  if (loggedContent) loggedContent.setAttribute('aria-hidden', 'true');
 }
 
 // ==== 21. تسجيل الخروج ====

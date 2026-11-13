@@ -1,4 +1,4 @@
-/* مدير صفحتي قائمة الامتحانات وأداء الامتحان - v5.0.0 */
+/* مدير صفحتي قائمة الامتحانات وأداء الامتحان - v5.2.0 */
 
 import { getCurrentUser, isTeacher, isModerator } from '../../js/core/session.js';
 import {
@@ -8,7 +8,9 @@ import {
     updateUserExamScore,
     getUnits,
     getUserExamResultsMap,
-    getActiveSemesterFor
+    getActiveSemesterFor,
+    getUserProgress,
+    getLessonById
 } from '../../js/core/api.js';
 import { EventBus } from '../../js/core/event-bus.js';
 
@@ -166,6 +168,22 @@ function canStudentAccessExam(meta) {
     if (meta.stage && normalizeStage(user.stage) !== normalizeStage(meta.stage)) return false;
     if (meta.grade && Number(user.grade) !== Number(meta.grade)) return false;
     return true;
+}
+
+// امتحان الدرس لا يُفتح للطالب قبل إكمال مشاهدة الدرس (نفس شرط صفحة الدرس)
+// الخطأ في الجلب أو درس محذوف لا يقفل الامتحان
+async function isLessonExamUnlocked(meta) {
+    const user = state.currentUser;
+    if (!meta?.lesson_id || !isStudentUser(user)) return true;
+    try {
+        const list = await getUserProgress(user.id);
+        const item = (list || []).find(p => String(p.lesson_id) === String(meta.lesson_id));
+        if (item && (item.completed || Number(item.progress) >= 100)) return true;
+        const lesson = await getLessonById(meta.lesson_id).catch(() => null);
+        return !lesson;
+    } catch (_) {
+        return true;
+    }
 }
 
 async function getStudentSemester(user = state.currentUser) {
@@ -346,6 +364,7 @@ function cacheElements(container) {
             restartBtn: q('[data-action="restart-exam"]'),
             startBtn: q('[data-action="start-exam"]'),
             backBtns: container.querySelectorAll('[data-action="back-to-exams"]'),
+            openLessonBtns: container.querySelectorAll('[data-action="open-lesson"]'),
 
             timerPill: q('.status-pill-time'),
             timerValue: q('#timer-value'),
@@ -546,6 +565,9 @@ async function loadListData() {
 }
 
 function filterByAudience(exams) {
+    // امتحانات الدروس تظهر داخل دروسها فقط ولا تدخل قائمة الامتحانات
+    exams = (exams || []).filter(exam => !exam.lesson_id);
+
     const user = state.currentUser;
     if (!user || isStaffUser(user)) return exams;
 
@@ -777,8 +799,9 @@ function renderExamsGrid(exams, { keepAnimated = false } = {}) {
 function createExamCard(exam, isAdmin, isKnown = false) {
     const unit = exam.unit_id ? state.units.find(u => u.id == exam.unit_id) : null;
     const isComprehensive = exam.exam_scope === 'comprehensive';
-    const scopeLabel = isComprehensive ? 'شامل' : (unit?.name || 'وحدة');
-    const scopeIcon = isComprehensive ? 'fa-globe' : 'fa-layer-group';
+    const isLessonExam = !!exam.lesson_id;
+    const scopeLabel = isLessonExam ? 'امتحان درس' : (isComprehensive ? 'شامل' : (unit?.name || 'وحدة'));
+    const scopeIcon = isLessonExam ? 'fa-link' : (isComprehensive ? 'fa-globe' : 'fa-layer-group');
 
     const completed = !!exam.completed;
     const passed = completed && exam.passed;
@@ -1335,6 +1358,15 @@ async function loadExamData(examId) {
             return;
         }
 
+        // امتحان الدرس لا يُفتح قبل إكمال الدرس
+        if (!(await isLessonExamUnlocked(data.meta))) {
+            if (state !== self) return;
+            showToast('أكمل مشاهدة الدرس أولاً لفتح امتحانه', 'warning');
+            window.router?.navigateTo('lesson-view', { path: { id: data.meta.lesson_id } });
+            return;
+        }
+        if (state !== self) return;
+
         state.examMeta = data.meta;
         state.questions = data.questions;
         state.durationSeconds = Math.max(60, safeInt(data.meta.duration, 30) * 60);
@@ -1374,6 +1406,8 @@ function renderIntroScreen() {
     if (el.semesterBadge) el.semesterBadge.textContent = `الفصل ${semesterLabel(meta.semester) || '-'}`;
     if (el.scopeBadge) el.scopeBadge.textContent = meta.exam_scope === 'comprehensive' ? 'امتحان شامل' : 'امتحان وحدة';
     if (el.challengeBadge) el.challengeBadge.style.display = meta.is_challenge ? 'inline-flex' : 'none';
+    if (el.scopeBadge && meta.lesson_id) el.scopeBadge.textContent = 'امتحان درس';
+    el.openLessonBtns?.forEach(btn => { btn.hidden = !meta.lesson_id; });
     if (el.questionsCountEl) el.questionsCountEl.textContent = state.questions.length;
     if (el.durationEl) el.durationEl.textContent = state.durationSeconds / 60;
     if (el.passScoreEl) el.passScoreEl.textContent = CONFIG.PASS_THRESHOLD;
@@ -1415,6 +1449,7 @@ function bindViewEvents() {
         startExam();
     });
     el.backBtns?.forEach(btn => btn.addEventListener('click', goToList));
+    el.openLessonBtns?.forEach(btn => btn.addEventListener('click', goToLesson));
 
     el.prevBtn?.addEventListener('click', () => goToQuestion(state.currentIndex - 1));
     el.nextBtn?.addEventListener('click', () => goToQuestion(state.currentIndex + 1));
@@ -1505,6 +1540,12 @@ function bindViewEvents() {
 
 function goToList() {
     window.router?.navigateTo('exams');
+}
+
+function goToLesson() {
+    const lessonId = state.examMeta?.lesson_id;
+    if (!lessonId) return;
+    window.router?.navigateTo('lesson-view', { path: { id: lessonId } });
 }
 
 function handleBeforeUnload(e) {

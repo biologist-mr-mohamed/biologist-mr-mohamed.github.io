@@ -11,18 +11,19 @@
   </nav>
 
   <!-- ==== 2. شريط إجراءات المعلم (للمعلم/المشرف فقط) ==== -->
-  <div class="teacher-toolbar teacher-only" data-ui-initial="hidden">
+  <div class="teacher-toolbar teacher-only" style="display: none;">
     <h2 class="teacher-toolbar-title"><i class="fas fa-user-cog" aria-hidden="true"></i> إجراءات المعلم</h2>
     <div class="admin-actions">
       <button type="button" class="btn btn-outline btn-sm" data-action="edit-lesson"><i class="fas fa-edit" aria-hidden="true"></i> تعديل</button>
+      <button type="button" class="btn btn-outline btn-sm" data-action="manage-exam" id="manage-exam-btn"><i class="fas fa-clipboard-list" aria-hidden="true"></i> <span class="manage-exam-label">إضافة امتحان</span></button>
       <button type="button" class="btn btn-outline btn-sm" data-action="delete-lesson"><i class="fas fa-trash" aria-hidden="true"></i> حذف</button>
     </div>
   </div>
 
   <!-- ==== 3. حالة التحميل ==== -->
-  <div class="loading-state" aria-live="polite" data-ui-initial="hidden">
+  <div class="loading-state" aria-live="polite" style="display: none;">
     <div class="loading-spinner">
-      <div class="bio-loader bio-loader--auto bio-loader--lg" role="status" aria-label="جاري تحميل الدرس"></div>
+      <div class="bio-loader bio-loader--auto" role="status" aria-label="جاري تحميل الدرس" style="--bio-size:72px"></div>
     </div>
     <p class="loading-text">جاري تحميل الدرس...</p>
   </div>
@@ -35,18 +36,17 @@
           <span class="lesson-tag lesson-tag-primary" id="lesson-stage-badge">جاري التحميل...</span>
           <span class="lesson-tag lesson-tag-secondary" id="lesson-grade-badge">جاري التحميل...</span>
           <span class="lesson-tag lesson-tag-success" id="lesson-semester-badge">جاري التحميل...</span>
-          <span class="lesson-tag lesson-tag-info" id="lesson-unit-badge" data-ui-initial="hidden"></span>
+          <span class="lesson-tag lesson-tag-info" id="lesson-unit-badge" style="display: none;"></span>
         </div>
         <h1 class="lesson-title" id="lesson-title">جاري تحميل عنوان الدرس...</h1>
         <p class="lesson-description" id="lesson-description">جاري تحميل وصف الدرس...</p>
         <div class="lesson-stats" id="lesson-stats">
           <span class="lesson-stat"><i class="fas fa-clock" aria-hidden="true"></i> <span id="lesson-duration">0</span> دقيقة</span>
-          <span class="lesson-stat"><i class="fas fa-heart" aria-hidden="true"></i> <span id="likes-count">0</span> إعجاب</span>
         </div>
       </div>
 
       <!-- ==== 5. صورة الغلاف ==== -->
-      <div class="lesson-cover-wrapper" id="lesson-cover-wrapper" data-ui-initial="hidden">
+      <div class="lesson-cover-wrapper" id="lesson-cover-wrapper" style="display: none;">
         <img id="lesson-cover-image" src="" alt="غلاف الدرس" class="lesson-cover-image" decoding="async">
       </div>
 
@@ -64,17 +64,12 @@
         <button type="button" class="btn btn-primary btn-large lesson-start-btn" data-action="start-lesson">
           <i class="fas fa-play" aria-hidden="true"></i> بدء المشاهدة
         </button>
-        <button type="button" class="btn btn-outline like-btn" data-action="toggle-lesson-like" id="lesson-like-btn">
-          <i class="far fa-heart" aria-hidden="true"></i> أعجبني
-        </button>
-        <!-- حاوية زر الامتحان تُملأ بواسطة JS -->
-        <div id="exam-btn-container" class="exam-btn-container"></div>
       </div>
     </div>
   </section>
 
   <!-- ==== 6. شاشة الدرس (المحتوى) ==== -->
-  <section class="lesson-screen-section" id="lesson-screen-section" aria-labelledby="lesson-screen-title" data-ui-initial="hidden">
+  <section class="lesson-screen-section" id="lesson-screen-section" style="display: none;" aria-labelledby="lesson-screen-title">
     <h2 class="screen-title" id="lesson-screen-title">الدرس: <span id="lesson-screen-title-span"></span></h2>
 
     <!-- ==== 7. شريط التحكم ==== -->
@@ -90,7 +85,7 @@
           <span class="progress-percentage" id="lesson-progress-percentage">0%</span>
         </div>
         <div class="progress-bar-container" role="progressbar" aria-label="تقدمك في الدرس" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-          <div class="progress-bar-fill" id="lesson-progress-bar"></div>
+          <div class="progress-bar-fill" id="lesson-progress-bar" style="width: 0%;"></div>
         </div>
       </div>
 
@@ -130,11 +125,18 @@
           </a>
         </div>
       </section>
+
+      <!-- امتحان الدرس: داخل الدرس بعد ملف الشرح (يُملأ بواسطة JS ويختفي إن لم يوجد امتحان) -->
+      <section class="lesson-exam-section" id="lesson-exam-section" aria-labelledby="lesson-exam-title" hidden>
+        <h3 id="lesson-exam-title" class="content-subtitle"><i class="fas fa-graduation-cap" aria-hidden="true"></i> امتحان الدرس</h3>
+        <p class="lesson-exam-hint" id="lesson-exam-hint"></p>
+        <div id="exam-btn-container" class="exam-btn-container"></div>
+      </section>
     </div>
   </section>
 
   <!-- ==== 9. شاشة النتائج ==== -->
-  <section class="lesson-results-section" id="lesson-results-section" aria-labelledby="results-title" data-ui-initial="hidden">
+  <section class="lesson-results-section" id="lesson-results-section" style="display: none;" aria-labelledby="results-title">
     <h2 class="section-title" id="results-title">تم إكمال الدرس</h2>
     <div class="results-summary">
       <div class="result-icon">
@@ -157,7 +159,7 @@
       </div>
 
       <!-- ==== 10. بطاقة امتحان الدرس ==== -->
-      <div class="exam-card-container" id="exam-card-container" data-ui-initial="hidden">
+      <div class="exam-card-container" id="exam-card-container" style="display: none;">
         <div class="exam-card-info">
           <div class="exam-card-header">
             <i class="fas fa-graduation-cap" aria-hidden="true"></i>

@@ -1465,6 +1465,7 @@ async function getExams(options = {}) {
       exams.push({
         docId: doc.id,
         id: data.id,
+        lesson_id: data.lesson_id ?? null,
         unit_id: unitId,
         exam_scope: examScope,
         stage: data.stage,
@@ -1535,6 +1536,7 @@ async function getExamFullData(examId) {
     return {
       meta: {
         title: examData.title,
+        lesson_id: examData.lesson_id ?? null,
         unit_id: unitId,
         exam_scope: examScope,
         stage: examData.stage,
@@ -2102,95 +2104,44 @@ async function createNotification(userId, {
   }
 }
 
-// ---- أدوات الإشعارات الداخلية (v5.1.0) ----
-const NOTIFICATIONS_MAX_FETCH = 200;
-
-function _mapNotificationDoc(d) {
-  // serverTimestamps:'estimate' يمنع ظهور created_at = null للإشعار المكتوب محلياً قبل تأكيد السيرفر
-  const data = d.data({ serverTimestamps: 'estimate' });
-  return {
-    docId: d.id,
-    id: data.id,
-    user_id: data.user_id,
-    title: data.title,
-    message: data.message,
-    read: data.read === true,
-    type: data.type || 'info',
-    created_at: data.created_at,
-    sender: data.sender || 'system',
-    related_lesson: data.related_lesson || 0,
-    related_exam: data.related_exam || 0,
-    related_id: data.related_id || null
-  };
-}
-
-function _notifTimeMs(n) {
-  const t = n?.created_at;
-  if (t?.toMillis) return t.toMillis();
-  if (t?.seconds) return t.seconds * 1000;
-  return Number(t) || 0;
-}
-
-function _sortNotifications(list) {
-  return list.sort((a, b) => _notifTimeMs(b) - _notifTimeMs(a)).slice(0, NOTIFICATIONS_MAX_FETCH);
-}
-
-// استعلام بشرط واحد (user_id) فقط، فلا يحتاج Composite Index.
-// الاستعلام القديم (where + orderBy('created_at')) كان يرمي failed-precondition
-// إن لم يكن الفهرس المركّب منشأ في Firebase، فتفشل الإشعارات كلها.
 async function getUserNotifications(userId) {
   await ensureApiInitialized();
   const db = getDb();
 
   try {
+    const notificationsRef = collection(db, COLLECTIONS.NOTIFICATIONS);
     const q = query(
-      collection(db, COLLECTIONS.NOTIFICATIONS),
-      where('user_id', '==', safeParseInt(userId))
+      notificationsRef,
+      where('user_id', '==', safeParseInt(userId)),
+      orderBy('created_at', 'desc'),
+      firestoreLimit(50)
     );
-    const snap = await getDocs(q);
-    return _sortNotifications(snap.docs.map(_mapNotificationDoc));
+
+    const querySnapshot = await getDocs(q);
+    const notifications = [];
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      notifications.push({
+        docId: doc.id,
+        id: data.id,
+        user_id: data.user_id,
+        title: data.title,
+        message: data.message,
+        read: data.read || false,
+        type: data.type || 'info',
+        created_at: data.created_at,
+        sender: data.sender || 'system',
+        related_lesson: data.related_lesson || 0,
+        related_exam: data.related_exam || 0,
+        related_id: data.related_id || null
+      });
+    });
+    return notifications;
   } catch (error) {
-    console.error('❌ Failed to get notifications:', error.code || '', error.message);
+    console.error('❌ Failed to get notifications:', error.message);
     throw error;
   }
-}
-
-// اشتراك لحظي. يُرجع دالة إلغاء الاشتراك فوراً (متزامنة).
-function subscribeToUserNotifications(userId, onData, onError) {
-  let unsub = null;
-  let cancelled = false;
-
-  (async () => {
-    try {
-      await ensureApiInitialized();
-      if (cancelled) return;
-      const db = getDb();
-      const q = query(
-        collection(db, COLLECTIONS.NOTIFICATIONS),
-        where('user_id', '==', safeParseInt(userId))
-      );
-      unsub = onSnapshot(
-        q,
-        (snap) => {
-          if (cancelled) return;
-          try { onData(_sortNotifications(snap.docs.map(_mapNotificationDoc))); }
-          catch (e) { console.error('❌ notifications onData:', e); }
-        },
-        (error) => {
-          if (cancelled) return;
-          console.error('❌ Notifications snapshot error:', error.code || '', error.message);
-          onError?.(error);
-        }
-      );
-    } catch (error) {
-      if (!cancelled) onError?.(error);
-    }
-  })();
-
-  return () => {
-    cancelled = true;
-    if (unsub) { try { unsub(); } catch (_e) { /* ignore */ } unsub = null; }
-  };
 }
 
 async function sendNotification(notificationData) {
@@ -2265,47 +2216,6 @@ async function markNotificationRead(notificationDocId) {
   }
 }
 
-async function _commitInChunks(db, refs, apply, chunkSize = 450) {
-  for (let i = 0; i < refs.length; i += chunkSize) {
-    const batch = writeBatch(db);
-    refs.slice(i, i + chunkSize).forEach(ref => apply(batch, ref));
-    await batch.commit();
-  }
-}
-
-async function markNotificationsRead(docIds = []) {
-  if (!docIds.length) return true;
-  await ensureApiInitialized();
-  const db = getDb();
-  try {
-    const refs = docIds.map(id => doc(db, COLLECTIONS.NOTIFICATIONS, id));
-    await _commitInChunks(db, refs, (b, r) => b.update(r, { read: true }));
-    return true;
-  } catch (error) {
-    console.error('❌ Failed to mark notifications as read:', error.message);
-    throw error;
-  }
-}
-
-async function markAllNotificationsRead(userId) {
-  await ensureApiInitialized();
-  const db = getDb();
-  try {
-    // شرطا مساواة فقط ← لا يحتاج Composite Index
-    const q = query(
-      collection(db, COLLECTIONS.NOTIFICATIONS),
-      where('user_id', '==', safeParseInt(userId)),
-      where('read', '==', false)
-    );
-    const snap = await getDocs(q);
-    await _commitInChunks(db, snap.docs.map(d => d.ref), (b, r) => b.update(r, { read: true }));
-    return true;
-  } catch (error) {
-    console.error('❌ Failed to mark all notifications as read:', error.message);
-    throw error;
-  }
-}
-
 async function deleteNotification(notificationDocId) {
   await ensureApiInitialized();
   const db = getDb();
@@ -2320,32 +2230,18 @@ async function deleteNotification(notificationDocId) {
   }
 }
 
-async function deleteNotifications(docIds = []) {
-  if (!docIds.length) return true;
-  await ensureApiInitialized();
-  const db = getDb();
-  try {
-    const refs = docIds.map(id => doc(db, COLLECTIONS.NOTIFICATIONS, id));
-    await _commitInChunks(db, refs, (b, r) => b.delete(r));
-    return true;
-  } catch (error) {
-    console.error('❌ Failed to delete notifications:', error.message);
-    throw error;
-  }
-}
-
 async function clearAllUserNotifications(userId) {
   await ensureApiInitialized();
   const db = getDb();
 
   try {
-    const q = query(
-      collection(db, COLLECTIONS.NOTIFICATIONS),
-      where('user_id', '==', safeParseInt(userId))
-    );
+    const notificationsRef = collection(db, COLLECTIONS.NOTIFICATIONS);
+    const q = query(notificationsRef, where('user_id', '==', safeParseInt(userId)));
     const snapshot = await getDocs(q);
-    // writeBatch محدود بـ500 عملية؛ نقسّم لدفعات
-    await _commitInChunks(db, snapshot.docs.map(d => d.ref), (b, r) => b.delete(r));
+
+    const batch = writeBatch(db);
+    snapshot.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
     return true;
   } catch (error) {
     console.error('❌ Failed to clear notifications:', error.message);
@@ -5173,7 +5069,102 @@ async function getGroupContentCatalog(type) {
   return items.sort((a, b) => b.created_ms - a.created_ms);
 }
 
-// ==== 31. التصدير ====
+// ==== 31. أبطال الصفحة الرئيسية ====
+const HOME_CHAMPIONS_LIMITS = Object.freeze({ MAX: 20 });
+
+function mapChampionData(data) {
+  return {
+    id: data.id,
+    username: data.username,
+    full_name: data.full_name,
+    gender: data.gender,
+    total_score: data.total_score || 0,
+    user_type: 'student',
+    avatar_url: data.avatar_url || '',
+    avatar_job_index: data.avatar_job_index ?? -1,
+    is_verified: data.is_verified || false
+  };
+}
+
+function assertCanManageChampions() {
+  if (!(isTeacher() || isModerator())) throw new Error('اختيار الأبطال للمعلم والمشرف فقط');
+}
+
+async function getHomeChampions(count = 6) {
+  await ensureApiInitialized();
+  const db = getDb();
+
+  try {
+    const curatedSnap = await getDocs(query(
+      collection(db, COLLECTIONS.USERS),
+      where('champion_order', '>', 0),
+      orderBy('champion_order', 'asc'),
+      firestoreLimit(HOME_CHAMPIONS_LIMITS.MAX)
+    ));
+
+    const curated = curatedSnap.docs
+      .map((d) => d.data())
+      .filter((data) => data.user_type === 'student')
+      .map(mapChampionData);
+
+    if (curated.length) return { mode: 'manual', champions: curated.slice(0, count) };
+    return { mode: 'auto', champions: await getTopStudents(count) };
+  } catch (error) {
+    console.error('❌ Failed to get home champions:', error.message);
+    throw error;
+  }
+}
+
+async function saveHomeChampions(userIds) {
+  await ensureApiInitialized();
+  assertCanManageChampions();
+  const db = getDb();
+
+  const ids = normalizeIdList(userIds);
+  if (!ids.length) throw new Error('اختر بطلًا واحدًا على الأقل أو أعد الوضع التلقائي');
+  if (ids.length > HOME_CHAMPIONS_LIMITS.MAX) throw new Error(`الحد الأقصى ${HOME_CHAMPIONS_LIMITS.MAX} بطلًا`);
+
+  const usersRef = collection(db, COLLECTIONS.USERS);
+  const [currentSnap, ...targetSnaps] = await Promise.all([
+    getDocs(query(usersRef, where('champion_order', '>', 0))),
+    ...chunkList(ids).map((chunk) => getDocs(query(usersRef, where('id', 'in', chunk))))
+  ]);
+
+  const targets = new Map();
+  targetSnaps.forEach((snapshot) => snapshot.forEach((d) => {
+    const data = d.data();
+    if (data.user_type === 'student') targets.set(Number(data.id), d.ref);
+  }));
+  if (ids.some((id) => !targets.has(id))) throw new Error('بعض الطلاب المختارين غير متاحين');
+
+  const batch = writeBatch(db);
+  currentSnap.forEach((d) => {
+    if (!ids.includes(Number(d.data().id))) batch.update(d.ref, { champion_order: 0 });
+  });
+  ids.forEach((id, index) => batch.update(targets.get(id), { champion_order: index + 1 }));
+
+  await batch.commit();
+  EventBus.emit('champions:changed', { mode: 'manual' });
+  return true;
+}
+
+async function resetHomeChampions() {
+  await ensureApiInitialized();
+  assertCanManageChampions();
+  const db = getDb();
+
+  const snapshot = await getDocs(query(collection(db, COLLECTIONS.USERS), where('champion_order', '>', 0)));
+  if (!snapshot.empty) {
+    const batch = writeBatch(db);
+    snapshot.forEach((d) => batch.update(d.ref, { champion_order: 0 }));
+    await batch.commit();
+  }
+
+  EventBus.emit('champions:changed', { mode: 'auto' });
+  return true;
+}
+
+// ==== 32. التصدير ====
 export {
   initializeApi,
 
@@ -5236,11 +5227,7 @@ export {
   sendNotification,
   sendBulkNotifications,
   markNotificationRead,
-  markNotificationsRead,
-  markAllNotificationsRead,
-  subscribeToUserNotifications,
   deleteNotification,
-  deleteNotifications,
   clearAllUserNotifications,
 
   addTestimonial,
@@ -5322,5 +5309,10 @@ export {
   deleteGroupMessage,
   getUsersByIds,
   getExamsByIds,
-  getGroupContentCatalog
+  getGroupContentCatalog,
+
+  HOME_CHAMPIONS_LIMITS,
+  getHomeChampions,
+  saveHomeChampions,
+  resetHomeChampions
 };

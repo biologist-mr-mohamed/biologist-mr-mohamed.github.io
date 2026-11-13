@@ -801,6 +801,12 @@ const BACK_CONFIG = {
   exitHintText: 'اضغط رجوع مرة أخرى للخروج من المنصة'
 };
 
+// الصفحات التي يرجع منها المستخدم لقائمتها بدل الرئيسية
+const BACK_PARENT_ROUTES = {
+  'lesson-view': 'lessons',
+  'exam-view': 'exams'
+};
+
 const backState = { handlers: [], goingHome: false, goingHomeTimer: null };
 
 function readEntry() {
@@ -942,6 +948,13 @@ function handleSmartBack(base) {
     return rearm(base);
   }
 
+  // صفحة تفاصيل (درس/امتحان): الرجوع يعيدنا لقائمتها أولًا ثم الضغطة التالية للرئيسية
+  const parentRoute = BACK_PARENT_ROUTES[routerState.currentRoute];
+  if (parentRoute) {
+    navigateTo(parentRoute, { path: {}, query: {} }, { replace: true, force: true });
+    return;
+  }
+
   if (routerState.currentRoute !== 'home') {
     if (!goHomeViaHistory()) navigateTo('home', { path: {}, query: {} }, { replace: true, force: true });
     return;
@@ -1001,9 +1014,15 @@ function handleUserStateChange(detail) {
   }
 }
 
+function isModifiedClick(e) {
+  return e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
+}
+
 function handleDocumentClick(e) {
   let target = e.target.closest('[data-nav-target]');
   if (target && !target.hasAttribute('disabled')) {
+    // Ctrl/⌘/Shift + نقر على رابط حقيقي = فتح في تبويب جديد (سلوك المتصفح)
+    if (target.tagName === 'A' && target.getAttribute('href') && isModifiedClick(e)) return;
     e.preventDefault();
     const routeName = target.getAttribute('data-nav-target');
     const params = { path: {}, query: {} };
@@ -1019,9 +1038,10 @@ function handleDocumentClick(e) {
   let anchor = e.target.closest('a');
   if (anchor && anchor.getAttribute('href')) {
     const href = anchor.getAttribute('href');
-    if (anchor.target === '_blank') return;
+    if (anchor.target === '_blank' || isModifiedClick(e)) return;
     if (href.startsWith('http') && !href.startsWith(window.location.origin)) return;
     if (href === '#' || href.startsWith('javascript:')) return;
+    if (/^(mailto|tel|sms|whatsapp):/i.test(href)) return;
     if (/\.[a-zA-Z0-9]+$/.test(href) && !href.includes('?')) return;
     e.preventDefault();
     let path = href;

@@ -3,7 +3,10 @@
 // ==== 1. استيراد التبعيات ====
 import {
   getPlatformStats,
-  getTopStudents,
+  getHomeChampions,
+  saveHomeChampions,
+  resetHomeChampions,
+  searchUsers,
   getComments,
   getPinnedComment,
   getRootCommentsCount,
@@ -15,7 +18,6 @@ import {
   toggleCommentLike,
   canEditComment,
   getLessonById,
-  updateUserPreferences,
   getAllLessons,
   getUserProgress,
   getUserExamStats,
@@ -25,12 +27,10 @@ import {
 } from '../../js/core/api.js';
 import { EventBus } from '../../js/core/event-bus.js';
 import { getCurrentUser, isAuthenticated, isTeacher, isModerator } from '../../js/core/session.js';
-import { showDirectingMessage } from '../../js/ui/directing.js';
 import { getCurrentRoute } from '../../js/core/router.js';
 import {
   createAvatarElement,
   updateAvatarElement,
-  getFrameClass,
   shouldShowVerificationBadge
 } from '../../js/utils/avatar.js';
 
@@ -56,7 +56,6 @@ const HOME_CONFIG = {
     STAFF_STATS: '[data-staff-stat]',
     STUDENT_STATS: '[data-student-stat]',
     CHAMPIONS_GRID: '.champions-grid',
-    REVEAL_ITEMS: '.reveal',
     TESTIMONIALS_SECTION: '.testimonials-section',
     TESTIMONIALS_CONTAINER: '.testimonials-container',
     RECOMMENDED_GRID: '#home-recommended',
@@ -84,6 +83,7 @@ const HOME_CONFIG = {
   DEFAULTS: {
     STATS: { students: 0, lessons: 0, exams: 0 },
     CHAMPIONS_LIMIT: 6,
+    CHAMPIONS_MODAL_LIMIT: 20,
     TESTIMONIALS_LIMIT: 10,
     RECOMMENDED_LIMIT: 4,
     CAROUSEL_INTERVAL: 5000,
@@ -100,6 +100,7 @@ const HOME_CONFIG = {
   CACHE_KEYS: {
     STATS: 'home_stats_cache',
     CHAMPIONS: 'home_champions_cache',
+    CHAMPIONS_ALL: 'home_champions_all_cache',
     TESTIMONIALS: 'home_testimonials_cache',
     RECOMMENDED: 'home_recommended_cache'
   },
@@ -142,7 +143,6 @@ let $homeState = {
   },
   cleanupFns: [],
   eventUnsubscribers: [],
-  revealObserver: null,
   currentUser: null,
   comments: {
     list: [],
@@ -382,6 +382,7 @@ function updateLoadMoreUI() {
 // ==== 7. دوال تحديث واجهة المستخدم ====
 
 function updateStats(stats) {
+  if (!$homeState.container) return;
   const statElements = $homeState.container.querySelectorAll(HOME_CONFIG.SELECTORS.STATS);
   if (!statElements.length) return;
 
@@ -420,6 +421,7 @@ function updateStats(stats) {
 }
 
 function updateStaffKpis(stats) {
+  if (!$homeState.container) return;
   const kpiElements = $homeState.container.querySelectorAll(HOME_CONFIG.SELECTORS.STAFF_STATS);
   if (!kpiElements.length) return;
 
@@ -438,58 +440,108 @@ function updateStaffKpis(stats) {
   });
 }
 
+function getChampionRankMark(rank) {
+  if (rank === 1) return '🥇';
+  if (rank === 2) return '🥈';
+  if (rank === 3) return '🥉';
+  return String(rank);
+}
+
+function getChampionAvatarHtml(student, size) {
+  return createAvatarElement(student, size, { clickable: false }).outerHTML;
+}
+
+function isStaffViewer() {
+  return $homeState.roleKey === ROLE_KEYS.TEACHER || $homeState.roleKey === ROLE_KEYS.MODERATOR;
+}
+
+function getPodiumClass(rank) {
+  return rank === 1 ? 'first-place' : rank === 2 ? 'second-place' : rank === 3 ? 'third-place' : '';
+}
+
+function getChampionCardHtml(student, rank) {
+  const avatarSize = rank === 1 ? 'lg' : rank <= 3 ? 'md' : 'sm';
+  const score = student.total_score || 0;
+  const name = escapeHtml(student.full_name);
+  const badgesHtml = (student.badges || []).slice(0, 2).map((badge) => `<span class="badge-item">${escapeHtml(badge)}</span>`).join('');
+
+  return `
+    <div class="champion-card ${getPodiumClass(rank)}" role="link" tabindex="0" data-user-id="${escapeHtml(student.id)}" aria-label="${name}، المركز ${rank}، ${score} نقطة">
+      <div class="champion-rank"><span class="rank-icon" aria-hidden="true">${getChampionRankMark(rank)}</span></div>
+      <div class="champion-avatar">${getChampionAvatarHtml(student, avatarSize)}</div>
+      <div class="champion-info">
+        <h3 class="champion-name">${name}</h3>
+        <div class="champion-score">
+          <i class="fas fa-star score-icon" aria-hidden="true"></i>
+          <span>${score} نقطة</span>
+        </div>
+        ${badgesHtml ? `<div class="champion-badges">${badgesHtml}</div>` : ''}
+      </div>
+    </div>`;
+}
+
+function getChampionPlaceholderHtml(rank) {
+  const staff = isStaffViewer();
+  const attrs = staff
+    ? `role="button" tabindex="0" data-champions-manage aria-label="إضافة بطل في المركز ${rank}"`
+    : 'aria-hidden="true"';
+
+  return `
+    <div class="champion-card ${getPodiumClass(rank)} is-placeholder" ${attrs}>
+      <div class="champion-rank"><span class="rank-icon" aria-hidden="true">${getChampionRankMark(rank)}</span></div>
+      <div class="champion-avatar"><span class="champion-ghost-avatar">${staff ? '<i class="fas fa-plus" aria-hidden="true"></i>' : ''}</span></div>
+      <div class="champion-info">
+        <span class="champion-ghost-line"></span>
+        <span class="champion-ghost-line champion-ghost-line--short"></span>
+      </div>
+    </div>`;
+}
+
 function updateChampionsGrid(students) {
+  if (!$homeState.container) return;
   const grid = $homeState.container.querySelector(HOME_CONFIG.SELECTORS.CHAMPIONS_GRID);
   if (!grid) return;
 
-  if (!students || students.length === 0) {
-    grid.innerHTML = `<div class="empty-state"><i class="fas fa-trophy empty-icon"></i><h3>لا يوجد أبطال بعد</h3><p>كن أول من يحقق إنجازاً!</p></div>`;
-    return;
-  }
+  grid.removeAttribute('aria-busy');
 
-  const championsHtml = students.map((student, index) => {
-    const rank = index + 1;
-    let rankClass = '';
-    if (rank === 1) rankClass = 'first-place';
-    else if (rank === 2) rankClass = 'second-place';
-    else if (rank === 3) rankClass = 'third-place';
+  const list = students || [];
+  const slots = [1, 2, 3].map((rank) => (list[rank - 1] ? getChampionCardHtml(list[rank - 1], rank) : getChampionPlaceholderHtml(rank)));
+  const rest = list.slice(3).map((student, index) => getChampionCardHtml(student, index + 4));
+  const emptyNote = list.length === 0
+    ? `<p class="champions-empty-note">${isStaffViewer() ? 'لم يُختر أبطال بعد، اضغط على أي خانة لاختيار الأبطال.' : 'لا يوجد أبطال بعد، كن أول من يحقق إنجازاً!'}</p>`
+    : '';
 
-    const avatarUrl = student.avatar_url || (student.gender === 'female' ? 'assets/images/G.png' : 'assets/images/M.png');
-    const badgesHtml = (student.badges || []).slice(0, 2).map(badge => `<span class="badge-item">${escapeHtml(badge)}</span>`).join('');
+  grid.innerHTML = slots.join('') + rest.join('') + emptyNote;
+}
 
-    return `
-      <div class="champion-card ${rankClass}" data-user-id="${student.id}">
-        <div class="champion-rank">
-          <span class="rank-icon">${rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}</span>
-        </div>
-        <div class="champion-avatar">
-          <img src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(student.full_name)}" class="avatar-image" loading="lazy">
-        </div>
-        <div class="champion-info">
-          <h3 class="champion-name">${escapeHtml(student.full_name)}</h3>
-          <div class="champion-score">
-            <i class="fas fa-star score-icon"></i>
-            <span>${student.total_score || 0} نقطة</span>
-          </div>
-          <div class="champion-badges">${badgesHtml}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
+function openChampionProfile(userId) {
+  if (userId) window.router?.openProfile?.(userId);
+}
 
-  grid.innerHTML = championsHtml;
+function bindChampionsNavigation(container) {
+  const grid = container.querySelector(HOME_CONFIG.SELECTORS.CHAMPIONS_GRID);
+  if (!grid) return;
 
-  grid.querySelectorAll('.champion-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const userId = card.dataset.userId;
-      if (userId && window.router?.navigateTo) {
-        window.router.navigateTo('profile', { path: { id: userId } });
-      }
-    });
+  const activate = (card) => {
+    if (!card) return;
+    if (card.hasAttribute('data-champions-manage')) showAllChampionsModal();
+    else openChampionProfile(card.dataset.userId);
+  };
+  const resolveCard = (target) => target.closest('.champion-card[data-user-id], .champion-card[data-champions-manage]');
+
+  grid.addEventListener('click', (event) => activate(resolveCard(event.target)));
+
+  grid.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const card = resolveCard(event.target);
+    if (!card || event.target !== card) return;
+    event.preventDefault();
+    activate(card);
   });
 }
 
 function updateRecommendedLessons(lessons) {
+  if (!$homeState.container) return;
   const grid = $homeState.container.querySelector(HOME_CONFIG.SELECTORS.RECOMMENDED_GRID);
   if (!grid) return;
 
@@ -501,7 +553,7 @@ function updateRecommendedLessons(lessons) {
   const lessonsHtml = lessons.map(lesson => `
     <div class="recommended-card" data-lesson-id="${lesson.id}">
       <div class="recommended-image">
-        <img src="${escapeHtml(lesson.cover_image_url || 'assets/images/biologist1.png')}" alt="${escapeHtml(lesson.title)}" loading="lazy">
+        <img src="${escapeHtml(lesson.cover_image_url || '/assets/images/biologist1.png')}" alt="${escapeHtml(lesson.title)}" loading="lazy">
       </div>
       <div class="recommended-info">
         <h3 class="recommended-title">${escapeHtml(lesson.title)}</h3>
@@ -601,7 +653,7 @@ function buildTestimonialsUI() {
 
     <div class="testimonials-list" id="home-testimonials-list">
       <div class="testimonials-loading">
-        <div class="spinner"></div>
+        <div class="bio-loader bio-loader--auto" role="status" aria-label="جاري تحميل الآراء" style="--bio-size:56px;"></div>
         <p>جاري تحميل الآراء...</p>
       </div>
     </div>
@@ -669,13 +721,6 @@ function buildTestimonialsUI() {
     els.sortSelect.addEventListener('change', boundSort);
     cs.boundHandlers.set('sort', boundSort);
   }
-
-  const loginPromptBtn = container.querySelector('[data-nav-target="login"]');
-  if (loginPromptBtn) {
-    loginPromptBtn.addEventListener('click', () => {
-      if (window.router?.navigateTo) window.router.navigateTo('login');
-    });
-  }
 }
 
 async function loadTestimonialsComments(append = false) {
@@ -691,7 +736,7 @@ async function loadTestimonialsComments(append = false) {
   if (!append) {
     listEl.innerHTML = `
       <div class="testimonials-loading">
-        <div class="spinner"></div>
+        <div class="bio-loader bio-loader--auto" role="status" aria-label="جاري تحميل الآراء" style="--bio-size:56px;"></div>
         <p>جاري تحميل الآراء...</p>
       </div>`;
   }
@@ -938,9 +983,7 @@ function initTestimonialAvatars(root) {
 
       avatarDiv.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (window.router?.navigateTo) {
-          window.router.navigateTo('profile', { path: { id: userData.id } });
-        }
+        window.router?.openProfile?.(userData.id);
       });
 
       avatarDiv.setAttribute('data-avatar-initialized', 'true');
@@ -1124,7 +1167,7 @@ async function loadTestimonialReplies(commentId, refresh = false) {
   if (!refresh) {
     repliesContainer.innerHTML = `
       <div class="testimonials-loading" style="padding:var(--space-2);">
-        <div class="spinner" style="width:20px;height:20px;"></div>
+        <div class="bio-loader bio-loader--auto" role="status" aria-label="جاري تحميل الردود" style="--bio-size:28px;"></div>
       </div>`;
   }
 
@@ -1474,12 +1517,12 @@ async function loadTopChampions(forceRefresh = false) {
   if ($homeState.isLoading.champions) return;
   $homeState.isLoading.champions = true;
   try {
-    let champions = forceRefresh ? null : getCachedData(HOME_CONFIG.CACHE_KEYS.CHAMPIONS);
-    if (!champions) {
-      champions = await getTopStudents(HOME_CONFIG.DEFAULTS.CHAMPIONS_LIMIT);
-      setCachedData(HOME_CONFIG.CACHE_KEYS.CHAMPIONS, champions);
+    let payload = forceRefresh ? null : getCachedData(HOME_CONFIG.CACHE_KEYS.CHAMPIONS);
+    if (!payload?.champions) {
+      payload = await getHomeChampions(HOME_CONFIG.DEFAULTS.CHAMPIONS_LIMIT);
+      setCachedData(HOME_CONFIG.CACHE_KEYS.CHAMPIONS, payload);
     }
-    updateChampionsGrid(champions);
+    updateChampionsGrid(payload.champions);
   } catch (error) {
     console.error('❌ فشل تحميل أبطال الأسبوع:', error);
     showToast('تعذر تحميل قائمة الأبطال', 'error');
@@ -1515,6 +1558,8 @@ async function loadRecommendedLessons(forceRefresh = false) {
       lessons = await getAllLessons(options);
       setCachedData(cacheKey, lessons);
     }
+
+    if (!$homeState.container) return;
 
     const titleEl = $homeState.container.querySelector(HOME_CONFIG.SELECTORS.RECOMMENDED_TITLE_TEXT);
     if (titleEl) titleEl.textContent = isStudent ? 'دروس مقترحة لمرحلتك' : 'دروس مقترحة لك';
@@ -1634,6 +1679,7 @@ async function renderContinueLearningCard(progressList) {
 }
 
 function renderStudentStats(progressList, examStats, user) {
+  if (!$homeState.container) return;
   const overallProgress = progressList.length
     ? Math.round(progressList.reduce((sum, p) => sum + (p.progress || 0), 0) / progressList.length)
     : 0;
@@ -1693,6 +1739,7 @@ async function loadStaffPanel(roleKey) {
       const key = el.getAttribute('data-staff-stat');
       if (values[key] !== undefined) el.textContent = values[key];
     });
+    $homeState.container.querySelector('.staff-kpi-card--alert')?.classList.toggle('is-alert', pendingComplaints > 0);
   } catch (error) {
     console.error('❌ فشل تحميل مؤشرات طاقم العمل الإضافية:', error);
   } finally {
@@ -1714,54 +1761,320 @@ function handleViewAllChampions() {
   showAllChampionsModal();
 }
 
-async function showAllChampionsModal() {
-  try {
-    const allChampions = await getTopStudents(20);
+function getChampionModalCardHtml(student, rank) {
+  const name = escapeHtml(student.full_name);
+  const score = student.total_score || 0;
+  return `
+    <button type="button" class="champion-modal-card" role="listitem" data-rank="${rank}" data-user-id="${escapeHtml(student.id)}" aria-label="${name}، المركز ${rank}، ${score} نقطة">
+      <span class="champion-modal-rank" aria-hidden="true">${rank <= 3 ? getChampionRankMark(rank) : `#${rank}`}</span>
+      <span class="champion-modal-avatar">${getChampionAvatarHtml(student, 'sm')}</span>
+      <span class="champion-modal-info">
+        <span class="champion-modal-name">${name}</span>
+        <span class="champion-modal-score"><i class="fas fa-star" aria-hidden="true"></i> ${score} نقطة</span>
+      </span>
+    </button>`;
+}
 
-    if (!allChampions || allChampions.length === 0) {
-      window.modals?.toast('لا يوجد أبطال حالياً', 'info');
+function invalidateChampionsCache() {
+  [HOME_CONFIG.CACHE_KEYS.CHAMPIONS, HOME_CONFIG.CACHE_KEYS.CHAMPIONS_ALL].forEach((key) => localStorage.removeItem(key));
+}
+
+// حارس فتح النوافذ: يمنع ظهور نافذتين معاً عند النقر المتكرر أثناء تحميل البيانات
+let isModalOpening = false;
+
+function acquireModalGuard() {
+  if (isModalOpening) return false;
+  isModalOpening = true;
+  // شبكة أمان: لو فشل الفتح لا يبقى الزر مقفولًا للأبد
+  setTimeout(() => { isModalOpening = false; }, 4000);
+  return true;
+}
+
+function releaseModalGuard() {
+  isModalOpening = false;
+}
+
+async function showAllChampionsModal() {
+  if (!window.modals?.showModal) {
+    showToast('نظام النوافذ غير متاح حاليًا', 'error');
+    return;
+  }
+  if (!acquireModalGuard()) return;
+
+  const staff = isStaffViewer();
+
+  try {
+    let payload = staff ? null : getCachedData(HOME_CONFIG.CACHE_KEYS.CHAMPIONS_ALL);
+    if (!payload?.champions) {
+      payload = await getHomeChampions(HOME_CONFIG.DEFAULTS.CHAMPIONS_MODAL_LIMIT);
+      if (!staff) setCachedData(HOME_CONFIG.CACHE_KEYS.CHAMPIONS_ALL, payload);
+    }
+
+    if (!staff && payload.champions.length === 0) {
+      releaseModalGuard();
+      showToast('لا يوجد أبطال حالياً', 'info');
       return;
     }
 
-    let championsHtml = `
-  <div class="champions-modal-list">
-    <div class="champions-modal-grid">
-`;
-
-allChampions.forEach((student, index) => {
-  const rank = index + 1;
-  let rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
-  const avatarUrl = student.avatar_url || (student.gender === 'female' ? 'assets/images/G.png' : 'assets/images/M.png');
-  championsHtml += `
-    <div class="champion-modal-card">
-      <div class="champion-modal-rank">${rankIcon}</div>
-      <div class="champion-modal-avatar">
-        <img src="${avatarUrl}" alt="${escapeHtml(student.full_name)}">
-      </div>
-      <div class="champion-modal-info">
-        <div class="champion-modal-name">${escapeHtml(student.full_name)}</div>
-        <div class="champion-modal-score">⭐ ${student.total_score || 0} نقطة</div>
-      </div>
-    </div>
-  `;
-});
-
-    championsHtml += `</div></div>`;
-
-    if (window.modals?.showModal) {
+    if (staff) {
       window.modals.showModal({
-        title: '🏆 أبطال هذا الأسبوع',
-        html: championsHtml,
+        title: '🏆 إدارة أبطال الأسبوع',
+        html: '<div class="champions-manager" data-cm-root></div>',
         size: 'large',
-        buttons: [{ text: 'إغلاق', role: 'cancel', type: 'secondary' }]
+        rtl: true,
+        closeOnBackdrop: false,
+        onOpen: (modal) => {
+          releaseModalGuard();
+          mountChampionsManager(modal, payload);
+        },
+        onClose: () => releaseModalGuard()
       });
-    } else {
-      alert('عذراً، نظام النوافذ غير متاح');
+      return;
     }
+
+    window.modals.showModal({
+      title: '🏆 أبطال هذا الأسبوع',
+      html: `<div class="champions-modal-grid" role="list">${payload.champions.map((student, index) => getChampionModalCardHtml(student, index + 1)).join('')}</div>`,
+      size: 'large',
+      rtl: true,
+      buttons: [{ text: 'إغلاق', role: 'cancel', type: 'secondary' }],
+      onOpen: (modal) => {
+        releaseModalGuard();
+        modal.element.querySelector('.champions-modal-grid')?.addEventListener('click', (event) => {
+          const userId = event.target.closest('.champion-modal-card')?.dataset.userId;
+          if (userId) modal.close(null, () => openChampionProfile(userId));
+        });
+      },
+      onClose: () => releaseModalGuard()
+    });
   } catch (error) {
-    console.error('فشل تحميل الأبطال:', error);
-    window.modals?.toast('حدث خطأ أثناء تحميل قائمة الأبطال', 'error');
+    releaseModalGuard();
+    console.error('❌ فشل تحميل قائمة الأبطال:', error);
+    showToast('حدث خطأ أثناء تحميل قائمة الأبطال', 'error');
   }
+}
+
+// ==== إدارة الأبطال (معلم / مشرف) ====
+
+function mountChampionsManager(modal, payload) {
+  const root = modal.element.querySelector('[data-cm-root]');
+  if (!root) return;
+
+  const MAX = HOME_CONFIG.DEFAULTS.CHAMPIONS_MODAL_LIMIT;
+  const idsOf = (list) => list.map((s) => String(s.id)).join(',');
+  const mgr = {
+    mode: payload.mode,
+    draft: payload.champions.map((s) => ({ ...s })),
+    baseline: idsOf(payload.champions),
+    picker: null,
+    confirmReset: false,
+    results: [],
+    resultsState: 'idle',
+    searchToken: 0,
+    searchTimer: null,
+    busy: false
+  };
+
+  const isDirty = () => idsOf(mgr.draft) !== mgr.baseline;
+
+  function rowHtml(student, index) {
+    const rank = index + 1;
+    const name = escapeHtml(student.full_name);
+    return `
+      <div class="champion-modal-card cm-row" role="listitem" data-rank="${rank}" data-index="${index}">
+        <span class="champion-modal-rank" aria-hidden="true">${rank <= 3 ? getChampionRankMark(rank) : `#${rank}`}</span>
+        <span class="champion-modal-avatar">${getChampionAvatarHtml(student, 'sm')}</span>
+        <span class="champion-modal-info">
+          <span class="champion-modal-name">${name}</span>
+          <span class="champion-modal-score"><i class="fas fa-star" aria-hidden="true"></i> ${student.total_score || 0} نقطة</span>
+        </span>
+        <span class="cm-row-actions">
+          <button type="button" class="cm-icon-btn" data-cm="up" data-index="${index}" aria-label="رفع ${name}" ${index === 0 ? 'disabled' : ''}><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
+          <button type="button" class="cm-icon-btn" data-cm="down" data-index="${index}" aria-label="خفض ${name}" ${index === mgr.draft.length - 1 ? 'disabled' : ''}><i class="fas fa-arrow-down" aria-hidden="true"></i></button>
+          <button type="button" class="cm-icon-btn" data-cm="replace" data-index="${index}" aria-label="استبدال ${name}"><i class="fas fa-right-left" aria-hidden="true"></i></button>
+          <button type="button" class="cm-icon-btn cm-icon-btn--danger" data-cm="remove" data-index="${index}" aria-label="إزالة ${name}"><i class="fas fa-trash-can" aria-hidden="true"></i></button>
+        </span>
+      </div>`;
+  }
+
+  function pickerHtml() {
+    if (!mgr.picker) return '';
+    const replacing = mgr.picker.type === 'replace';
+    const target = replacing ? mgr.draft[mgr.picker.index] : null;
+    return `
+      <div class="cm-picker">
+        <div class="cm-picker-head">
+          <strong>${replacing ? `اختر بديلاً لـ ${escapeHtml(target?.full_name || '')}` : 'إضافة بطل جديد'}</strong>
+          <button type="button" class="cm-link-btn" data-cm="picker-close">إلغاء</button>
+        </div>
+        <label class="cm-search">
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <input type="search" class="cm-search-input" placeholder="ابحث باسم الطالب أو رقم هاتفه" autocomplete="off" aria-label="بحث عن طالب" data-cm-search>
+        </label>
+        <div class="cm-results" role="listbox" aria-label="نتائج البحث" data-cm-results>${resultsHtml()}</div>
+      </div>`;
+  }
+
+  function resultsHtml() {
+    if (mgr.resultsState === 'idle') return '<p class="cm-note">اكتب حرفين على الأقل للبحث.</p>';
+    if (mgr.resultsState === 'loading') return '<p class="cm-note">جاري البحث...</p>';
+    if (mgr.resultsState === 'error') return '<p class="cm-note">تعذر البحث، حاول مرة أخرى.</p>';
+    if (!mgr.results.length) return '<p class="cm-note">لا يوجد طلاب مطابقون.</p>';
+
+    const taken = new Set(mgr.draft.map((s) => String(s.id)));
+    return mgr.results.map((user) => {
+      const inList = taken.has(String(user.id));
+      const meta = [user.stage, user.grade ? `الصف ${user.grade}` : ''].filter(Boolean).map(escapeHtml).join(' · ');
+      return `
+        <button type="button" class="cm-result" role="option" data-cm="pick" data-user-id="${escapeHtml(user.id)}" ${inList ? 'disabled' : ''}>
+          <span class="champion-modal-avatar">${getChampionAvatarHtml(user, 'sm')}</span>
+          <span class="champion-modal-info">
+            <span class="champion-modal-name">${escapeHtml(user.full_name)}</span>
+            <span class="champion-modal-score">${meta || `${user.total_score || 0} نقطة`}</span>
+          </span>
+          ${inList ? '<span class="cm-tag">ضمن القائمة</span>' : ''}
+        </button>`;
+    }).join('');
+  }
+
+  function render() {
+    const dirty = isDirty();
+    root.innerHTML = `
+      <div class="cm-status">
+        <span class="cm-badge ${mgr.mode === 'manual' ? 'is-manual' : ''}">${mgr.mode === 'manual' ? 'قائمة مخصصة من الإدارة' : 'ترتيب تلقائي حسب النقاط'}</span>
+        <span class="cm-count">${mgr.draft.length} / ${MAX}</span>
+      </div>
+      <p class="cm-hint">أول ثلاثة في القائمة يظهرون على المنصة، والمركز الأول في المنتصف.</p>
+      <div class="cm-toolbar">
+        <button type="button" class="btn btn-outline btn-sm" data-cm="add" ${mgr.draft.length >= MAX ? 'disabled' : ''}><i class="fas fa-user-plus" aria-hidden="true"></i><span>إضافة بطل</span></button>
+        ${mgr.mode === 'manual' ? '<button type="button" class="btn btn-outline btn-sm" data-cm="reset"><i class="fas fa-rotate-left" aria-hidden="true"></i><span>إعادة للترتيب التلقائي</span></button>' : ''}
+      </div>
+      ${mgr.confirmReset ? `
+      <div class="cm-confirm" role="alert">
+        <p class="cm-confirm-text"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> سيتم حذف القائمة المخصصة وعرض الأبطال حسب النقاط. هل تريد المتابعة؟</p>
+        <div class="cm-confirm-actions">
+          <button type="button" class="btn btn-secondary btn-sm" data-cm="reset-cancel">إلغاء</button>
+          <button type="button" class="btn btn-primary btn-sm cm-confirm-danger" data-cm="reset-confirm">إعادة الترتيب</button>
+        </div>
+      </div>` : ''}
+      ${pickerHtml()}
+      <div class="champions-modal-grid cm-list" role="list">
+        ${mgr.draft.length ? mgr.draft.map(rowHtml).join('') : '<p class="cm-note">القائمة فارغة، أضف بطلاً للبدء.</p>'}
+      </div>
+      <div class="cm-actions">
+        <span class="cm-dirty" ${dirty ? '' : 'hidden'}>تغييرات غير محفوظة</span>
+        <button type="button" class="btn btn-secondary" data-cm="discard" ${dirty && !mgr.busy ? '' : 'disabled'}>تراجع</button>
+        <button type="button" class="btn btn-primary" data-cm="save" ${dirty && !mgr.busy && mgr.draft.length ? '' : 'disabled'}>${mgr.busy ? 'جاري الحفظ...' : 'حفظ التغييرات'}</button>
+      </div>`;
+
+    if (mgr.picker) root.querySelector('[data-cm-search]')?.focus();
+  }
+
+  function refreshResults() {
+    const box = root.querySelector('[data-cm-results]');
+    if (box) box.innerHTML = resultsHtml();
+  }
+
+  function runSearch(term) {
+    clearTimeout(mgr.searchTimer);
+    const token = ++mgr.searchToken;
+    if (term.trim().length < 2) {
+      mgr.results = [];
+      mgr.resultsState = 'idle';
+      refreshResults();
+      return;
+    }
+    mgr.resultsState = 'loading';
+    refreshResults();
+    mgr.searchTimer = setTimeout(async () => {
+      try {
+        const found = await searchUsers(term, { limit: 15, throwOnError: true });
+        if (token !== mgr.searchToken) return;
+        mgr.results = (found || []).filter((user) => user.user_type === 'student');
+        mgr.resultsState = 'done';
+      } catch (error) {
+        if (token !== mgr.searchToken) return;
+        mgr.resultsState = 'error';
+      }
+      refreshResults();
+    }, 300);
+  }
+
+  function resetPicker() {
+    mgr.picker = null;
+    mgr.results = [];
+    mgr.resultsState = 'idle';
+    mgr.searchToken += 1;
+  }
+
+  async function save() {
+    mgr.busy = true;
+    render();
+    try {
+      await saveHomeChampions(mgr.draft.map((s) => s.id));
+      invalidateChampionsCache();
+      showToast('تم حفظ أبطال الأسبوع', 'success');
+      modal.close(null, () => loadTopChampions(true));
+    } catch (error) {
+      mgr.busy = false;
+      showToast(/[\u0600-\u06FF]/.test(error?.message || '') ? error.message : 'تعذر حفظ الأبطال', 'error');
+      render();
+    }
+  }
+
+  // التأكيد يظهر داخل نفس النافذة (بدون نافذة ثانية بجوارها)
+  async function resetToAuto() {
+    mgr.busy = true;
+    render();
+    try {
+      await resetHomeChampions();
+      invalidateChampionsCache();
+      showToast('تمت إعادة الترتيب التلقائي', 'success');
+      modal.close(null, () => loadTopChampions(true));
+    } catch (error) {
+      mgr.busy = false;
+      showToast('تعذر إعادة الترتيب التلقائي', 'error');
+      render();
+    }
+  }
+
+  root.addEventListener('click', (event) => {
+    const btn = event.target.closest('[data-cm]');
+    if (!btn || btn.disabled || mgr.busy) return;
+    const index = Number(btn.dataset.index);
+    if (!btn.dataset.cm.startsWith('reset')) mgr.confirmReset = false;
+
+    switch (btn.dataset.cm) {
+      case 'add': resetPicker(); mgr.picker = { type: 'add' }; break;
+      case 'replace': resetPicker(); mgr.picker = { type: 'replace', index }; break;
+      case 'picker-close': resetPicker(); break;
+      case 'up': [mgr.draft[index - 1], mgr.draft[index]] = [mgr.draft[index], mgr.draft[index - 1]]; break;
+      case 'down': [mgr.draft[index + 1], mgr.draft[index]] = [mgr.draft[index], mgr.draft[index + 1]]; break;
+      case 'remove': mgr.draft.splice(index, 1); resetPicker(); break;
+      case 'discard': mgr.draft = payload.champions.map((s) => ({ ...s })); resetPicker(); break;
+      case 'pick': {
+        const user = mgr.results.find((u) => String(u.id) === btn.dataset.userId);
+        if (!user) return;
+        const student = { ...user, user_type: 'student' };
+        if (mgr.picker?.type === 'replace') mgr.draft[mgr.picker.index] = student;
+        else mgr.draft.push(student);
+        resetPicker();
+        break;
+      }
+      case 'save': save(); return;
+      case 'reset': resetPicker(); mgr.confirmReset = true; break;
+      case 'reset-cancel': mgr.confirmReset = false; break;
+      case 'reset-confirm': mgr.confirmReset = false; resetToAuto(); return;
+      default: return;
+    }
+    render();
+  });
+
+  root.addEventListener('input', (event) => {
+    if (event.target.matches('[data-cm-search]')) runSearch(event.target.value);
+  });
+
+  render();
 }
 
 // ==== 14. الكاروسيل ====
@@ -2214,6 +2527,7 @@ export function initializePage(container, params = {}) {
 
   updateUserStreak($homeState.currentUser);
 
+  bindChampionsNavigation(container);
   loadTopChampions();
 
   loadRoleDependentSections();
@@ -2233,7 +2547,7 @@ export function initializePage(container, params = {}) {
   const exploreBtns = container.querySelectorAll(HOME_CONFIG.SELECTORS.WELCOME_BTN_EXPLORE);
   const viewAllChampionsBtn = container.querySelector(HOME_CONFIG.SELECTORS.VIEW_ALL_CHAMPIONS_BTN);
 
-  startBtns.forEach(btn => btn.addEventListener('click', () => handleNavigation('lessons')));
+  startBtns.forEach(btn => btn.addEventListener('click', () => handleNavigation('register')));
   exploreBtns.forEach(btn => btn.addEventListener('click', () => handleNavigation('lessons')));
   const registerBtns = container.querySelectorAll('[data-action="register-now"]');
   registerBtns.forEach(btn => btn.addEventListener('click', () => handleNavigation('register')));
@@ -2243,7 +2557,9 @@ export function initializePage(container, params = {}) {
     btn.addEventListener('click', () => handleNavigation('exams'))
   );
   container.querySelectorAll(HOME_CONFIG.SELECTORS.WELCOME_BTN_DASHBOARD).forEach(btn =>
-    btn.addEventListener('click', () => handleNavigation('dashboard'))
+    btn.addEventListener('click', () => handleNavigation(
+      $homeState.roleKey === ROLE_KEYS.TEACHER ? 'modDashboard' : 'dashboard'
+    ))
   );
   container.querySelectorAll(HOME_CONFIG.SELECTORS.WELCOME_BTN_GROUPS).forEach(btn =>
     btn.addEventListener('click', () => handleNavigation('groups'))
@@ -2264,6 +2580,7 @@ export function initializePage(container, params = {}) {
       initFeaturesCarousel();
 
       loadRoleDependentSections(true);
+      loadTopChampions(true);
 
       $homeState.comments.list = [];
       $homeState.comments.repliesCache.clear();

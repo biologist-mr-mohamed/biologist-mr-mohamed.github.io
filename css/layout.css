@@ -4,16 +4,16 @@
 .main-footer {
   background-color: var(--surface-light);
   border-top: 1px solid var(--border-color-light);
-  padding: var(--space-6) 0 var(--space-4);
-  margin-top: auto;
+  padding: var(--space-8) 0 calc(var(--space-4) + var(--bottom-nav-height));
 }
 
 .footer-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--space-5);
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
 }
 
+/* ==== 2. قسم الهوية ==== */
 .footer-logo-section {
   display: flex;
   flex-direction: column;
@@ -28,26 +28,30 @@
 }
 
 .footer-logo-img {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
 }
 
 .footer-logo-text {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   font-weight: 800;
+  color: var(--primary);
   background: linear-gradient(to right, var(--primary), var(--accent));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .footer-description {
+  max-width: 46ch;
   color: var(--text-secondary-light);
-  margin-bottom: var(--space-4);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .social-links {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   gap: var(--space-2);
 }
 
@@ -56,6 +60,7 @@
   height: 40px;
   border-radius: var(--border-radius-full);
   background-color: var(--background-light);
+  border: 1px solid var(--border-color-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,118 +71,176 @@
 
 .social-link:hover {
   background-color: var(--primary);
-  color: white;
+  border-color: var(--primary);
+  color: #fff;
   transform: translateY(-2px);
 }
 
+/* ==== 3. الأعمدة والروابط ==== */
 .footer-links-section,
 .footer-contact-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.footer-column {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
 .footer-column-title {
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--text-primary-light);
-  margin-bottom: var(--space-2);
 }
 
 .footer-links {
   list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-1) var(--space-3);
 }
 
 .footer-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
   color: var(--text-secondary-light);
   text-decoration: none;
   font-weight: 500;
   transition: color var(--transition-fast);
-  text-align: right;
 }
 
 .footer-link:hover {
   color: var(--primary);
 }
 
+.footer-guest-only {
+  display: none;
+}
+
+body[data-auth="guest"] .footer-guest-only {
+  display: list-item;
+}
+
+/* ==== 4. التواصل ==== */
 .contact-info {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-1);
 }
 
 .contact-item {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  min-height: 44px;
   color: var(--text-secondary-light);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a.contact-item:hover {
+  color: var(--primary);
 }
 
 .contact-icon {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--border-radius-full);
+  background-color: rgba(var(--primary-rgb), 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--primary);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
 }
 
 .contact-text {
+  min-width: 0;
   font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
+.contact-text--ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: start;
+}
+
+/* ==== 5. الشريط السفلي للتذييل ==== */
 .footer-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
   text-align: center;
   padding-top: var(--space-4);
   border-top: 1px solid var(--border-color-light);
-  margin-top: var(--space-4);
+  margin-top: var(--space-6);
   color: var(--text-secondary-light);
   font-size: var(--font-size-sm);
 }
 
-.copyright,
-.footer-credits {
-  display: block;
+/* ==== 6. إمكانية الوصول ==== */
+.footer-link:focus-visible,
+.social-link:focus-visible,
+.contact-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: var(--border-radius-sm);
 }
 
-/* ==== 2. تعديلات الموبايل ==== */
-@media (max-width: 767.98px) {
+@media (prefers-reduced-motion: reduce) {
+  .social-link:hover {
+    transform: none;
+  }
+}
+
+/* ==== 7. الأجهزة اللوحية ==== */
+@media (min-width: 768px) {
+  .main-footer {
+    padding-top: var(--space-9);
+  }
+
   .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-8);
+  }
+
+  .footer-logo-section {
+    grid-column: 1 / -1;
+  }
+
+  .footer-logo-img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .footer-logo-text {
+    font-size: var(--font-size-2xl);
+  }
+
+  .footer-links {
     grid-template-columns: 1fr;
   }
-  
+
   .footer-bottom {
-    text-align: center;
-  }
-  
-  .copyright,
-  .footer-credits {
-    display: inline-block;
-  }
-  
-  .main-footer {
-    padding: var(--space-4) 0;
-  }
-  
-  .footer-logo-text {
-    font-size: var(--font-size-xl);
-  }
-  
-  .footer-logo-img {
-    width: 40px;
-    height: 40px;
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: start;
   }
 }
 
-/* ==== 3. حاوية التطبيق الرئيسية ==== */
+/* ==== 8. الشاشات الكبيرة ==== */
+@media (min-width: 992px) {
+  .footer-content {
+    grid-template-columns: 1.6fr 1fr 1.3fr;
+  }
+
+  .footer-logo-section {
+    grid-column: auto;
+  }
+}
+
+/* ==== 9. حاوية التطبيق الرئيسية ==== */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -191,10 +254,10 @@
   flex-direction: column;
   overflow-y: auto;
   padding-top: 0;
-  padding-bottom: var(--bottom-nav-height);
+  padding-bottom: 0;
 }
 
-/* ==== 4. حاوية المحتوى الديناميكي ==== */
+/* ==== 10. حاوية المحتوى الديناميكي ==== */
 #app-router-view,
 .router-view {
   flex: 1;
@@ -202,34 +265,4 @@
   max-width: var(--container-width);
   margin: 0 auto;
   width: 100%;
-}
-
-/* ==== 5. الوضع الليلي للتذييل ==== */
-[data-theme="dark"] .main-footer {
-  background-color: var(--surface-dark);
-  border-top-color: var(--border-color-dark);
-}
-
-[data-theme="dark"] .footer-column-title {
-  color: var(--text-primary-dark);
-}
-
-[data-theme="dark"] .footer-description,
-[data-theme="dark"] .footer-link,
-[data-theme="dark"] .contact-item,
-[data-theme="dark"] .footer-bottom {
-  color: var(--text-secondary-dark);
-}
-
-[data-theme="dark"] .social-link {
-  background-color: var(--background-dark);
-  border-color: var(--border-color-dark);
-}
-
-[data-theme="dark"] .social-link:hover {
-  background-color: var(--primary);
-}
-
-[data-theme="dark"] .footer-bottom {
-  border-top-color: var(--border-color-dark);
 }

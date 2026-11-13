@@ -1243,3 +1243,135 @@ body.drawer-open {
   line-height: 1.6;
   resize: vertical;
 }
+
+/* ==== 23. إيقاف الحركات اللانهائية أثناء الإغلاق ==== */
+
+.sidebar:not(.drawer-open) *,
+.sidebar:not(.drawer-open) *::before,
+.sidebar:not(.drawer-open) *::after {
+  animation-play-state: paused !important;
+}
+
+/* ==== 24. وضع القائمة المنبثقة على الكمبيوتر ==== */
+/* نفس الشرط في variables.css و navbar.css و navbar.js و drawer.js */
+
+@media (min-width: 992px) and (hover: hover) and (pointer: fine) {
+  body.drawer-open {
+    overflow: visible;
+    overscroll-behavior: auto;
+  }
+
+  /* طبقة شفافة تلتقط النقر خارج القائمة وتترك الشريط العلوي شغالًا */
+  .sidebar-overlay {
+    top: var(--navbar-height);
+    background-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    cursor: default;
+  }
+
+  .sidebar-overlay,
+  .sidebar-overlay.overlay-visible {
+    transition: none;
+  }
+
+  .sidebar {
+    top: calc(var(--navbar-height) + var(--space-2));
+    bottom: auto;
+    left: var(--drawer-anchor-left, var(--space-4));
+    width: min(var(--drawer-width), calc(100vw - var(--space-4) * 2));
+    height: auto;
+    max-height: calc(100dvh - var(--navbar-height) - var(--space-4) * 2);
+    border: 1px solid var(--sb-line);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-xl);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.97);
+    transform-origin: top left;
+    transition:
+      transform 0.2s var(--ease-out),
+      opacity 0.2s ease,
+      visibility 0s linear 0.2s;
+  }
+
+  .sidebar.drawer-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    transition:
+      transform 0.2s var(--ease-out),
+      opacity 0.2s ease,
+      visibility 0s linear 0s;
+  }
+
+  /* اللوجو وزر الإغلاق غير لازمين: الشعار في الشريط العلوي، والإغلاق بـ Esc أو النقر خارج القائمة */
+  .sidebar-topbar {
+    display: none;
+  }
+
+  .sidebar-header {
+    padding: var(--space-4) var(--space-4) var(--space-2);
+  }
+
+  /* الهيدر المضغوط: الأفاتار بجانب الاسم */
+  .sidebar-user {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "avatar greeting"
+      "avatar info"
+      "stats stats"
+      "progress progress"
+      "activity activity";
+    align-items: center;
+    column-gap: var(--space-3);
+    margin-top: 0;
+    text-align: start;
+  }
+
+  .sidebar-user > .user-avatar-large { grid-area: avatar; margin: 0; opacity: 1; transform: none; transition: none; }
+  .sidebar-user > .sb-greeting       { grid-area: greeting; align-self: end; margin: 0; }
+  .sidebar-user > .user-info         { grid-area: info; align-self: start; justify-content: flex-start; }
+  .sidebar-user > .sb-stats          { grid-area: stats; }
+  .sidebar-user > .sb-progress       { grid-area: progress; }
+  .sidebar-user > .sb-last-activity  { grid-area: activity; justify-self: start; }
+
+  .user-avatar-large::before {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  /* القائمة تظهر فورًا بدون تتابع */
+  .sidebar-menu-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .sidebar-link {
+    min-height: 42px;
+    padding-block: 5px;
+  }
+
+  .sidebar-link > i {
+    flex-basis: 32px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .sidebar-footer {
+    padding: var(--space-2) var(--space-4) var(--space-3);
+  }
+
+  .sidebar-social {
+    margin-bottom: var(--space-2);
+  }
+
+  .social-icon {
+    width: 34px;
+    height: 34px;
+  }
+}

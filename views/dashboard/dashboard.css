@@ -115,13 +115,13 @@
   text-align: center;
 }
 
-.db-spinner {
-  inline-size: 48px;
-  block-size: 48px;
-  border: 4px solid rgba(var(--db-primary-rgb), 0.2);
-  border-block-start-color: var(--db-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+/* .db-spinner: مجرد مرجع للجافاسكريبت (يخفيه عند الخطأ)، والشكل من .bio-loader في components.css القسم 9 */
+.db-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
 }
 
 .db-state__text { color: var(--db-text-2); font-weight: 600; }
@@ -210,14 +210,16 @@
 .db-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 .db-btn[aria-busy="true"] { opacity: 0.75; cursor: progress; pointer-events: none; }
 
-.db-btn[aria-busy="true"]::after {
-  content: "";
-  inline-size: 1em;
-  block-size: 1em;
-  border: 2px solid currentColor;
-  border-inline-end-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
+/* مؤشر التحميل داخل الأزرار (اللوجو الزجاجي) — يُضاف من setBusy في dashboard.js.
+   تكرار الكلاس لرفع الأولوية فوق قاعدة الوضع الليلي */
+.bio-loader.bio-loader.db-btn-loader {
+  --bio-size: 1.4em;
+  --bio-ga1: currentColor;
+  --bio-ga2: color-mix(in srgb, currentColor 65%, transparent);
+  --bio-gb1: color-mix(in srgb, currentColor 85%, transparent);
+  --bio-gb2: color-mix(in srgb, currentColor 50%, transparent);
+  --bio-ghost: color-mix(in srgb, currentColor 28%, transparent);
+  --bio-gl: 0.2;
 }
 
 .db-btn--primary { background: var(--db-gradient); color: var(--db-on-primary); box-shadow: var(--db-glow); }
@@ -843,9 +845,7 @@ textarea.db-input { min-block-size: 110px; resize: vertical; line-height: 1.7; }
   .db-kpi,
   .db-mod,
   .db-btn,
-  .db-btn::after,
-  .db-skeleton,
-  .db-spinner {
+  .db-skeleton {
     animation: none !important;
     transition: none !important;
     transform: none !important;

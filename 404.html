@@ -19,7 +19,7 @@
   <link rel="canonical" href="https://biologist-platform.com">
   <meta property="og:title" content="منصة بيولوجست | العلم المبسط للجميع" />
   <meta property="og:description" content="منصة تعليمية تفاعلية متخصصة في العلوم والأحياء للمراحل الإعدادية والثانوية مع نظام تحليلات ومكافآت متكامل." />
-  <meta property="og:image" content="/assets/images/biologist2.png" />
+  <meta property="og:image" content="https://biologist-platform.com/assets/images/biologist2.png" />
   <meta property="og:url" content="https://biologist-platform.com" />
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="ar_EG" />
@@ -27,7 +27,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="منصة بيولوجست | الإصدار 5.0.0" />
   <meta name="twitter:description" content="تعلم الأحياء بتجربة رقمية فريدة." />
-  <meta name="twitter:image" content="/assets/images/biologist2.png" />
+  <meta name="twitter:image" content="https://biologist-platform.com/assets/images/biologist2.png" />
   
   <!-- ==== 3. سياسة أمان المحتوى ==== -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https: blob:; script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://www.gstatic.com https://apis.google.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https:; font-src 'self' https: data:; connect-src 'self' https: wss:; frame-src https://www.youtube-nocookie.com https://www.youtube.com; object-src 'none'; base-uri 'self';">
@@ -69,8 +69,9 @@
   <link rel="stylesheet" href="/css/themes/theme-orange.css" disabled />
   
   <!-- ==== 9. إعدادات PWA والأيقونات ==== -->
-  <link rel="icon" href="/assets/images/biologist.png" type="image/png" sizes="32x32" />
-  <link rel="apple-touch-icon" href="/assets/images/biologist.png" sizes="180x180" />
+  <link rel="icon" href="/assets/images/biologist1.svg" type="image/svg+xml" />
+  <link rel="icon" href="/assets/images/biologist1.png" type="image/png" sizes="512x512" />
+  <link rel="apple-touch-icon" href="/assets/images/biologist1.png" sizes="512x512" />
   <link rel="apple-touch-startup-image" href="/assets/images/biologist1.png">
   <link rel="manifest" href="/manifest.json">
 
@@ -81,7 +82,7 @@
 
   <!-- ==== 11. دعم المتصفحات بدون جافاسكريبت ==== -->
   <noscript>
-    <div class="no-js-warning" style="position: fixed; top: 0; left: 0; right: 0; background: #f44336; color: white; text-align: center; padding: 1rem; z-index: 10000; font-family: 'Cairo', sans-serif;">
+    <div class="no-js-warning">
       ⚠️ هذا التطبيق يعتمد بشكل كامل على JavaScript. يرجى تفعيل JavaScript من إعدادات المتصفح للاستمتاع بالتجربة الكاملة.
     </div>
   </noscript>
@@ -159,10 +160,35 @@
             </a>
           </div>
         </div>
-        
+
+        <nav class="navbar-primary" id="navbar-primary" aria-label="التنقل الرئيسي">
+          <ul class="navbar-primary-list">
+            <li>
+              <a href="/" class="navbar-link active" data-nav-target="home" aria-current="page">
+                <i class="fas fa-home" aria-hidden="true"></i><span>الرئيسية</span>
+              </a>
+            </li>
+            <li>
+              <a href="/lessons" class="navbar-link" data-nav-target="lessons">
+                <i class="fas fa-book-open" aria-hidden="true"></i><span>الدروس</span>
+              </a>
+            </li>
+            <li>
+              <a href="/exams" class="navbar-link" data-nav-target="exams">
+                <i class="fas fa-graduation-cap" aria-hidden="true"></i><span>الامتحانات</span>
+              </a>
+            </li>
+            <li class="navbar-primary-item--auth">
+              <a href="/groups" class="navbar-link" data-nav-target="groups">
+                <i class="fas fa-users" aria-hidden="true"></i><span>المجموعات</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+
         <div class="navbar-top-right">
           <div class="navbar-search" id="navbar-search">
-            <button type="button" class="search-btn" id="global-search-btn" data-action="open-search" aria-label="فتح البحث المتقدم" aria-haspopup="true" aria-expanded="false" aria-controls="search-panel" style="display: none;">
+            <button type="button" class="search-btn" id="global-search-btn" data-action="open-search" aria-label="فتح البحث المتقدم" title="بحث المستخدمين (Ctrl+K)" aria-haspopup="true" aria-expanded="false" aria-controls="search-panel" style="display: none;">
               <i class="fas fa-search" aria-hidden="true"></i>
             </button>
 
@@ -183,14 +209,22 @@
           </button>
           
           <div class="notification-bell">
-            <button type="button" id="notification-btn" class="notification-btn" aria-label="الإشعارات (0 جديد)" aria-haspopup="true" aria-expanded="false" data-action="toggle-notifications" aria-controls="notifications-panel">
+            <button type="button" id="notification-btn" class="notification-btn" aria-label="الإشعارات (0 جديد)" title="الإشعارات" aria-haspopup="true" aria-expanded="false" data-action="toggle-notifications" aria-controls="notifications-panel">
               <i class="fas fa-bell" aria-hidden="true"></i>
               <span class="notification-badge" id="notification-badge" data-count="0" aria-live="polite" aria-atomic="true" style="display: none;">0</span>
             </button>
           </div>
           
-          <div class="user-avatar-container" id="user-avatar-container" role="button" tabindex="0" aria-label="فتح ملف المستخدم" aria-haspopup="true" aria-expanded="false" data-action="open-sidebar" aria-controls="sidebar">
-         </div>
+          <div class="navbar-auth" id="navbar-auth">
+            <a href="/login" class="btn btn-outline btn-sm" data-nav-target="login">تسجيل الدخول</a>
+            <a href="/register" class="btn btn-primary btn-sm" data-nav-target="register">إنشاء حساب</a>
+          </div>
+
+          <div class="user-avatar-container" id="user-avatar-container" role="button" tabindex="0" aria-label="فتح القائمة" aria-haspopup="dialog" aria-expanded="false" data-action="open-sidebar" aria-controls="sidebar">
+            <span class="user-avatar-mount" id="user-avatar-mount"></span>
+            <span class="user-menu-name" id="navbar-user-name" hidden></span>
+            <i class="fas fa-chevron-down user-menu-caret" aria-hidden="true"></i>
+          </div>
         </div>
       </div>
     </div>
@@ -198,27 +232,27 @@
   
   <!-- ==== 15. شريط التنقل السفلي ==== -->
   <nav class="bottom-navigation" id="bottom-navigation" role="navigation" aria-label="شريط التنقل الرئيسي">
-    <ul class="bottom-nav-items" role="tablist">
-      <li role="presentation">
-        <button type="button" class="bottom-nav-btn active" data-nav-target="home" aria-label="الرئيسية" aria-selected="true" aria-controls="app-router-view">
+    <ul class="bottom-nav-items">
+      <li>
+        <a href="/" class="bottom-nav-btn active" data-nav-target="home" aria-current="page">
           <span class="bottom-icon"><i class="fas fa-home" aria-hidden="true"></i></span>
           <span class="bottom-text">الرئيسية</span>
-        </button>
+        </a>
       </li>
-      <li role="presentation">
-        <button type="button" class="bottom-nav-btn" data-nav-target="lessons" aria-label="الدروس" aria-selected="false" aria-controls="app-router-view">
+      <li>
+        <a href="/lessons" class="bottom-nav-btn" data-nav-target="lessons">
           <span class="bottom-icon"><i class="fas fa-book-open" aria-hidden="true"></i></span>
           <span class="bottom-text">الدروس</span>
-        </button>
+        </a>
       </li>
-      <li role="presentation">
-        <button type="button" class="bottom-nav-btn" data-nav-target="exams" aria-label="الامتحانات" aria-selected="false" aria-controls="app-router-view">
+      <li>
+        <a href="/exams" class="bottom-nav-btn" data-nav-target="exams">
           <span class="bottom-icon"><i class="fas fa-graduation-cap" aria-hidden="true"></i></span>
           <span class="bottom-text">الامتحانات</span>
-        </button>
+        </a>
       </li>
-      <li role="presentation">
-        <button type="button" class="bottom-nav-btn" id="open-drawer-btn" aria-label="فتح القائمة الجانبية" aria-haspopup="true" aria-expanded="false" data-action="open-sidebar" aria-controls="sidebar">
+      <li>
+        <button type="button" class="bottom-nav-btn" id="open-drawer-btn" aria-label="فتح القائمة الجانبية" aria-haspopup="dialog" aria-expanded="false" data-action="open-sidebar" aria-controls="sidebar">
           <span class="bottom-icon"><i class="fas fa-bars" aria-hidden="true"></i></span>
           <span class="bottom-text">القائمة</span>
         </button>
@@ -244,34 +278,34 @@
       <div class="footer-content">
         <div class="footer-logo-section">
           <div class="footer-logo">
-            <img src="/assets/images/biologist.png" alt="شعار بيولوجست" class="footer-logo-img" width="50" height="50" loading="lazy">
+            <img src="/assets/images/biologist.png" alt="شعار بيولوجست" class="footer-logo-img" width="48" height="48" loading="lazy">
             <span class="footer-logo-text">بيولوجست</span>
           </div>
           <p class="footer-description">نظام بيئي تعليمي متكامل لتعليم الأحياء والعلوم بأسلوب تفاعلي، معتمد على أحدث أساليب التحفيز والتوجيه.</p>
+        </div>
+        <nav class="footer-links-section" aria-label="روابط التذييل">
+          <h2 class="footer-column-title">روابط سريعة</h2>
+          <ul class="footer-links">
+            <li><a href="/" class="footer-link" data-nav-target="home">الرئيسية</a></li>
+            <li><a href="/lessons" class="footer-link" data-nav-target="lessons">الدروس</a></li>
+            <li><a href="/exams" class="footer-link" data-nav-target="exams">الامتحانات</a></li>
+            <li><a href="/groups" class="footer-link" data-nav-target="groups">المجموعات</a></li>
+            <li class="footer-guest-only"><a href="/login" class="footer-link" data-nav-target="login">تسجيل الدخول</a></li>
+            <li class="footer-guest-only"><a href="/register" class="footer-link" data-nav-target="register">إنشاء حساب</a></li>
+          </ul>
+        </nav>
+        <div class="footer-contact-section">
+          <h2 class="footer-column-title">تواصل مع الأستاذ محمد</h2>
+          <div class="contact-info">
+            <a href="mailto:biologist.mr.mohamed@gmail.com" class="contact-item"><i class="fas fa-envelope contact-icon" aria-hidden="true"></i><span class="contact-text contact-text--ltr">biologist.mr.mohamed@gmail.com</span></a>
+            <a href="tel:+201208388529" class="contact-item"><i class="fas fa-phone contact-icon" aria-hidden="true"></i><span class="contact-text contact-text--ltr">+201208388529</span></a>
+            <div class="contact-item"><i class="fas fa-map-marker-alt contact-icon" aria-hidden="true"></i><span class="contact-text">بني سويف، مصر</span></div>
+          </div>
           <div class="social-links">
             <a href="https://www.facebook.com/share/155UM8qAFYZ/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="فيسبوك"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
             <a href="https://instagram.com/mr_mohamed_ibrahim_taha" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="إنستجرام"><i class="fab fa-instagram" aria-hidden="true"></i></a>
             <a href="https://wa.me/201208388529" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="واتساب"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
             <a href="https://youtube.com/@biologist-mr-mohamed-ibrahim" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="يوتيوب"><i class="fab fa-youtube" aria-hidden="true"></i></a>
-          </div>
-        </div>
-        <div class="footer-links-section">
-          <div class="footer-column">
-            <h3 class="footer-column-title">روابط سريعة</h3>
-            <ul class="footer-links">
-              <li><a href="/" class="footer-link" data-nav-target="home" aria-label="الرئيسية">الرئيسية</a></li>
-              <li><a href="/lessons" class="footer-link" data-nav-target="lessons" aria-label="الدروس">الدروس</a></li>
-              <li><a href="/exams" class="footer-link" data-nav-target="exams" aria-label="الامتحانات">الامتحانات</a></li>
-              <li><a href="/groups" class="footer-link" data-nav-target="groups" aria-label="المجموعات">المجموعات</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="footer-contact-section">
-          <h3 class="footer-column-title">تواصل مع الأستاذ محمد</h3>
-          <div class="contact-info">
-            <div class="contact-item"><i class="fas fa-envelope contact-icon" aria-hidden="true"></i><span class="contact-text">biologist.mr.mohamed@gmail.com</span></div>
-            <div class="contact-item"><i class="fas fa-phone contact-icon" aria-hidden="true"></i><span class="contact-text">+201208388529</span></div>
-            <div class="contact-item"><i class="fas fa-map-marker-alt contact-icon" aria-hidden="true"></i><span class="contact-text">بني سويف، مصر</span></div>
           </div>
         </div>
       </div>
@@ -445,7 +479,7 @@
   <div id="modal-container" class="modal-container" data-component="modal"></div>
   
   <!-- ==== 23. مكتبة الرسوم البيانية ==== -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" crossorigin="anonymous"></script>
   
   <!-- ==== 24. نقطة الدخول ==== -->
   <script type="module" src="/js/main.js"></script>
